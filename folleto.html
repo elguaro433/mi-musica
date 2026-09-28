@@ -1,0 +1,191 @@
+<title>Mi Música</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;700&family=DM+Sans:wght@400;500&family=Caveat:wght@600&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#0b0913;
+  --bg2:#120e1e;
+  --card:#181328;
+  --card2:#1f1733;
+  --line:#2c2342;
+  --ink:#f2ecff;
+  --muted:#a99fc7;
+  --dim:#7d7499;
+  --purple:#a970ff;
+  --purple-soft:#2a1f47;
+  --pink:#ff5fa6;
+  --pink-soft:#3a1730;
+  --cyan:#43e0d0;
+  --gold:#ffcf5c;
+  --font-d:'Sora',system-ui,sans-serif;
+  --font-b:'DM Sans',system-ui,sans-serif;
+  --font-s:'Caveat',cursive;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1100px 620px at 82% -8%, #241640 0%, rgba(36,22,64,0) 60%), radial-gradient(900px 520px at -10% 12%, #2a1030 0%, rgba(42,16,48,0) 55%), var(--bg);color:var(--ink);font-family:var(--font-b);line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding-block:2.4rem 3rem;padding-left:20px;padding-right:20px}
+.eyebrow{font-family:var(--font-b);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--purple);font-weight:500}
+h1{font-family:var(--font-d);font-weight:700;font-size:clamp(40px,9vw,72px);line-height:.98;margin:.35rem 0 0;letter-spacing:-.02em;text-wrap:balance}
+h1 .note{display:block;font-size:clamp(15px,3.6vw,20px);font-weight:400;font-family:var(--font-b);color:var(--muted);letter-spacing:0;margin-top:.85rem;max-width:36ch;line-height:1.5}
+h2{font-family:var(--font-d);font-weight:500;font-size:clamp(20px,4.4vw,26px);margin:0 0 .2rem;letter-spacing:-.01em}
+.section-tag{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:500}
+
+.hero{display:grid;grid-template-columns:1.35fr .8fr;gap:26px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:1.5rem}
+.chip{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:40px;padding:8px 15px 8px 10px;font-size:14px;font-weight:500}
+.dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#120e1e}
+.chip.me .dot{background:var(--purple)}
+.chip.her .dot{background:var(--pink)}
+.chip small{color:var(--dim);font-weight:400}
+
+.phone{width:210px;max-width:100%;margin:0 auto;background:var(--bg2);border:1px solid var(--line);border-radius:26px;padding:12px 10px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.pv-top{font-size:10px;color:var(--dim);text-align:center;letter-spacing:.1em;text-transform:uppercase}
+.art{height:96px;border-radius:14px;margin:9px 4px;background:linear-gradient(135deg,var(--purple),var(--pink))}
+.pt-title{font-family:var(--font-d);font-weight:500;font-size:13px;text-align:center}
+.pt-sub{font-size:11px;color:var(--muted);text-align:center;margin-bottom:8px}
+.bar{height:4px;border-radius:3px;background:var(--line);margin:0 6px 10px;position:relative}
+.bar::before{content:"";position:absolute;left:0;top:0;height:4px;width:42%;border-radius:3px;background:var(--purple)}
+.ctrls{display:flex;justify-content:center;align-items:center;gap:16px;color:var(--ink);font-size:16px;margin-bottom:8px}
+.play{width:34px;height:34px;border-radius:50%;background:var(--purple);color:#120e1e;display:grid;place-items:center;font-size:15px}
+.tabbar{display:flex;justify-content:space-around;border-top:1px solid var(--line);padding-top:8px;color:var(--dim);font-size:11px}
+.tabbar .on{color:var(--purple)}
+
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:1rem}
+.mode{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 16px}
+.mode .ic{font-size:24px}
+.mode h3{font-family:var(--font-d);font-weight:500;font-size:16px;margin:.6rem 0 .35rem}
+.mode p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.5}
+.mode.m1{border-top:3px solid var(--purple)}
+.mode.m2{border-top:3px solid var(--cyan)}
+.mode.m3{border-top:3px solid var(--pink)}
+
+.feat{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:1rem}
+.f{background:var(--card2);border:1px solid var(--line);border-radius:13px;padding:14px 14px;font-size:13px;font-weight:500;display:flex;flex-direction:column;gap:7px}
+.f .fi{font-size:19px}
+.f small{display:block;color:var(--dim);font-weight:400;font-size:11.5px;line-height:1.4}
+
+.band{background:linear-gradient(120deg,var(--purple-soft),var(--pink-soft));border:1px solid var(--line);border-radius:18px;padding:22px 22px;margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.band .who{background:rgba(11,9,19,.5);border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+.band .who .greet{font-family:var(--font-d);font-size:17px;font-weight:500}
+.band .who .name{font-size:13px;color:var(--muted);margin-top:2px}
+.band .who.me{border-left:3px solid var(--purple)}
+.band .who.her{border-left:3px solid var(--pink)}
+
+.sources{display:flex;flex-wrap:wrap;gap:10px;margin-top:.9rem}
+.src{background:var(--card);border:1px solid var(--line);border-radius:40px;padding:7px 14px;font-size:13px;color:var(--muted);font-weight:500}
+.src b{color:var(--ink);font-weight:500}
+.honest{margin-top:.9rem;font-size:13px;color:var(--dim);display:flex;gap:9px;align-items:flex-start}
+.honest .k{color:var(--gold)}
+
+.foot{margin-top:2.4rem;border-top:1px solid var(--line);padding-top:1.4rem;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.foot .credit{font-size:13px;color:var(--muted)}
+.foot .credit b{color:var(--ink);font-weight:500}
+.sign{font-family:var(--font-s);font-size:30px;color:var(--ink);line-height:1}
+.sep{height:1px;background:var(--line);border:0;margin:2.4rem 0}
+.blk{margin-top:2.4rem}
+@media (max-width:720px){
+  .hero{grid-template-columns:1fr;gap:22px}
+  .phone{order:-1}
+  .modes{grid-template-columns:1fr}
+  .feat{grid-template-columns:1fr 1fr}
+  .band{grid-template-columns:1fr}
+}
+</style>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div>
+      <span class="eyebrow">App de la familia Díaz González</span>
+      <h1>Mi Música
+        <span class="note">Tu música, tuya de verdad. Sin internet, en el coche por Bluetooth, y con tu nombre.</span>
+      </h1>
+      <div class="chips">
+        <span class="chip me"><span class="dot">E</span>Emmanuel Díaz <small>· su móvil</small></span>
+        <span class="chip her"><span class="dot">E</span>Elibel González <small>· su móvil</small></span>
+      </div>
+    </div>
+
+    <div class="phone" aria-hidden="true">
+      <div class="pv-top">Sonando ahora</div>
+      <div class="art"></div>
+      <div class="pt-title">Nombre de la canción</div>
+      <div class="pt-sub">Artista · Álbum</div>
+      <div class="bar"></div>
+      <div class="ctrls">
+        <span>🔀</span><span>⏮</span>
+        <span class="play">▶</span>
+        <span>⏭</span><span>🔁</span>
+      </div>
+      <div class="tabbar"><span class="on">Inicio</span><span>Buscar</span><span>Biblioteca</span></div>
+    </div>
+  </section>
+
+  <div class="blk">
+    <span class="section-tag">Tres formas de escuchar</span>
+    <div class="modes">
+      <div class="mode m1">
+        <div class="ic">🎵</div>
+        <h3>Mi música</h3>
+        <p>Tus canciones descargadas. Suenan <b style="color:var(--ink);font-weight:500">sin internet</b> y en el coche por Bluetooth, incluso con la pantalla apagada.</p>
+      </div>
+      <div class="mode m2">
+        <div class="ic">🔎</div>
+        <h3>Descubrir</h3>
+        <p>Busca y descarga música libre y legal con un toque, desde Jamendo e Internet Archive.</p>
+      </div>
+      <div class="mode m3">
+        <div class="ic">📺</div>
+        <h3>YouTube</h3>
+        <p>¿No la tienes? Mira el vídeo dentro de la app. Solo con la app abierta (se pausa al bloquear).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <span class="section-tag">Lo que trae dentro</span>
+    <div class="feat">
+      <div class="f"><span class="fi">🔎</span>Buscador al instante<small>encuentra por título o artista</small></div>
+      <div class="f"><span class="fi">⭐</span>Favoritos y listas<small>tus recopilaciones</small></div>
+      <div class="f"><span class="fi">🔀</span>Aleatorio y repetir<small>como las grandes</small></div>
+      <div class="f"><span class="fi">🏷️</span>Se ordena sola<small>por artista, álbum, género</small></div>
+      <div class="f"><span class="fi">🚗</span>Coche y bloqueo<small>controles en el volante</small></div>
+      <div class="f"><span class="fi">😴</span>Temporizador<small>se apaga sola de noche</small></div>
+      <div class="f"><span class="fi">💿</span>Carátulas<small>portada de cada disco</small></div>
+      <div class="f"><span class="fi">📶</span>Sin datos<small>funciona offline</small></div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <span class="section-tag">Cada teléfono, con su dueño</span>
+    <div class="band">
+      <div class="who me">
+        <div class="greet">Buenas tardes, Emmanuel</div>
+        <div class="name">Emmanuel Díaz · su colección</div>
+      </div>
+      <div class="who her">
+        <div class="greet">Buenas tardes, Elibel</div>
+        <div class="name">Elibel González · su colección</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <span class="section-tag">De dónde sale todo</span>
+    <div class="sources">
+      <span class="src"><b>Jamendo</b> · música libre</span>
+      <span class="src"><b>Internet Archive</b> · dominio público</span>
+      <span class="src"><b>Free Music Archive</b></span>
+      <span class="src"><b>YouTube</b> · vídeos</span>
+    </div>
+    <div class="honest"><span class="k">●</span><span>Tu música descargada se guarda <b style="color:var(--muted)">solo en tu teléfono</b>. Nadie más la ve. Sin cuentas, sin claves.</span></div>
+  </div>
+
+  <div class="foot">
+    <div class="credit">Propiedad de la <b>Familia Díaz González</b><br>Creador: <b>Emmanuel Díaz</b></div>
+    <div class="sign">Emmanuel Díaz</div>
+  </div>
+
+</div>

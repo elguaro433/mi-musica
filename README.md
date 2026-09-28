@@ -65,12 +65,88 @@ Vienen de fábrica y **las ven los dos** (son el catálogo de la casa); los ❤�
 de cada uno son suyos. Con **➕ Añadir emisora a mano** pegas cualquier otra,
 siempre que empiece por `https://` — las de `http://` el iPhone las bloquea.
 
-**YouTube** — Pegas un enlace y el vídeo se ve dentro. ⚠️ Se para al bloquear
-el móvil: lo bloquean Apple y YouTube, no hay forma de evitarlo desde una web.
+**YouTube** — **Escribes lo que quieras y busca**, sin ninguna clave de Google.
+Usa Piped, una fachada libre de YouTube, con cinco servidores en fila: si uno
+está caído pasa al siguiente solo y recuerda cuál funcionó. También puedes
+pegar un enlace. ⚠️ El vídeo se para al bloquear el móvil: lo bloquean Apple y
+YouTube, no hay forma de evitarlo desde una web.
 
-**Y además:** favoritos, listas propias, aleatorio y repetir, cola "A
-continuación", temporizador para dormir, copia de seguridad, y controles en la
-pantalla de bloqueo y en el coche (Media Session).
+**Descubrir** — Música **legal y gratis** de Internet Archive, filtrada a las
+tres colecciones limpias: `georgeblood` (78 rpm en dominio público), `etree`
+(conciertos que los grupos autorizan) y `netlabels` (licencia Creative Commons).
+Se descarga a tu biblioteca de un toque. Aquí no hay éxitos comerciales.
+
+**Coche y auriculares** — Un **modo coche** con tres botones gigantes (atrás,
+play, adelante) para no apartar la vista. La cola sobrevive a cerrar la app.
+Repetir tiene tres estados: apagado, toda la lista, una sola. Y si una llamada
+o el GPS cortan la música, **vuelve sola** cuando terminan.
+
+**Calidad** — La app **nunca recodifica**: guarda el archivo byte por byte tal
+como entra. Lee la cabecera real del MP3 y te enseña el bitrate de verdad
+(«MP3 320 kbps»). Las emisoras llevan su calidad y estrellas: ★★★ desde 256
+kbps equivalentes, ★★ desde 128, ★ desde 96. Cuenta que **HE-AAC rinde cerca
+del doble** que MP3, así que 64 kbps HE-AAC suenan como 128 de MP3.
+
+**Y además:** favoritos, listas propias, aleatorio, cola "A continuación",
+temporizador para dormir, copia de seguridad, mantener la pantalla encendida, y
+controles en la pantalla de bloqueo y en el coche (Media Session).
+
+
+## Que el iPhone vaya en armonía con la app
+
+Tres cosas que no están en el código pero cambian mucho la experiencia:
+
+### 1. Que se abra sola al entrar en el coche ⭐
+
+Lo más parecido a tener icono en CarPlay, y funciona de verdad:
+
+1. Abre la app **Atajos** → pestaña **Automatización**
+2. **Crear automatización personal** → **CarPlay** → marca **Se conecta**
+3. **Ejecutar inmediatamente** (para que no te pregunte)
+4. Acción: **Abrir app** → **Mi Música**
+
+A partir de ahí, enchufas el móvil al Dacia y Mi Música se abre sola. Le das a
+▶ una vez y ya controlas todo desde la pantalla del coche y el volante.
+
+### 2. Pantalla de arranque propia
+
+Ya está hecho: hay una imagen por cada iPhone (`splash-393x852.png` para el
+14 Pro, `splash-440x956.png` para el 16 Pro Max, y cuatro más). Al abrir desde
+el icono no hay fogonazo blanco — sale la nota y la firma sobre el fondo neón.
+
+### 3. "Oye Siri, pon mi música"
+
+En **Atajos** → **+** → **Abrir app** → **Mi Música**, ponle de nombre
+*"Poner mi música"*. Luego basta con decírselo a Siri.
+
+## Dónde guardar los MP3 en el iPhone
+
+La app se queda con **su propia copia** dentro del teléfono (por eso suena sin
+internet). Los archivos originales conviene tenerlos ordenados:
+
+1. **Archivos → iCloud Drive**, crear una carpeta **Mi Música**.
+2. **Ajustes → Safari → Descargas → iCloud Drive**, para que lo que bajes caiga ahí.
+3. Mover ahí los MP3 comprados o descargados.
+4. En la app: **Biblioteca → ➕ Añadir música → iCloud Drive → Mi Música**.
+
+Los de iCloud quedan de respaldo: si se borra la app, se vuelven a añadir desde
+ahí. La misma guía está dentro de la app, en **⚙️ Ajustes → Dónde guardar tus MP3**.
+
+## Dónde comprar música legal (para que sea tuya)
+
+Necesitas **el archivo**, no una suscripción:
+
+| Tienda | Qué te llevas |
+|---|---|
+| **Amazon Música Digital** (amazon.es) | MP3 con etiquetas y carátula — el más cómodo |
+| **Bandcamp** | MP3 320 o FLAC, y al artista le llega ~85% |
+| **Qobuz** · **7digital** | MP3/FLAC |
+
+⚠️ El **iTunes Store** vende canciones, pero caen en la app Música del iPhone,
+no en Archivos: sacarlas para meterlas aquí es un lío.
+
+Gratis y legal: **Jamendo**, **Free Music Archive**, **ccMixter**, **Musopen**,
+**Pixabay Music** y Bandcamp "name your price".
 
 ---
 

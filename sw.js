@@ -6,12 +6,18 @@
    ⚠️ IMPORTANTE: este service worker NUNCA toca IndexedDB. La música vive ahí.
    Borrar estas cachés no borra ni una canción.                                 */
 
-const VERSION = '1.0.1';
+const VERSION = '1.1.0';
 const CACHE = 'mimusica-' + VERSION;
 
 const ARMAZON = [
   './', './index.html', './manifest.json',
-  './icon-180.png', './icon-192.png', './icon-512.png'
+  './icon-180.png', './icon-192.png', './icon-512.png',
+  './splash-375x812.png',
+  './splash-390x844.png',
+  './splash-393x852.png',
+  './splash-402x874.png',
+  './splash-430x932.png',
+  './splash-440x956.png'
 ];
 
 // Solo cacheamos lo nuestro y las fuentes. Nunca los streams de radio

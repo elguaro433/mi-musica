@@ -8,7 +8,34 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
-## Estado — 28/09/2026
+## Estado — 28/09/2026 (v1.1.0)
+
+Publicada en https://elguaro433.github.io/mi-musica/ — repo `elguaro433/mi-musica`.
+
+### Lo que se añadió en la v1.1.0
+- **Buscador de YouTube escribiendo**, sin clave de Google, vía **Piped**
+  (fachada libre). Cinco servidores en fila con `AbortController`; recuerda el
+  que funcionó en `localStorage.mm_piped_ok`. Los que responden con CORS hoy:
+  `api.piped.private.coffee` y `pipedapi.ducks.party`. El resto suelen dar
+  502/000 — por eso la lista con respaldo.
+- **Pestaña Descubrir**: Internet Archive limitado a `georgeblood`, `etree` y
+  `netlabels`. ⚠️ NO ampliar a otras colecciones: el resto son subidas de
+  usuarios y hay discos comerciales pirateados.
+- **Modo coche**: tres botones gigantes; aleatorio y repetir se ocultan.
+- **Cola persistente**, **repetir de 3 estados**, **vuelta tras interrupción**
+  (llamada/GPS) y **Wake Lock** opcional.
+- **Calidad real**: lee la cabecera de trama MPEG para el bitrate; las
+  emisoras llevan codec/kbps y estrellas. Nunca se recodifica nada.
+- **Pantallas de arranque** iOS por aparato (6 imágenes).
+
+### Verificado midiendo, no a ojo
+- Maquetación sin un solo problema a **393×852** (14 Pro, el de Emmanuel) y
+  **440×956** (16 Pro Max, el de Elibel): sin desbordes, sin letra <9,4 px,
+  sin zonas de toque menores de lo que pide Apple.
+- Integridad del audio: 4.638.208 bytes entran, 4.638.208 salen, idénticos.
+- Las 30 emisoras suenan desde la web publicada.
+
+## Estado anterior
 
 **La app está CONSTRUIDA y probada en el ordenador. NO está publicada.**
 Lo único que falta antes de seguir: **que Emmanuel haga la prueba en su Dacia**

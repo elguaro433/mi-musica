@@ -71,7 +71,7 @@ Plan C (app nativa, Mac + 99 €/año) **descartado**: ni así daría el icono.
 
 ## Cosas del código que conviene saber
 
-- `index.html` es autocontenido y lleva las 29 emisoras **embebidas** (para que
+- `index.html` es autocontenido y lleva las 30 emisoras **embebidas** (para que
   la radio esté disponible sin red al abrir). Se generaron y probaron una a una.
 - El lector ID3 es propio, sin librerías. Maneja v2.2/2.3/2.4, encodings
   ISO-8859-1 / UTF-16 (con y sin BOM) / UTF-8, y APIC/PIC para la carátula.
@@ -90,5 +90,5 @@ Plan C (app nativa, Mac + 99 €/año) **descartado**: ni así daría el icono.
 - Añadir canciones a una lista desde la ficha (las listas se crean pero solo se
   llenan restaurando una copia).
 - Reordenar la cola a mano.
-- Verificar las 29 emisoras periódicamente y poner en gris las muertas.
+- Verificar las 30 emisoras periódicamente y poner en gris las muertas.
 - Normalizar el volumen entre canciones.

@@ -1,7 +1,7 @@
 # 🎵 Mi Música
 
 App de música **personal y privada** para los iPhone de Emmanuel y Elibel.
-Música descargada (suena sin internet y en el coche), **29 emisoras de radio**
+Música descargada (suena sin internet y en el coche), **30 emisoras de radio**
 y YouTube para lo que no tengas.
 
 - **Propietario:** Emmanuel Díaz · Familia Díaz González
@@ -51,14 +51,14 @@ etiquetas, usa el nombre "Artista - Título".
 **Un mismo MP3 se guarda una sola vez.** Si los dos tenéis *Pegao*, ocupa la
 mitad: cada uno tiene su ficha y comparten el archivo.
 
-**Radio** — 29 emisoras probadas una a una, todas en HTTPS:
+**Radio** — 30 emisoras probadas una a una, todas en HTTPS:
 
 | | Emisoras |
 |---|---|
 | 🇦🇩 Andorra | RNA · Andorra Música · Flaix FM · Flaixbac · Ràdio Valira · SER Andorra |
 | 🇻🇪 Barquisimeto | Rumba 100.1 · Fama 98.1 |
 | 🇻🇪 Caracas | Éxitos 99.9 · La Mega 107.3 · Planeta 105.3 · KYS FM · Onda 107.9 |
-| 🇨🇴 Bogotá | Tropicana · Candela Estéreo · Vibra · LOS40 Colombia · Radioacktiva · La X |
+| 🇨🇴 Bogotá | Tropicana · Candela Estéreo · Vibra · Olímpica Stéreo · Bésame · LOS40 Colombia · Radioacktiva |
 | 🇪🇸 España | LOS 40 (+Dance, +Urban) · Cadena Dial · KISS FM · Cadena 100 · Hit FM · Rock FM · Máxima · Flaix FM |
 
 Vienen de fábrica y **las ven los dos** (son el catálogo de la casa); los ❤️

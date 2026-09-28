@@ -8,6 +8,37 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
+## 👉 EMPIEZA AQUÍ (sesión del 29/09/2026)
+
+**Lo primero que hay que preguntarle: ¿hizo la prueba en el coche?**
+(⚙️ Ajustes → Diagnóstico → Hacer la prueba, y los 5 pasos en su Dacia.)
+
+Todo el proyecto depende de esa respuesta:
+- **Si la música suena con la pantalla apagada** → seguimos puliendo la app.
+- **Si NO suena** → hay que hablarle del plan B (meter los MP3 en la app
+  Música del iPhone con Dispositivos Apple en Windows). Está explicado abajo.
+
+Segunda pregunta: **¿montó la automatización de Atajos** (CarPlay → Se conecta
+→ Abrir Mi Música)? Es lo que hace que se abra sola al entrar en el coche.
+
+### Pendientes concretos, por orden
+1. Añadir canciones a una lista desde la ficha de la canción. Hoy las listas se
+   crean vacías y solo se llenan restaurando una copia. **Es el hueco más
+   evidente de la app.**
+2. Reordenar la cola a mano.
+3. Repasar las 30 emisoras y poner en gris las que hayan muerto.
+4. Guía paso a paso de cómo comprar en Amazon Música Digital y meterlo en la
+   app (se la prometí y quedó solo resumida en el README).
+
+## Sus aparatos (importa para la maquetación)
+- **Emmanuel → iPhone 14 Pro** (393×852)
+- **Elibel → iPhone 16 Pro Max** (440×956)
+- Coche: **Dacia con CarPlay**. Escucha reggaetón, salsa y bachata
+  (CNCO, Manuel Turizo, Marc Anthony, Romeo Santos).
+- Hay un comprobador de maquetación en el historial de la sesión: recorre las
+  9 pantallas y mide desbordes, letra pequeña y zonas de toque. Si tocas CSS,
+  vuelve a pasarlo a 393×852 y 440×956.
+
 ## Estado — 28/09/2026 (v1.1.0)
 
 Publicada en https://elguaro433.github.io/mi-musica/ — repo `elguaro433/mi-musica`.

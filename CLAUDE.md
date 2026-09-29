@@ -31,16 +31,25 @@ Segunda pregunta: **¿montó la automatización de Atajos** (CarPlay → Se cone
 → Abrir Mi Música)? El 29/09 dijo que no. Es lo que hace que se abra sola al
 entrar en el coche.
 
-### Pendientes concretos, por orden
-1. Reordenar la cola a mano.
-2. Repasar las 30 emisoras y poner en gris las que hayan muerto.
-3. Guía paso a paso de cómo comprar en Amazon Música Digital y meterlo en la
-   app (se la prometí y quedó solo resumida en el README). **Le interesa:** el
-   29/09 se quejó de que la música de Descubrir es vieja y pidió más fuentes.
-   Esta es la respuesta honesta, porque música actual + gratis + descargable +
-   legal no existe.
-4. Un interruptor de «letra más grande» para el coche (se lo ofrecí y de
-   momento eligió otra cosa).
+### Pendientes concretos
+
+> El 29/09 dijo **«guarda la lista de pendientes, retomamos luego»**. Esta es
+> la lista. Antes de elegir uno, preguntarle por la prueba del coche: si
+> falla de verdad, cambia el orden de todo lo demás.
+
+1. **Guía de comprar en Amazon Música Digital**, paso a paso dentro de la app:
+   comprar el MP3, bajarlo en Windows, pasarlo al iPhone, meterlo en Mi
+   Música. **Es la más urgente de las cuatro**: se la prometí hace días, quedó
+   solo resumida en el README, y el 29/09 se quejó dos veces de que la música
+   de Descubrir es vieja y pidió más fuentes. Esta es la respuesta honesta,
+   porque música actual + gratis + descargable + legal no existe.
+2. **Reordenar la cola a mano.**
+3. **Repasar las 30 emisoras** y poner en gris las que hayan muerto. (Ojo: no
+   fiarse de un fallo en el móvil, que puede ser nuestro; comprobarlas por
+   fuera con `curl`, como se hizo con Olimpica el 29/09.)
+4. **Interruptor de «letra más grande»** para el coche. Se lo ofrecí el 29/09
+   y de momento eligió las listas. Requiere repasar el CSS entero porque todo
+   está en px.
 
 ### Lo que pidió el 29/09 y NO se puede hacer
 **Bajar el audio de los vídeos de YouTube a MP3.** Lo pidió dos veces, la

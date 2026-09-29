@@ -8,7 +8,7 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
-## 👉 EMPIEZA AQUÍ (tras la sesión del 29/09/2026 tarde, v1.5.0)
+## 👉 EMPIEZA AQUÍ (tras la sesión del 29/09/2026 noche, v1.6.1)
 
 **La prueba del coche está SUPERADA.** El 29/09 Emmanuel la repitió en su
 Dacia con la v1.3.0 y **la música siguió sonando con la pantalla apagada**.
@@ -26,7 +26,10 @@ mirar el registro de errores.
    hay una sola línea que pueda abrir otra app. Las dos sospechas: una
    **cámara de salpicadero Xiaomi/70mai** que enciende su wifi al arrancar el
    coche, o una automatización suya en **Atajos**. Sin resolver.
-3. ¿Cómo se ve la v1.5.0 en el iPhone? (letra, logos, el hueco de abajo)
+3. **¿Desapareció el escalón del borde de abajo con la v1.6.1?** Si sigue,
+   la otra vía está explicada más abajo (quitar `black-translucent`).
+4. ¿Qué tal la letra? La v1.6.0 la subió un 12 % y añadió el interruptor
+   Normal / Grande / Muy grande en ⚙️ Ajustes. Para el coche, «Muy grande».
 
 ### Cómo trabaja él, y cómo hay que responderle
 
@@ -72,35 +75,53 @@ y Bandcamp tiene poco reggaetón comercial.
   9 pantallas y mide desbordes, letra pequeña y zonas de toque. Si tocas CSS,
   vuelve a pasarlo a 393×852 y 440×956.
 
-## ⚠️ SIN RESOLVER: el hueco negro de abajo en su iPhone
+## El hueco negro de abajo: causa MEDIDA (v1.6.1)
 
-**El fallo que más le molesta y que sigue vivo.** En su iPhone 14 Pro queda
-una franja negra debajo de la barra de Inicio/Buscar/Biblioteca. **No se
-reproduce en el ordenador**: ahí la barra llega al borde y el hueco mide 0.
+Le costó cuatro versiones y tres intentos fallidos. **Si vuelve a aparecer
+algo parecido, empieza por aquí.**
 
-Descartado, comprobado:
-- No es el colchón de la barra (se bajó de 34 a 16 px y el hueco siguió igual).
-- No es que falte fondo: la v1.5.1 alarga el fondo de la barra 180 px hacia
-  abajo con `#barra::after` y **el hueco siguió exactamente igual**. Eso
-  demuestra que **está fuera de la ventana de la app**.
-- No son las pantallas de arranque: las 6 tienen el tamaño exacto en píxeles
-  que pide cada aparato (verificado leyendo la cabecera de cada PNG).
+Medido en su iPhone 14 Pro con la tarjeta de ⚙️ Ajustes → «Esta pantalla»:
 
-La sospecha viva: **iOS no le dio a la app la pantalla completa**. En sus
-fotos la barra mide unos 60 px en vez de 76, y 60 es justo lo que mide cuando
-`env(safe-area-inset-bottom)` vale **0**. La franja la pintaría iOS con el
-`background_color` del manifest, que es `#0b0913` — el color exacto que se ve.
-Si es eso, el arreglo es **borrar el icono y volver a añadir la app** (ese
-permiso iOS lo decide al instalar y no lo vuelve a mirar). ⚠️ Antes hay que
-hacerle **copia de seguridad**: borrar el icono puede llevarse la música.
+```
+pantalla del aparato : 393 x 852
+ventana de la app    : 393 x 793      <- 59 px menos
+safe-area arriba     : 59             <- exactamente los que faltan
+barra                : 717 -> 793 (alto 76), hueco debajo: 0
+```
 
-**Cómo confirmarlo:** la v1.5.2 pone las medidas A LA VISTA en la primera
-tarjeta de ⚙️ Ajustes («Esta pantalla») — él manda fotos, no textos, así que
-el dato tiene que estar donde pueda fotografiarlo. Mirar **Margen de
-seguridad ↓**: si dice **0**, es esto y toca reinstalar; si dice **34**, es
-otra cosa y hay que seguir buscando. **Pedirle esa foto antes de tocar nada.**
+**La causa:** con `apple-mobile-web-app-status-bar-style: black-translucent`,
+iOS dibuja la web detrás de la barra de estado (empieza en `y=0`) pero le da
+una ventana de solo `alto − safe-area-inset-top`, y la pega arriba. Sobra esa
+misma altura por abajo. La app llega a su último píxel —el hueco medido desde
+dentro es **0**— y esos 59 px los pinta iOS. **No hay CSS que los alcance.**
 
-## Estado — 29/09/2026 (v1.6.0)
+**El arreglo (v1.6.1):** esa franja se pinta con el fondo de la página, así
+que `body` lleva el color de la **barra** (`#120e1e`), no el fondo general.
+El fondo que se ve de verdad lo pone `#app`, que va por encima, así que la
+app no cambia de aspecto. El `background_color` del manifest, igual, como
+respaldo — ese solo se relee al reinstalar el icono.
+
+**Si aún se nota el escalón**, la otra vía es quitar `black-translucent`
+(dejarlo en `black` o `default`): iOS daría la ventana completa, pero la app
+empezaría bajo el reloj en vez de detrás. Se pierde el efecto a sangre de
+arriba. Preguntárselo antes.
+
+### Lo que NO era, ya descartado con pruebas
+- El colchón de la barra (se bajó de 34 a 16 px: no movió nada).
+- Que faltara fondo (`#barra::after` con 180 px: no movió nada — y eso fue
+  justo lo que demostró que el hueco estaba **fuera** de la ventana).
+- Las pantallas de arranque: las 6 tienen el tamaño exacto en píxeles que
+  pide cada aparato (verificado leyendo la cabecera de cada PNG).
+
+### La lección
+**Tres versiones arreglando a ciegas algo que no se reproduce en el
+ordenador.** Él lo dijo claro: «¿por qué arreglas a ciegas si te dije qué
+teléfono uso?». Cuando un fallo solo pase en su móvil, lo primero es
+**instrumentar la app para que se mida sola** y poner el dato donde él pueda
+fotografiarlo — no en el informe que hay que copiar y pegar. La tarjeta
+«Esta pantalla» de Ajustes existe para eso; no la quites.
+
+## Estado — 29/09/2026 (v1.6.1)
 
 Publicada en https://elguaro433.github.io/mi-musica/ — repo `elguaro433/mi-musica`.
 

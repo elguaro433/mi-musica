@@ -8,56 +8,60 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
-## 👉 EMPIEZA AQUÍ (tras la sesión del 29/09/2026, v1.3.0)
+## 👉 EMPIEZA AQUÍ (tras la sesión del 29/09/2026 tarde, v1.5.0)
 
-**Lo primero: ¿repitió la prueba del coche con la v1.3.0?**
-(⚙️ Ajustes → Diagnóstico → Hacer la prueba, y los 5 pasos en su Dacia.)
+**La prueba del coche está SUPERADA.** El 29/09 Emmanuel la repitió en su
+Dacia con la v1.3.0 y **la música siguió sonando con la pantalla apagada**.
+El riesgo que tenía el proyecto en vilo desde el principio ya no existe. El
+plan B (MP3 en la app Música con Dispositivos Apple) **queda en el cajón**;
+no lo vuelvas a ofrecer. La moraleja, que vale para siempre: la primera
+prueba falló y **la culpa era nuestra, no de iOS**. Antes de acusar a Apple,
+mirar el registro de errores.
 
-**Ojo, esto cambió:** la prueba del 28/09 salió mal —con la pantalla apagada
-no sonaba— **pero no valía**. El informe traía cortes de radio cada 20 s.
-Midiendo el stream de Olimpica Stereo por fuera con curl: **515 KB en 35 s sin
-un corte**. La emisora estaba perfecta. Quien cortaba era el **guardián nº 1**
-de la propia app (ver abajo). Arreglado en la v1.2.0.
+**Lo que hay que preguntarle al empezar:**
+1. ¿Montó por fin la **automatización de Atajos** (CarPlay → Se conecta →
+   Abrir Mi Música)? El 29/09 seguía sin hacerlo.
+2. ¿Se sigue abriendo sola **la app de cámara de Xiaomi** al poner la radio
+   en el coche? **Eso NO es cosa nuestra** — revisado el código entero, no
+   hay una sola línea que pueda abrir otra app. Las dos sospechas: una
+   **cámara de salpicadero Xiaomi/70mai** que enciende su wifi al arrancar el
+   coche, o una automatización suya en **Atajos**. Sin resolver.
+3. ¿Cómo se ve la v1.5.0 en el iPhone? (letra, logos, el hueco de abajo)
 
-Así que **sigue sin respuesta** si iOS corta el audio de fondo. Ahora el
-registro de errores marca `[PANTALLA APAGADA]` en cada anotación: pídele el
-informe y míralo.
-- Si el informe viene **sin reintentos** y aun así no sonó → **ahora sí es
-  iOS**, y toca hablarle del plan B (los MP3 en la app Música del iPhone con
-  Dispositivos Apple en Windows).
-- Si vuelve a haber reintentos → todavía queda algo nuestro por arreglar.
+### Cómo trabaja él, y cómo hay que responderle
 
-Segunda pregunta: **¿montó la automatización de Atajos** (CarPlay → Se conecta
-→ Abrir Mi Música)? El 29/09 dijo que no. Es lo que hace que se abra sola al
-entrar en el coche.
+El 29/09 dijo **«hay muchos fallos, necesito que verifiquemos muchas cosas
+primero»** y luego mandó capturas. **Es así como trabaja: manda fotos del
+iPhone y del coche.** Míralas con calma, que en ellas hay fallos que él no
+menciona (en las del 29/09 estaba la barra de progreso de la radio en
+CarPlay, que nadie había visto). Cuando le des a elegir entre opciones y
+conteste algo que no está en la lista, **deja de preguntar y ponte a buscar
+tú**: eso es lo que quiere.
 
 ### Pendientes concretos
 
-> El 29/09 dijo **«guarda la lista de pendientes, retomamos luego»**. Esta es
-> la lista. Antes de elegir uno, preguntarle por la prueba del coche: si
-> falla de verdad, cambia el orden de todo lo demás.
+1. **Reordenar la cola a mano.**
+2. **Repasar las 30 emisoras** y poner en gris las muertas. (No fiarse de un
+   fallo en el móvil: comprobar por fuera con `curl`.) Ahora hay una vía
+   mejor: preguntarle a Radio Browser por cada una.
+3. **Interruptor de «letra más grande»** para el coche. En la v1.5.0 ya
+   subieron todas las letras pequeñas, así que corre menos prisa.
+4. **Logos para las 18 emisoras que se quedaron sin él.** El script está en
+   el historial; exige que coincida el país, no lo aflojes.
+5. **Guía de comprar MP3** (Qobuz o Amazon Música Digital) paso a paso dentro
+   de la app. Bajó de prioridad: el 29/09 eligió el buscador de emisoras
+   antes que esto, y con el buscador ya tiene música actual.
 
-1. **Guía de comprar en Amazon Música Digital**, paso a paso dentro de la app:
-   comprar el MP3, bajarlo en Windows, pasarlo al iPhone, meterlo en Mi
-   Música. **Es la más urgente de las cuatro**: se la prometí hace días, quedó
-   solo resumida en el README, y el 29/09 se quejó dos veces de que la música
-   de Descubrir es vieja y pidió más fuentes. Esta es la respuesta honesta,
-   porque música actual + gratis + descargable + legal no existe.
-2. **Reordenar la cola a mano.**
-3. **Repasar las 30 emisoras** y poner en gris las que hayan muerto. (Ojo: no
-   fiarse de un fallo en el móvil, que puede ser nuestro; comprobarlas por
-   fuera con `curl`, como se hizo con Olimpica el 29/09.)
-4. **Interruptor de «letra más grande»** para el coche. Se lo ofrecí el 29/09
-   y de momento eligió las listas. Requiere repasar el CSS entero porque todo
-   está en px.
+### Lo que pidió y NO se puede hacer
+**Bajar el audio de los vídeos de YouTube a MP3.** Va contra las condiciones
+de uso de YouTube y desde una web en el iPhone es técnicamente imposible.
+Ya está dicho y aceptado; no hace falta suavizarlo ni volver a ofrecerlo.
 
-### Lo que pidió el 29/09 y NO se puede hacer
-**Bajar el audio de los vídeos de YouTube a MP3.** Lo pidió dos veces, la
-segunda aclarando que solo quería el audio, no el vídeo. La respuesta es no:
-va contra las condiciones de uso de YouTube, y además desde una web instalada
-en el iPhone es técnicamente imposible (haría falta un servidor propio). No
-hace falta suavizarlo ni volver a ofrecerlo; lo que sí vale es reconducirlo a
-comprar los MP3 (pendiente nº 3).
+**Sobre «música actual y gratis para descargar»:** no existe legalmente.
+Investigado el 29/09. Lo que sí hay es (a) **radio en directo**, que ya está
+resuelto con el buscador del mundo, y (b) **comprar los MP3** en Qobuz o
+Amazon (sin candado, descargables). 7digital ya casi no vende a particulares
+y Bandcamp tiene poco reggaetón comercial.
 
 ## Sus aparatos (importa para la maquetación)
 - **Emmanuel → iPhone 14 Pro** (393×852)
@@ -68,43 +72,44 @@ comprar los MP3 (pendiente nº 3).
   9 pantallas y mide desbordes, letra pequeña y zonas de toque. Si tocas CSS,
   vuelve a pasarlo a 393×852 y 440×956.
 
-## Estado — 28/09/2026 (v1.1.0)
+## Estado — 29/09/2026 (v1.5.0)
 
 Publicada en https://elguaro433.github.io/mi-musica/ — repo `elguaro433/mi-musica`.
 
-### Lo que se añadió en la v1.1.0
-- **Buscador de YouTube escribiendo**, sin clave de Google, vía **Piped**
-  (fachada libre). Cinco servidores en fila con `AbortController`; recuerda el
-  que funcionó en `localStorage.mm_piped_ok`. Los que responden con CORS hoy:
-  `api.piped.private.coffee` y `pipedapi.ducks.party`. El resto suelen dar
-  502/000 — por eso la lista con respaldo.
-- **Pestaña Descubrir**: Internet Archive limitado a `georgeblood`, `etree` y
-  `netlabels`. ⚠️ NO ampliar a otras colecciones: el resto son subidas de
-  usuarios y hay discos comerciales pirateados.
-- **Modo coche**: tres botones gigantes; aleatorio y repetir se ocultan.
-- **Cola persistente**, **repetir de 3 estados**, **vuelta tras interrupción**
-  (llamada/GPS) y **Wake Lock** opcional.
-- **Calidad real**: lee la cabecera de trama MPEG para el bitrate; las
-  emisoras llevan codec/kbps y estrellas. Nunca se recodifica nada.
-- **Pantallas de arranque** iOS por aparato (6 imágenes).
+### v1.4.0 — seis fallos que se veían a simple vista
+- **El ❤️ que no era un ❤️.** `filaCancion` se pasaba a `.map()` a pelo, así
+  que su segundo argumento no era el id de una lista sino el **índice**. En
+  Inicio y en Buscar → Mi música, solo la primera fila sacaba corazón y las
+  demás una ✕ que no hacía nada. **Este era el fallo que él veía.**
+- **La cabecera se comía su propio texto**: la máscara de desvanecido iba en
+  el `.vhead` entero. Ahora en un `::before`. El saludo pasó a 16,5 px claro.
+- El colchón de la barra de abajo, de 34 px a 16 (`--sabn`).
+- Todas las letras pequeñas subieron (calidad y estrellas de 9,5 a 11 px).
+- La radio en directo ya no hereda la barra de progreso de la canción
+  anterior en CarPlay: se borra `setPositionState()`.
+- La app ya **no se trae todos los MP3 a memoria** al arrancar ni al abrir
+  Ajustes. Hay `claves(store)` y `existe(store,k)` para eso.
+
+### v1.5.0 — las emisoras del mundo, y cada una con su cara
+- **Buscador de Radio Browser** en Buscar → Radio. Sin clave. Se pregunta por
+  nombre **y** por etiqueta a la vez. Solo `https://`. Fuera los nombres de
+  más de 70 caracteres (granjas de etiquetas). Cuatro servidores en fila,
+  recuerda el bueno en `mm_rb_ok`: el 29/09 respondían `de1` y `de2`, no
+  `fi1` ni `at1`. Países traducidos y con bandera.
+- **Logos de emisora**, también en CarPlay y en la pantalla de bloqueo. 12 de
+  las 30 de casa, **exigiendo que coincida el país**: sin ese filtro a Hit FM
+  le tocaba uno ucraniano y a KISS FM uno mexicano. Las otras 18, a su color.
+  Un logo se ve entero (`contain`), no recortado como una carátula.
+- `.enc` — dentro de `.r-s` (que es flex) el texto suelto no se encogía y
+  empujaba la calidad fuera de la pantalla.
 
 ### Verificado midiendo, no a ojo
-- Maquetación sin un solo problema a **393×852** (14 Pro, el de Emmanuel) y
-  **440×956** (16 Pro Max, el de Elibel): sin desbordes, sin letra <9,4 px,
-  sin zonas de toque menores de lo que pide Apple.
+- Maquetación sin un solo problema a **393×852** y **440×956**, repasada de
+  nuevo en la v1.5.0 con las filas de emisoras del mundo pintadas.
+- Los 12 logos cargan de verdad (comprobados en el navegador, no con Python:
+  su almacén de certificados da falsos negativos).
+- Guardar una emisora del mundo y escucharla: probado con clics de verdad.
 - Integridad del audio: 4.638.208 bytes entran, 4.638.208 salen, idénticos.
-- Las 30 emisoras suenan desde la web publicada.
-
-## Estado anterior
-
-**La app está CONSTRUIDA y probada en el ordenador. NO está publicada.**
-Lo único que falta antes de seguir: **que Emmanuel haga la prueba en su Dacia**
-(⚙️ Ajustes → Diagnóstico). Todo el proyecto depende de esa prueba.
-
-Verificado ya en Chromium: arranque, perfiles separados, lector ID3
-(UTF-16/Latin-1/carátulas/respaldo por nombre), deduplicado por huella,
-reproducción local, radio en directo, Media Session, modo seguro y su
-recuperación, persistencia tras recargar.
 
 ## Decisiones CERRADAS (no volver a preguntar)
 
@@ -151,6 +156,13 @@ Plan C (app nativa, Mac + 99 €/año) **descartado**: ni así daría el icono.
 ## Entorno
 
 - **En este PC hay `git` y `python`. NO hay `node` ni `gh`.** Scripts en Python.
+- ⚠️ **`index.html` está en CRLF.** Al parchearlo con Python, leer con
+  `io.open(p, encoding='utf-8')` (traduce a `
+`) y escribir con
+  `newline='
+'`. Y **escribir siempre a un temporal y `os.replace`**: un
+  `open(p,'w')` trunca el fichero antes de fallar, y así se quedó en 0 bytes
+  una vez (se recuperó con `git restore`, pero por poco).
 - Repo pendiente de crear: `elguaro433/mi-musica`. Mirar cómo están montadas
   las otras apps en `Desktop/Proyectos-Hijos` (Calendario, AventuraEspacial).
 - Servidor local: `.claude/launch.json` → `python -m http.server 8770`.

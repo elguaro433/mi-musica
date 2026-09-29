@@ -47,7 +47,11 @@
      laterales en horizontal. Sin viewport-fit=cover estos valen 0. */
   --sat:env(safe-area-inset-top,0px);   --sab:env(safe-area-inset-bottom,0px);
   --sal:env(safe-area-inset-left,0px);  --sar:env(safe-area-inset-right,0px);
-  --barra:calc(58px + var(--sab));
+  /* El colchon de la rayita de inicio: iOS da 34px, pero eso deja una franja
+     negra enorme debajo de los botones. 16px basta para no pisarla.
+     (fallo del 29/09/2026: "sobra espacio en la parte de abajo") */
+  --sabn:min(var(--sab), 16px);
+  --barra:calc(60px + var(--sabn));
   --gutter:18px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -98,17 +102,21 @@ button{font-family:inherit;color:inherit}
 .vhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
   position:sticky;top:0;z-index:20;
   margin:0 calc(-1 * (var(--gutter) + var(--sar))) 0 calc(-1 * (var(--gutter) + var(--sal)));
-  padding:10px calc(var(--gutter) + var(--sar)) 18px calc(var(--gutter) + var(--sal));
+  padding:10px calc(var(--gutter) + var(--sar)) 18px calc(var(--gutter) + var(--sal))}
+/* El desvanecido va SOLO en el fondo. Antes la mascara se comia tambien el
+   texto, y por eso el saludo con su nombre salia lavado y no habia forma de
+   leerlo. (fallo del 29/09/2026) */
+.vhead::before{content:'';position:absolute;inset:0;z-index:-1;
   background:rgba(11,9,19,.55);
   backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
   -webkit-mask-image:linear-gradient(to bottom,#000 66%,rgba(0,0,0,0));
           mask-image:linear-gradient(to bottom,#000 66%,rgba(0,0,0,0))}
 /* Sin backdrop-filter (navegador viejo) mejor opaco que ilegible. */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  .vhead{background:var(--bg)}
+  .vhead::before{background:var(--bg)}
 }
 .vhead h2{font-family:var(--font-d);font-weight:700;font-size:26px;margin:0;letter-spacing:-.02em;line-height:1.15}
-.vhead .sal{font-size:13px;color:var(--muted);font-weight:500;margin-bottom:3px}
+.vhead .sal{font-size:16.5px;color:var(--ink);font-weight:600;margin-bottom:2px;letter-spacing:-.01em}
 .gear{width:44px;height:44px;flex:0 0 auto;border-radius:50%;background:var(--card);
   border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;font-size:17px}
 .shelf-t{font-family:var(--font-d);font-weight:600;font-size:15.5px;margin:22px 0 10px;
@@ -125,12 +133,12 @@ button{font-family:inherit;color:inherit}
 .r-x{min-width:0;flex:1;overflow:hidden}
 .r-t{display:block;font-weight:500;font-size:15px;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;font-family:var(--font-d)}
-.r-s{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+.r-s{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   display:flex;align-items:center;gap:5px;min-width:0}
-.badge{font-size:10px;flex:0 0 auto}
-.cal{font-size:9.5px;font-weight:700;letter-spacing:.05em;color:var(--dim);
+.badge{font-size:11px;flex:0 0 auto}
+.cal{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--dim);
   border:1px solid var(--line);border-radius:4px;padding:0 4px;flex:0 0 auto}
-.est{font-size:9.5px;color:var(--cyan);flex:0 0 auto;letter-spacing:.04em}
+.est{font-size:11px;color:var(--cyan);flex:0 0 auto;letter-spacing:.04em}
 .r-a{flex:0 0 auto;color:var(--dim);font-size:17px;padding:13px 12px;margin:-13px -7px}
 .r-a.on{color:var(--pink)}
 .hscroll{display:flex;gap:13px;overflow-x:auto;scrollbar-width:none;
@@ -159,7 +167,7 @@ button{font-family:inherit;color:inherit}
   padding:12px 14px;color:var(--ink);font-family:inherit;font-size:16px;margin-bottom:8px}
 .campo::placeholder{color:var(--dim)}
 .campo:focus{outline:none;border-color:var(--purple)}
-.city{font-family:var(--font-d);font-weight:600;font-size:12px;color:var(--purple);
+.city{font-family:var(--font-d);font-weight:600;font-size:13px;color:var(--purple);
   letter-spacing:.09em;text-transform:uppercase;margin:19px 0 7px;display:flex;align-items:center;gap:7px}
 .note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);
   border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--muted);margin:14px 0;line-height:1.55}
@@ -210,7 +218,7 @@ button{font-family:inherit;color:inherit}
 #mini.on{display:flex}
 #mini .art{width:40px;height:40px;border-radius:9px;font-size:16px}
 #mini .r-t{font-size:13.5px}
-#mini .r-s{font-size:11.5px}
+#mini .r-s{font-size:12px}
 .pp{width:36px;height:36px;flex:0 0 auto;border-radius:50%;background:var(--purple);color:#120e1e;
   display:grid;place-items:center;font-size:14px;border:0;cursor:pointer}
 #mini .prog{position:absolute;left:11px;right:11px;bottom:4px;height:2px;background:var(--pista);
@@ -245,7 +253,7 @@ button{font-family:inherit;color:inherit}
 
 /* ---------- barra inferior ---------- */
 #barra{position:fixed;left:0;right:0;bottom:0;height:var(--barra);padding-left:var(--sal);padding-right:var(--sar);
-  padding-bottom:var(--sab);background:rgba(18,14,30,.96);
+  padding-bottom:var(--sabn);background:rgba(18,14,30,.96);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:1px solid rgba(138,118,198,.32);display:none;z-index:45}
 #barra.on{display:flex}
@@ -460,7 +468,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.3.0';
+var APP_VERSION = '1.4.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -591,6 +599,17 @@ function borrar(store, k){
 }
 function leer(store, k){
   return pedir(tx([store]).objectStore(store).get(k));
+}
+/* Solo las claves. Para 'audios' es la diferencia entre traerse una lista de
+   textos y traerse TODOS los MP3 del telefono a la vez. (fallo del 29/09/2026) */
+function claves(store){
+  return pedir(tx([store]).objectStore(store).getAllKeys());
+}
+/* ¿Existe ya esa clave? Sin traerse el contenido. */
+async function existe(store, k){
+  var s = tx([store]).objectStore(store);
+  if(s.getKey) return !!(await pedir(s.getKey(k)));
+  return (await pedir(s.count(k))) > 0;
 }
 
 /* ═════════════════ LECTOR DE ETIQUETAS ID3 ══════════════════════ */
@@ -1255,6 +1274,9 @@ async function pintarAhora(cancion){
         ['seekto','seekbackward','seekforward'].forEach(function(a){
           try{ navigator.mediaSession.setActionHandler(a, null); }catch(_){}
         });
+        if(navigator.mediaSession.setPositionState){
+          try{ navigator.mediaSession.setPositionState(); }catch(_){}
+        }
       }
     }catch(err){ anotar('mediaSession', err.message); }
   }
@@ -1270,7 +1292,15 @@ function pintarProgreso(){
   if(!actual) return;
   if(actual.tipo === 'radio'){
     $('m-prog').style.width = '100%'; $('n-seek').style.width = '100%';
-    $('n-a').textContent = '●'; return;
+    $('n-a').textContent = '●';
+    // En directo no hay principio ni final. Si no se BORRA lo que quedo de la
+    // cancion anterior, CarPlay y la pantalla de bloqueo siguen pintando una
+    // barra de progreso y un "-0:29" que no significan nada.
+    // (fallo del 29/09/2026, visto en las fotos de la Dacia)
+    if('mediaSession' in navigator && navigator.mediaSession.setPositionState){
+      try{ navigator.mediaSession.setPositionState(); }catch(_){}
+    }
+    return;
   }
   var d = audio.duration || actual.dur || 0;
   var pct = d ? (audio.currentTime / d * 100) : 0;
@@ -1345,8 +1375,8 @@ async function anadirFicheros(lista){
 
       // ¿ya existe el AUDIO en el teléfono? (lo comparten los dos perfiles)
       // El Blob se guarda TAL CUAL: no se recodifica ni se toca un byte.
-      var yaAudio = await leer('audios', h);
-      if(!yaAudio) await guardar('audios', {hash:h, blob:new Blob([buf], {type:f.type||'audio/mpeg'}), bytes:f.size});
+      if(!(await existe('audios', h)))
+        await guardar('audios', {hash:h, blob:new Blob([buf], {type:f.type||'audio/mpeg'}), bytes:f.size});
 
       // ¿ya la tiene ESTA persona?
       if(mias[h]){ repes++; continue; }
@@ -1397,8 +1427,7 @@ async function revisarBiblioteca(){
   try{
     var cs = await todos('canciones', 'duenyo', yo);
     var hs = {};
-    var as = await todos('audios');
-    as.forEach(function(a){ hs[a.hash] = true; });
+    (await claves('audios')).forEach(function(h){ hs[h] = true; });
     var rotas = 0;
     for(var i=0;i<cs.length;i++){
       var falta = !hs[cs[i].hash];
@@ -1487,6 +1516,10 @@ function saludoHora(){
 // dentroDe = id de la lista que estás mirando; entonces el botón de la
 // derecha saca la canción de esa lista en vez de marcarla como favorita.
 function filaCancion(c, dentroDe){
+  // Guardián: si esta función se pasa a .map() a pelo, el segundo argumento
+  // que llega es el INDICE del array, y a partir del segundo la fila sacaba
+  // una ✕ de "quitar de la lista" en vez del corazón. (fallo del 29/09/2026)
+  if(typeof dentroDe !== 'string' || !dentroDe) dentroDe = null;
   var son = actual && actual.tipo==='cancion' && actual.id === c.id;
   var der = dentroDe
     ? '<span class="r-a" data-quitar="'+esc(dentroDe)+'" data-quitar-id="'+esc(c.id)+'">✕</span>'
@@ -1525,8 +1558,8 @@ function pintarInicio(){
   h += '<div class="shelf-t">🕐 Recientes</div><div class="hscroll">' + recientes.map(function(c){
         return '<div class="tile" data-cancion="'+esc(c.id)+'"><span class="art" style="background:'+tono(c.titulo+c.artista)+'"></span>'+
           '<div class="t">'+esc(c.titulo)+'</div><div class="s">'+esc(c.artista)+'</div></div>'; }).join('') + '</div>';
-  if(favs.length) h += '<div class="shelf-t">❤️ Tus favoritas</div>' + favs.map(filaCancion).join('');
-  if(mas.length)  h += '<div class="shelf-t">🔥 Más escuchadas</div>' + mas.map(filaCancion).join('');
+  if(favs.length) h += '<div class="shelf-t">❤️ Tus favoritas</div>' + favs.map(function(c){ return filaCancion(c); }).join('');
+  if(mas.length)  h += '<div class="shelf-t">🔥 Más escuchadas</div>' + mas.map(function(c){ return filaCancion(c); }).join('');
   if(favR.length) h += '<div class="shelf-t">📻 Tus emisoras</div>' + favR.map(function(e){
         return '<div class="row" data-emisora="'+esc(e.nombre)+'">'+
           '<span class="art" style="background:'+tono(e.nombre)+'">📻</span>'+
@@ -1544,7 +1577,7 @@ function pintarBuscar(){
   if(pestana === 'mimusica'){
     var L = CANCIONES.filter(function(c){
       return !q || (c.titulo+' '+c.artista+' '+c.album+' '+c.genero).toLowerCase().indexOf(q) >= 0; });
-    C.innerHTML = L.length ? L.map(filaCancion).join('')
+    C.innerHTML = L.length ? L.map(function(c){ return filaCancion(c); }).join('')
       : '<div class="vacio"><span class="em">🔎</span>'+(CANCIONES.length?'Nada con ese nombre en tu música.':'Todavía no has añadido música.')+'</div>';
   }
   else if(pestana === 'radio'){
@@ -1791,11 +1824,11 @@ async function pintarAjustes(){
   try{ if(navigator.storage && navigator.storage.persisted) persistido = await navigator.storage.persisted(); }catch(_){}
 
   // espacio por persona
-  var audios = await todos('audios'), todasC = await todos('canciones');
-  var bytesDe = {}; audios.forEach(function(a){ bytesDe[a.hash] = a.bytes || (a.blob?a.blob.size:0); });
+  // El tamano lo lleva cada cancion (c.bytes); no hay que abrir los MP3.
+  var todasC = await todos('canciones');
   var porDuenyo = {emmanuel:0, elibel:0}, cuenta = {emmanuel:0, elibel:0}, hashes = {};
   todasC.forEach(function(c){
-    porDuenyo[c.duenyo] = (porDuenyo[c.duenyo]||0) + (bytesDe[c.hash]||0);
+    porDuenyo[c.duenyo] = (porDuenyo[c.duenyo]||0) + (c.bytes||0);
     cuenta[c.duenyo] = (cuenta[c.duenyo]||0) + 1;
     (hashes[c.hash] = hashes[c.hash] || []).push(c.duenyo);
   });

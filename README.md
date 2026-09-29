@@ -87,7 +87,23 @@ como entra. Lee la cabecera real del MP3 y te enseña el bitrate de verdad
 kbps equivalentes, ★★ desde 128, ★ desde 96. Cuenta que **HE-AAC rinde cerca
 del doble** que MP3, así que 64 kbps HE-AAC suenan como 128 de MP3.
 
-**Y además:** favoritos, listas propias, aleatorio, cola "A continuación",
+### Listas que se llenan de verdad (v1.3.0)
+
+Cada canción lleva un **⋯** a la derecha. Ahí dentro:
+
+- **Añadir a una lista** — elige una de las tuyas o crea una nueva con esa
+  canción ya dentro.
+- **Ponerla a continuación** — se cuela justo después de la que suena.
+- **Marcar como favorita**.
+
+El mismo **⋯** está arriba en «Sonando ahora», para la que está sonando.
+
+Y al tocar una lista en **Biblioteca → Listas** ya no se pone a sonar a lo
+bruto: se abre su ficha, con **▶ Reproducir la lista**, **➕ Añadir canciones**
+(puedes meter varias de un tirón) y una **✕** en cada canción para sacarla de
+la lista sin borrarla de la biblioteca.
+
+**Y además:** favoritos, aleatorio, cola "A continuación",
 temporizador para dormir, copia de seguridad, mantener la pantalla encendida, y
 controles en la pantalla de bloqueo y en el coche (Media Session).
 
@@ -172,10 +188,19 @@ restricciones del sistema.
 
 ---
 
-## ⚠️ Lo que falta: la prueba del coche
+## ⚠️ Lo que falta: repetir la prueba del coche
 
 Todo esto depende de una pregunta que **solo se responde probándolo**: ¿deja
 iOS que una web instalada suene con la pantalla apagada y en CarPlay?
+
+> **28/09/2026 — la primera prueba salió mal, pero no valía.** Con la pantalla
+> apagada no sonaba, y el informe traía cortes de radio cada 20 s. Midiendo el
+> stream por fuera resultó que la emisora estaba perfecta (515 KB en 35 s sin
+> un corte): quien cortaba era el **guardián nº 1** de la propia app, que daba
+> la alarma a los 2,4 s sin avance y reasignaba la fuente. Arreglado en la
+> v1.2.0. **Hay que repetir la prueba.** Ahora el registro de errores marca
+> `[PANTALLA APAGADA]` en cada anotación, así que el informe lo dirá sin
+> ninguna duda.
 
 La app trae la prueba dentro: **⚙️ Ajustes → Diagnóstico → Hacer la prueba**.
 Comprueba sola lo que puede, y te da la lista de lo que tienes que mirar tú:
@@ -238,6 +263,16 @@ independientes: no se mezclan.
   Para limpiar, usar *Ajustes → Reparar*, que respeta la música.
 - **No meter emisoras `http://`**: el iPhone las bloquea y no suenan.
 - **No prometer icono en CarPlay.** No se puede.
+- **No poner al guardián nº 1 a vigilar la radio con poco margen.** Un bache
+  de 2 s en directo es normal; si se reasigna la fuente por eso, se corta la
+  emisora sola. Radio 12 s, canción 4 s, y solo si `readyState < 3`.
+- **No llamar a `audio.pause()` a pelo.** Hay que usar `pausarYo()`, que deja
+  la bandera `paradoPorMi`. Si no, la app cree que fue una llamada entrante y
+  vuelve a encender la música sola.
+- **No montar un descargador de YouTube.** Va contra sus condiciones de uso y
+  además desde una web instalada es imposible (haría falta servidor propio).
+  Ya se preguntó; la respuesta es no, y las alternativas están arriba en
+  *Dónde comprar música legal*.
 
 ---
 

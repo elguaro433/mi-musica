@@ -220,6 +220,29 @@ button{font-family:inherit;color:inherit}
   padding:1px 5px;letter-spacing:.05em;flex:0 0 auto}
 .live.malo{background:var(--gold)}
 
+/* ---------- hoja de acciones (sube desde abajo) ---------- */
+#hoja{position:fixed;inset:0;z-index:80;display:none;align-items:flex-end;
+  background:rgba(4,3,8,.64);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+#hoja.on{display:flex}
+#hoja .caja{width:100%;max-height:84%;overflow-y:auto;scrollbar-width:none;
+  background:var(--card);border-top:1px solid var(--line);border-radius:20px 20px 0 0;
+  padding:8px calc(var(--gutter) + var(--sar)) calc(var(--sab) + 16px) calc(var(--gutter) + var(--sal))}
+#hoja .caja::-webkit-scrollbar{display:none}
+#hoja .asa{width:38px;height:4px;border-radius:3px;background:var(--line);margin:6px auto 14px}
+#hoja h4{margin:0 0 4px;font-family:var(--font-d);font-size:17px;font-weight:700;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#hoja .sub{color:var(--muted);font-size:12.5px;margin-bottom:13px;line-height:1.45}
+.opc{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:9px 12px;
+  background:var(--card2);border:1px solid var(--line);border-radius:13px;margin-bottom:8px;
+  font-size:14.5px;color:var(--ink);cursor:pointer;text-align:left;font-weight:500}
+.opc .em{font-size:18px;flex:0 0 auto;width:24px;text-align:center}
+.opc .tx{min-width:0;flex:1}
+.opc .tx b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.opc small{display:block;color:var(--dim);font-size:11.5px;font-weight:400;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opc:active{background:rgba(169,112,255,.18)}
+.opc[disabled]{opacity:.45}
+
 /* ---------- barra inferior ---------- */
 #barra{position:fixed;left:0;right:0;bottom:0;height:var(--barra);padding-left:var(--sal);padding-right:var(--sar);
   padding-bottom:var(--sab);background:rgba(18,14,30,.96);
@@ -377,7 +400,7 @@ body.coche #coche-salir{display:block}
 
   <!-- Sonando ahora -->
   <div id="now">
-    <div class="now-top"><span id="now-cerrar">⌄</span><span style="letter-spacing:.14em;font-size:11px;cursor:default">SONANDO AHORA</span><span id="now-fav">♡</span></div>
+    <div class="now-top"><span id="now-cerrar">⌄</span><span style="letter-spacing:.14em;font-size:11px;cursor:default">SONANDO AHORA</span><span style="display:flex;gap:16px;align-items:center"><span id="now-mas">⋯</span><span id="now-fav">♡</span></span></div>
     <div class="art" id="n-art"></div>
     <h3 id="n-t">—</h3>
     <div id="n-s">—</div>
@@ -411,6 +434,9 @@ body.coche #coche-salir{display:block}
   </div>
 
   <div id="toast"></div>
+
+  <!-- Hoja de acciones: añadir a una lista, poner a continuación… -->
+  <div id="hoja"><div class="caja" id="hoja-caja"></div></div>
 </div>
 
 <!-- El <audio> vive aquí y no se destruye al navegar -->
@@ -434,7 +460,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.2.0';
+var APP_VERSION = '1.3.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -823,6 +849,7 @@ var EMIS_CASA = [];            // emisoras añadidas a mano
 var FAV_RADIO = {};            // nombre → true (del dueño actual)
 var VIDEOS = [];
 var vistaActual = 'quien', pestana = 'mimusica', filtro = 'canciones';
+var listaAbierta = null;       // id de la lista cuya ficha estás mirando
 var AJ = {};                   // ajustes del teléfono
 
 var audio = $('audio');
@@ -1457,13 +1484,19 @@ function saludoHora(){
   var h = new Date().getHours();
   return h<6 ? 'Buenas noches' : h<13 ? 'Buenos días' : h<21 ? 'Buenas tardes' : 'Buenas noches';
 }
-function filaCancion(c){
+// dentroDe = id de la lista que estás mirando; entonces el botón de la
+// derecha saca la canción de esa lista en vez de marcarla como favorita.
+function filaCancion(c, dentroDe){
   var son = actual && actual.tipo==='cancion' && actual.id === c.id;
+  var der = dentroDe
+    ? '<span class="r-a" data-quitar="'+esc(dentroDe)+'" data-quitar-id="'+esc(c.id)+'">✕</span>'
+    : '<span class="r-a '+(c.fav?'on':'')+'" data-fav="'+esc(c.id)+'">'+(c.fav?'❤️':'♡')+'</span>';
   return '<div class="row'+(son?' sonando':'')+(c.falta?' falta':'')+'" data-cancion="'+esc(c.id)+'">'+
     '<span class="art" style="background:'+tono(c.titulo+c.artista)+'">'+(c.falta?'⚠️':'')+'</span>'+
     '<span class="r-x"><span class="r-t">'+esc(c.titulo)+'</span>'+
       '<span class="r-s">'+(c.falta?'':'<span class="badge">⬇️</span>')+esc(c.artista)+'</span></span>'+
-    '<span class="r-a '+(c.fav?'on':'')+'" data-fav="'+esc(c.id)+'">'+(c.fav?'❤️':'♡')+'</span></div>';
+    der +
+    '<span class="r-a" data-mas="'+esc(c.id)+'">⋯</span></div>';
 }
 function pintarInicio(){
   $('saludo').textContent = saludoHora() + ', ' + PERSONAS[yo].corto;
@@ -1692,16 +1725,44 @@ function idYouTube(t){
 }
 function pintarBiblio(){
   var C = $('bib-cuerpo');
+  // Dentro de la ficha de una lista, el "Anadir musica" global estorba:
+  // ahi lo que quieres es "Anadir canciones", que es otra cosa.
+  $('b-anadir').style.display = (filtro === 'listas' && listaAbierta) ? 'none' : '';
   if(!CANCIONES.length){
     C.innerHTML = '<div class="vacio"><span class="em">➕</span>Tu biblioteca está vacía.<br>'+
       'Toca <b>Añadir música</b> y elige tus MP3<br>desde <b>Archivos</b> o <b>iCloud Drive</b>.<br><br>'+
       '<span style="font-size:12.5px">¿No sabes dónde guardarlos?<br>Mira <b>⚙️ Ajustes → Dónde guardar tus MP3</b>.</span></div>';
     return;
   }
-  if(filtro === 'canciones'){ C.innerHTML = CANCIONES.map(filaCancion).join(''); return; }
+  if(filtro === 'canciones'){
+    C.innerHTML = CANCIONES.map(function(c){ return filaCancion(c); }).join(''); return; }
   if(filtro === 'listas'){
+    // ¿Estás dentro de una lista? Entonces se ve su ficha.
+    var abierta = null;
+    if(listaAbierta) for(var li=0; li<LISTAS.length; li++)
+      if(LISTAS[li].id === listaAbierta) abierta = LISTAS[li];
+    if(listaAbierta && !abierta) listaAbierta = null;   // la borraron
+    if(abierta){
+      var ids = abierta.canciones || [], dentro = [];
+      for(var di=0; di<ids.length; di++)
+        for(var dj=0; dj<CANCIONES.length; dj++)
+          if(CANCIONES[dj].id === ids[di]) dentro.push(CANCIONES[dj]);
+      C.innerHTML =
+        '<button class="btn suave" data-cerrar-lista="1" style="margin-bottom:12px">←&nbsp; Volver a las listas</button>'+
+        '<div class="card" style="display:flex;align-items:center;gap:12px">'+
+          '<span class="art" style="background:'+tono(abierta.nombre)+'">☰</span>'+
+          '<span class="r-x"><span class="r-t" style="font-size:16px">'+esc(abierta.nombre)+'</span>'+
+          '<span class="r-s">'+dentro.length+(dentro.length===1?' canción':' canciones')+'</span></span></div>'+
+        (dentro.length ? '<button class="btn solido" data-tocar-lista="'+esc(abierta.id)+'">▶&nbsp; Reproducir la lista</button>' : '')+
+        '<button class="btn" data-anadir-a="'+esc(abierta.id)+'">➕&nbsp; Añadir canciones</button>'+
+        (dentro.length
+          ? dentro.map(function(c){ return filaCancion(c, abierta.id); }).join('')
+          : '<div class="vacio"><span class="em">☰</span>Esta lista está vacía.<br>'+
+            'Toca <b>➕ Añadir canciones</b> y elige las que quieras.</div>');
+      return;
+    }
     C.innerHTML = (LISTAS.length ? LISTAS.map(function(l){
-      return '<div class="row" data-lista="'+esc(l.id)+'"><span class="art" style="background:'+tono(l.nombre)+'">☰</span>'+
+      return '<div class="row" data-abrir-lista="'+esc(l.id)+'"><span class="art" style="background:'+tono(l.nombre)+'">☰</span>'+
         '<span class="r-x"><span class="r-t">'+esc(l.nombre)+'</span>'+
         '<span class="r-s">'+(l.canciones||[]).length+' canciones</span></span>'+
         '<span class="r-a" data-borrar-lista="'+esc(l.id)+'">🗑</span></div>'; }).join('')
@@ -1988,6 +2049,7 @@ document.addEventListener('click', async function(ev){
   if((el = t.closest('[data-t]'))){ ponerPestana(el.dataset.t); return; }
   if((el = t.closest('[data-b]'))){
     filtro = el.dataset.b;
+    listaAbierta = null;
     var bs = document.querySelectorAll('[data-b]');
     for(var i=0;i<bs.length;i++) bs[i].classList.toggle('on', bs[i].dataset.b === filtro);
     pintarBiblio(); return;
@@ -2014,6 +2076,83 @@ document.addEventListener('click', async function(ev){
   }
 
   // reproducir
+  /* ── hoja de acciones y listas ────────────────────────────────
+     Estos van ANTES que [data-cancion]: el ⋯ vive dentro de la fila. */
+  if(t.closest('#hoja') && !t.closest('#hoja .caja')){ cerrarHoja(); return; }
+  if((el = t.closest('[data-cerrar-hoja]'))){ cerrarHoja(); return; }
+  if((el = t.closest('[data-mas]'))){ ev.stopPropagation(); hojaCancion(el.dataset.mas); return; }
+  if(t.closest('#now-mas')){
+    if(actual && actual.tipo === 'cancion') hojaCancion(actual.id);
+    else toast('Esto es para las canciones, no para la radio.');
+    return;
+  }
+  if((el = t.closest('[data-elegir-lista]'))){ hojaElegirLista(el.dataset.elegirLista); return; }
+  if((el = t.closest('[data-anadir-a]'))){ hojaAnadirA(el.dataset.anadirA); return; }
+  if((el = t.closest('[data-meter]'))){
+    var lHecha = await meterEnLista(el.dataset.meter, el.dataset.meteId);
+    if(lHecha){
+      toast('Añadida a «' + lHecha.nombre + '».', 'bueno', 2200);
+      // Si estás llenando la lista desde su ficha, la hoja sigue abierta
+      // para que puedas meter varias de un tirón.
+      if(listaAbierta === lHecha.id) hojaAnadirA(lHecha.id); else cerrarHoja();
+      pintarVista();
+    }
+    return;
+  }
+  if((el = t.closest('[data-lista-con]'))){
+    var idCon = el.dataset.listaCon;
+    var nomCon = prompt('¿Cómo se llama la lista?');
+    if(!nomCon || !nomCon.trim()) return;
+    var nlc = {id:'l_'+yo+'_'+Date.now(), duenyo:yo, nombre:nomCon.trim(), canciones:[idCon]};
+    await guardar('listas', nlc); await cargarDatos();
+    cerrarHoja(); pintarVista();
+    toast('Lista «' + nlc.nombre + '» creada con esa canción.', 'bueno', 4000);
+    return;
+  }
+  if((el = t.closest('[data-hoja-fav]'))){
+    var cHF = await leer('canciones', el.dataset.hojaFav);
+    if(cHF){
+      cHF.fav = !cHF.fav; await guardar('canciones', limpia(cHF)); await cargarDatos();
+      if(actual && actual.id === cHF.id){ actual.fav = cHF.fav; $('now-fav').textContent = cHF.fav?'❤️':'♡'; }
+      toast(cHF.fav ? 'Marcada como favorita.' : 'Quitada de favoritos.', 'bueno', 2000);
+    }
+    cerrarHoja(); pintarVista(); return;
+  }
+  if((el = t.closest('[data-luego]'))){
+    var idL = el.dataset.luego;
+    cerrarHoja();
+    if(!actual || actual.tipo !== 'cancion'){ await tocarCancion(idL); pintarVista(); return; }
+    var pos = cola.indexOf(idL);
+    if(pos >= 0){ cola.splice(pos, 1); if(pos < colaPos) colaPos--; }
+    cola.splice(colaPos + 1, 0, idL);
+    guardarCola(); pintarVista();
+    toast('Suena justo después de esta.', 'bueno', 2400);
+    return;
+  }
+  if((el = t.closest('[data-abrir-lista]'))){
+    listaAbierta = el.dataset.abrirLista; pintarBiblio(); $('v-biblio').scrollTop = 0; return;
+  }
+  if((el = t.closest('[data-cerrar-lista]'))){ listaAbierta = null; pintarBiblio(); return; }
+  if((el = t.closest('[data-tocar-lista]'))){
+    var lT = await leer('listas', el.dataset.tocarLista);
+    var idsT = [];
+    if(lT) for(var ti=0; ti<(lT.canciones||[]).length; ti++)
+      if(buscarCancion(lT.canciones[ti])) idsT.push(lT.canciones[ti]);
+    if(idsT.length) await tocarCancion(idsT[0], idsT);
+    else toast('Esa lista está vacía.');
+    pintarVista(); return;
+  }
+  if((el = t.closest('[data-quitar]'))){
+    ev.stopPropagation();
+    var lQ = await leer('listas', el.dataset.quitar), idQ = el.dataset.quitarId;
+    if(lQ){
+      lQ.canciones = (lQ.canciones||[]).filter(function(x){ return x !== idQ; });
+      await guardar('listas', lQ); await cargarDatos(); pintarBiblio();
+      toast('Quitada de la lista. La canción sigue en tu biblioteca.', 'bueno', 3000);
+    }
+    return;
+  }
+
   if((el = t.closest('[data-cancion]'))){ await tocarCancion(el.dataset.cancion); pintarVista(); return; }
   if((el = t.closest('[data-emisora]'))){
     var L = listaEmisoras();
@@ -2026,15 +2165,10 @@ document.addEventListener('click', async function(ev){
     if(ids.length) await tocarCancion(ids[0], ids);
     pintarVista(); return;
   }
-  if((el = t.closest('[data-lista]'))){
-    var l = await leer('listas', el.dataset.lista);
-    if(l && l.canciones && l.canciones.length) await tocarCancion(l.canciones[0], l.canciones);
-    else toast('Esa lista está vacía.');
-    return;
-  }
   if((el = t.closest('[data-borrar-lista]'))){
     ev.stopPropagation();
     if(confirm('¿Borrar esta lista? Las canciones no se borran.')){
+      if(listaAbierta === el.dataset.borrarLista) listaAbierta = null;
       await borrar('listas', el.dataset.borrarLista); await cargarDatos(); pintarVista();
     }
     return;
@@ -2185,10 +2319,98 @@ async function nuevaEmisora(){
 }
 async function nuevaLista(){
   var n = prompt('¿Cómo se llama la lista?');
-  if(!n) return;
-  await guardar('listas', {id:'l_'+yo+'_'+Date.now(), duenyo:yo, nombre:n.trim(), canciones:[]});
-  await cargarDatos(); pintarBiblio();
-  toast('Lista creada. Añádele canciones desde tu biblioteca.', 'bueno', 4000);
+  if(!n || !n.trim()) return;
+  var nl = {id:'l_'+yo+'_'+Date.now(), duenyo:yo, nombre:n.trim(), canciones:[]};
+  await guardar('listas', nl);
+  await cargarDatos();
+  listaAbierta = nl.id;                    // se abre para que le metas canciones
+  pintarBiblio();
+  toast('Lista creada. Toca ➕ Añadir canciones.', 'bueno', 4000);
+}
+
+/* ═════════ Hoja de acciones (la que sube desde abajo) ═══════════════
+   Es el sitio donde por fin se puede meter una canción en una lista.
+   Antes las listas se creaban vacías y solo se llenaban restaurando una
+   copia de seguridad: era el hueco más gordo de la app. */
+function abrirHoja(html){
+  $('hoja-caja').innerHTML = '<div class="asa"></div>' + html;
+  $('hoja').classList.add('on');
+  $('hoja-caja').scrollTop = 0;
+}
+function cerrarHoja(){ $('hoja').classList.remove('on'); $('hoja-caja').innerHTML = ''; }
+
+function buscarCancion(id){
+  for(var i=0;i<CANCIONES.length;i++) if(CANCIONES[i].id === id) return CANCIONES[i];
+  return null;
+}
+function buscarLista(id){
+  for(var i=0;i<LISTAS.length;i++) if(LISTAS[i].id === id) return LISTAS[i];
+  return null;
+}
+
+function hojaCancion(id){
+  var c = buscarCancion(id);
+  if(!c) return;
+  var cuantas = LISTAS.length
+    ? LISTAS.length + (LISTAS.length === 1 ? ' lista tuya' : ' listas tuyas')
+    : 'todavía no tienes ninguna';
+  abrirHoja(
+    '<h4>' + esc(c.titulo) + '</h4>' +
+    '<div class="sub">' + esc(c.artista) + ' · ' + esc(c.album) + '</div>' +
+    '<button class="opc" data-elegir-lista="'+esc(c.id)+'"><span class="em">➕</span>' +
+      '<span class="tx"><b>Añadir a una lista</b><small>'+cuantas+'</small></span></button>' +
+    '<button class="opc" data-luego="'+esc(c.id)+'"><span class="em">⏭</span>' +
+      '<span class="tx"><b>Ponerla a continuación</b><small>suena justo después de la de ahora</small></span></button>' +
+    '<button class="opc" data-hoja-fav="'+esc(c.id)+'"><span class="em">'+(c.fav?'❤️':'♡')+'</span>' +
+      '<span class="tx"><b>'+(c.fav?'Quitar de favoritos':'Marcar como favorita')+'</b></span></button>' +
+    '<button class="opc" data-cerrar-hoja="1"><span class="em">✕</span>' +
+      '<span class="tx"><b>Cerrar</b></span></button>');
+}
+
+function hojaElegirLista(id){
+  var c = buscarCancion(id);
+  var h = '<h4>Añadir a una lista</h4>' +
+          '<div class="sub">' + (c ? esc(c.titulo) + ' · ' : '') + 'elige dónde la guardas.</div>';
+  h += LISTAS.map(function(l){
+    var ya = (l.canciones||[]).indexOf(id) >= 0;
+    return '<button class="opc" data-meter="'+esc(l.id)+'" data-mete-id="'+esc(id)+'"'+(ya?' disabled':'')+'>'+
+      '<span class="em">'+(ya?'✓':'☰')+'</span><span class="tx"><b>'+esc(l.nombre)+'</b>'+
+      '<small>'+(ya ? 'ya está en esta lista' : (l.canciones||[]).length+' canciones')+'</small></span></button>';
+  }).join('');
+  h += '<button class="opc" data-lista-con="'+esc(id)+'"><span class="em">➕</span>' +
+       '<span class="tx"><b>Crear una lista nueva</b><small>y meter esta canción dentro</small></span></button>' +
+       '<button class="opc" data-cerrar-hoja="1"><span class="em">✕</span>' +
+       '<span class="tx"><b>Cerrar</b></span></button>';
+  abrirHoja(h);
+}
+
+function hojaAnadirA(listaId){
+  var l = buscarLista(listaId);
+  if(!l) return;
+  var dentro = l.canciones || [];
+  var fuera = CANCIONES.filter(function(c){ return dentro.indexOf(c.id) < 0; });
+  var h = '<h4>Añadir a «' + esc(l.nombre) + '»</h4>' +
+          '<div class="sub">' + (fuera.length
+            ? 'Toca las que quieras: se van metiendo al momento.'
+            : 'Ya tienes toda tu música en esta lista.') + '</div>';
+  h += fuera.map(function(c){
+    return '<button class="opc" data-meter="'+esc(l.id)+'" data-mete-id="'+esc(c.id)+'">'+
+      '<span class="em">➕</span><span class="tx"><b>'+esc(c.titulo)+'</b>'+
+      '<small>'+esc(c.artista)+'</small></span></button>';
+  }).join('');
+  h += '<button class="opc" data-cerrar-hoja="1"><span class="em">✓</span>' +
+       '<span class="tx"><b>Listo</b></span></button>';
+  abrirHoja(h);
+}
+
+async function meterEnLista(listaId, cancionId){
+  var l = await leer('listas', listaId);
+  if(!l) return null;
+  l.canciones = l.canciones || [];
+  if(l.canciones.indexOf(cancionId) < 0) l.canciones.push(cancionId);
+  await guardar('listas', l);
+  await cargarDatos();
+  return l;
 }
 function copiarInforme(){
   var e = [];
@@ -2244,6 +2466,7 @@ async function entrar(p){
 async function cambiarPersona(){
   // Guardián: al cambiar, se para la música y se vacía la cola.
   paradoPorMi = true; viendoVideo = false; recuperarAlVolver = false;
+  listaAbierta = null; cerrarHoja();
   try{ audio.pause(); }catch(_){}
   clearTimeout(reintento); clearTimeout(vigilante); clearTimeout(dormir); dormir = null;
   soltarURLs(); soltarCaratula();

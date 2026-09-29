@@ -8,27 +8,47 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
-## 👉 EMPIEZA AQUÍ (sesión del 29/09/2026)
+## 👉 EMPIEZA AQUÍ (tras la sesión del 29/09/2026, v1.3.0)
 
-**Lo primero que hay que preguntarle: ¿hizo la prueba en el coche?**
+**Lo primero: ¿repitió la prueba del coche con la v1.3.0?**
 (⚙️ Ajustes → Diagnóstico → Hacer la prueba, y los 5 pasos en su Dacia.)
 
-Todo el proyecto depende de esa respuesta:
-- **Si la música suena con la pantalla apagada** → seguimos puliendo la app.
-- **Si NO suena** → hay que hablarle del plan B (meter los MP3 en la app
-  Música del iPhone con Dispositivos Apple en Windows). Está explicado abajo.
+**Ojo, esto cambió:** la prueba del 28/09 salió mal —con la pantalla apagada
+no sonaba— **pero no valía**. El informe traía cortes de radio cada 20 s.
+Midiendo el stream de Olimpica Stereo por fuera con curl: **515 KB en 35 s sin
+un corte**. La emisora estaba perfecta. Quien cortaba era el **guardián nº 1**
+de la propia app (ver abajo). Arreglado en la v1.2.0.
+
+Así que **sigue sin respuesta** si iOS corta el audio de fondo. Ahora el
+registro de errores marca `[PANTALLA APAGADA]` en cada anotación: pídele el
+informe y míralo.
+- Si el informe viene **sin reintentos** y aun así no sonó → **ahora sí es
+  iOS**, y toca hablarle del plan B (los MP3 en la app Música del iPhone con
+  Dispositivos Apple en Windows).
+- Si vuelve a haber reintentos → todavía queda algo nuestro por arreglar.
 
 Segunda pregunta: **¿montó la automatización de Atajos** (CarPlay → Se conecta
-→ Abrir Mi Música)? Es lo que hace que se abra sola al entrar en el coche.
+→ Abrir Mi Música)? El 29/09 dijo que no. Es lo que hace que se abra sola al
+entrar en el coche.
 
 ### Pendientes concretos, por orden
-1. Añadir canciones a una lista desde la ficha de la canción. Hoy las listas se
-   crean vacías y solo se llenan restaurando una copia. **Es el hueco más
-   evidente de la app.**
-2. Reordenar la cola a mano.
-3. Repasar las 30 emisoras y poner en gris las que hayan muerto.
-4. Guía paso a paso de cómo comprar en Amazon Música Digital y meterlo en la
-   app (se la prometí y quedó solo resumida en el README).
+1. Reordenar la cola a mano.
+2. Repasar las 30 emisoras y poner en gris las que hayan muerto.
+3. Guía paso a paso de cómo comprar en Amazon Música Digital y meterlo en la
+   app (se la prometí y quedó solo resumida en el README). **Le interesa:** el
+   29/09 se quejó de que la música de Descubrir es vieja y pidió más fuentes.
+   Esta es la respuesta honesta, porque música actual + gratis + descargable +
+   legal no existe.
+4. Un interruptor de «letra más grande» para el coche (se lo ofrecí y de
+   momento eligió otra cosa).
+
+### Lo que pidió el 29/09 y NO se puede hacer
+**Bajar el audio de los vídeos de YouTube a MP3.** Lo pidió dos veces, la
+segunda aclarando que solo quería el audio, no el vídeo. La respuesta es no:
+va contra las condiciones de uso de YouTube, y además desde una web instalada
+en el iPhone es técnicamente imposible (haría falta un servidor propio). No
+hace falta suavizarlo ni volver a ofrecerlo; lo que sí vale es reconducirlo a
+comprar los MP3 (pendiente nº 3).
 
 ## Sus aparatos (importa para la maquetación)
 - **Emmanuel → iPhone 14 Pro** (393×852)
@@ -142,11 +162,33 @@ Plan C (app nativa, Mac + 99 €/año) **descartado**: ni así daría el icono.
 - `sw.js` **nunca toca IndexedDB**. Borrar sus cachés no borra ni una canción.
 - Los diez guardianes están documentados en el README con su número; en el
   código llevan comentarios `Guardián nº N`.
+- **El guardián nº 1 fue el gran fallo del 28/09/2026.** Vigilaba con 2,4 s de
+  margen y, si `currentTime` no avanzaba, reasignaba `audio.src`. En radio en
+  directo con datos móviles eso es un bache normal, así que cortaba la emisora
+  sola cada 20 s; y con la pantalla apagada era mortal, porque iOS no deja
+  arrancar una fuente nueva de fondo. Ahora: 12 s en radio y 4 s en canción,
+  solo actúa si `readyState < 3`, descarta las medidas que llegan tarde
+  (iOS congela los temporizadores con la pantalla apagada) y **con
+  `document.hidden` no toca la fuente jamás**: como mucho reintenta `play()`.
+- **`paradoPorMi`** es la bandera de «lo paraste tú». La ponen `pausarYo()` y
+  `cambiarPersona()`, y la respetan `programarReconexion`, `trasInterrupcion`,
+  `vigilar`, el evento `online` y el `visibilitychange`. **Nunca llamar a
+  `audio.pause()` a pelo** —los mandos de Media Session lo hacían, y por eso la
+  radio se encendía sola cada vez que la parabas desde el volante.
+- Parar la radio **suelta** el `src` (deja de tirar de datos). Por eso
+  `playPause()` reconecta desde `actual.url` si no hay `src`.
+- **`viendoVideo`** hace que mande el vídeo de YouTube: al abrirlo se para la
+  música, al cerrarlo no vuelve sola, y darle al ▶ cierra el vídeo. Una cosa
+  suena cada vez.
+- `anotar()` añade `[PANTALLA APAGADA]` cuando `document.hidden`. Es lo que
+  permitirá saber por fin si iOS nos corta el audio de fondo.
+- La **hoja de acciones** (`#hoja` + `abrirHoja`/`cerrarHoja`) es el único
+  componente tipo modal de la app. De ahí cuelga meter canciones en listas.
+  `listaAbierta` guarda qué ficha de lista estás mirando, igual que `ytVerId`
+  e `iaAbierto` hacen en la pestaña Buscar.
 
 ## Ideas propuestas y NO hechas
 
-- Añadir canciones a una lista desde la ficha (las listas se crean pero solo se
-  llenan restaurando una copia).
 - Reordenar la cola a mano.
 - Verificar las 30 emisoras periódicamente y poner en gris las muertas.
 - Normalizar el volumen entre canciones.

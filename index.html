@@ -218,6 +218,12 @@ button{font-family:inherit;color:inherit}
 .guia .ojo{background:rgba(11,9,19,.5);border-left:2px solid var(--gold);border-radius:8px;
   padding:9px 11px;font-size:calc(12.5px * var(--esc));margin-top:12px}
 .sign{font-family:var(--font-s);font-size:calc(27px * var(--esc));text-align:right;margin-top:8px}
+.colores{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:6px}
+.col{border:2px solid transparent;border-radius:13px;height:58px;cursor:pointer;
+  display:grid;place-items:end center;padding-bottom:5px;position:relative}
+.col span{font-size:calc(11px * min(var(--esc),1.15));font-weight:700;color:#12101e;
+  background:rgba(255,255,255,.72);border-radius:20px;padding:1px 9px}
+.col.on{border-color:var(--ink);box-shadow:0 0 0 3px rgba(255,255,255,.14)}
 .perfil{display:flex;align-items:center;gap:14px;margin:4px 0 12px}
 .perfil-x{min-width:0;flex:1}
 .perfil-n{font-family:var(--font-d);font-weight:700;font-size:calc(18px * var(--esc));letter-spacing:-.01em}
@@ -410,7 +416,7 @@ body.coche #coche-salir{display:block}
     <div class="tabs fijas">
       <button class="tab on" data-t="mimusica">🎵 Mi música</button>
       <button class="tab" data-t="radio">📻 Radio</button>
-      <button class="tab" data-t="youtube">📺 YouTube</button>
+      <button class="tab" data-t="youtube">▶︎ YouTube</button>
       <button class="tab" data-t="descubrir">🔎 Descubrir</button>
     </div>
     <form id="form-q" autocomplete="off"><input class="campo" id="q" type="search" enterkeyhint="search"
@@ -505,7 +511,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.9.0';
+var APP_VERSION = '1.10.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -611,6 +617,34 @@ var PERSONAS = {
   emmanuel:{n:'Emmanuel Díaz', corto:'Emmanuel', g:'linear-gradient(135deg,#a970ff,#7b4ddb)', c:'#a970ff'},
   elibel:  {n:'Elibel González', corto:'Elibel',  g:'linear-gradient(135deg,#ff5fa6,#ff8fc4)', c:'#ff5fa6'}
 };
+/* [clave, nombre, principal, segundo, acento] */
+var TEMAS = [
+  ['neon',   'Ne\u00f3n',   '#a970ff', '#ff5fa6', '#43e0d0'],
+  ['oceano', 'Oc\u00e9ano', '#4aa3ff', '#31e0c6', '#8ad9ff'],
+  ['selva',  'Selva',  '#4bd47e', '#b9e657', '#2fd6c0'],
+  ['fuego',  'Fuego',  '#ff7a45', '#ff4d6d', '#ffc857'],
+  ['oro',    'Oro',    '#e8bf5a', '#ff9f68', '#ffe1a0'],
+  ['hielo',  'Hielo',  '#9aa8ff', '#c9a7ff', '#7fd8ff']
+];
+function temaDe(cual){
+  for(var i=0;i<TEMAS.length;i++) if(TEMAS[i][0] === cual) return TEMAS[i];
+  return TEMAS[0];
+}
+/* Cambia los acentos y REHACE los degradados de los cuadros: si no, la app
+   se quedaba medio morada por mucho que se tocaran los botones. */
+function ponerColor(cual){
+  var t = temaDe(cual), p = t[2], g = t[3], c = t[4];
+  try{
+    var r = document.documentElement.style;
+    r.setProperty('--purple', p);
+    r.setProperty('--pink', g);
+    r.setProperty('--cyan', c);
+  }catch(_){}
+  TONOS = ['linear-gradient(135deg,'+p+','+g+')', 'linear-gradient(135deg,'+c+','+p+')',
+           'linear-gradient(135deg,'+g+',#ffcf5c)', 'linear-gradient(135deg,'+p+','+c+')',
+           'linear-gradient(135deg,#ffcf5c,'+g+')', 'linear-gradient(135deg,'+p+','+g+')',
+           'linear-gradient(135deg,'+g+','+p+')',   'linear-gradient(135deg,'+c+','+g+')'];
+}
 var TONOS = ['linear-gradient(135deg,#a970ff,#ff5fa6)','linear-gradient(135deg,#43e0d0,#a970ff)',
   'linear-gradient(135deg,#ff5fa6,#ffcf5c)','linear-gradient(135deg,#7b4ddb,#43e0d0)',
   'linear-gradient(135deg,#ffcf5c,#ff5fa6)','linear-gradient(135deg,#a970ff,#43e0d0)',
@@ -1032,13 +1066,9 @@ function bloqueMundo(){
   if(rbBuscando) return h + '<div class="vacio"><span class="em">⏳</span>Buscando «' + esc(rbTexto) + '»…</div>';
   if(rbFallo)    return h + '<div class="vacio"><span class="em">📻</span>' + esc(rbFallo) + '</div>';
   if(rbResultados.length)
-    return h + '<div class="r-s" style="margin:-4px 0 8px">' + rbResultados.length +
-           ' encontradas para «' + esc(rbTexto) + '». Tócala para oírla; el ➕ la guarda.</div>' +
-           rbResultados.map(function(e, i){ return filaEmisoraMundo(e, i); }).join('');
-  return h + '<div class="vacio"><span class="em">🌍</span>' +
-    'Escribe arriba y pulsa <b>buscar</b> para rebuscar entre miles de emisoras.<br>' +
-    '<span style="font-size:calc(12.5px * var(--esc))">Prueba con un estilo o con una ciudad.</span></div>' +
-    '<div class="hscroll">' +
+    return h + rbResultados.map(function(e, i){ return filaEmisoraMundo(e, i); }).join('');
+  return h +
+    '<div class="hscroll" style="margin-top:2px">' +
     ['reggaeton','salsa','bachata','vallenato','merengue','Medellin','Santo Domingo','Caracas']
       .map(function(t){ return '<button class="tab" data-rb-sug="' + esc(t) + '">' + esc(t) + '</button>'; })
       .join('') + '</div>';
@@ -1385,6 +1415,12 @@ function siguiente(){
     for(var k=0;k<L.length;k++) if(L[k].nombre === actual.titulo) i = k;
     tocarRadio(L[(i+1+L.length) % L.length]); return;
   }
+  if(actual.remota){
+    if(colaAu.length < 2) return;
+    if(aleatorio) colaAuPos = Math.floor(Math.random()*colaAu.length);
+    else colaAuPos = (colaAuPos + 1) % colaAu.length;
+    tocarAudius(colaAu[colaAuPos], colaAu); pintarVista(); return;
+  }
   if(!cola.length) return;
   if(aleatorio){ colaPos = Math.floor(Math.random()*cola.length); }
   else colaPos = (colaPos + 1) % cola.length;
@@ -1398,6 +1434,11 @@ function anterior(){
     tocarRadio(L[(i-1+L.length) % L.length]); return;
   }
   if(audio.currentTime > 4){ audio.currentTime = 0; return; }
+  if(actual.remota){
+    if(colaAu.length < 2) return;
+    colaAuPos = (colaAuPos - 1 + colaAu.length) % colaAu.length;
+    tocarAudius(colaAu[colaAuPos], colaAu); pintarVista(); return;
+  }
   if(!cola.length) return;
   colaPos = (colaPos - 1 + cola.length) % cola.length;
   tocarCancion(cola[colaPos], cola);
@@ -2073,7 +2114,8 @@ async function lanzarBusquedaAudius(texto){
 /* Suena como una cancion normal (con su barra y su duracion), pero marcada
    como remota: no esta en la biblioteca, asi que no se le guardan veces ni
    duracion ni se le puede dar al corazon. */
-function tocarAudius(p){
+var colaAu = [], colaAuPos = -1;
+function tocarAudius(p, lista){
   clearTimeout(reintento); clearTimeout(vigilante);
   soltarURLs(); soltarCaratula();
   fallosRadio = 0; espera = 1000; intentosVigilante = 0;
@@ -2082,10 +2124,39 @@ function tocarAudius(p){
             artista:p.artista, album:'Audius', sub:p.artista + ' \u00b7 Audius',
             dur:p.dur, url:p.url, logo:p.caratula, cal:''};
   cola = []; colaPos = -1;
+  if(lista && lista.length){
+    colaAu = lista.slice();
+    colaAuPos = 0;
+    for(var q=0;q<colaAu.length;q++) if(colaAu[q].id === p.id) colaAuPos = q;
+  }else if(!colaAu.length){ colaAu = [p]; colaAuPos = 0; }
   audio.src = p.url;
   var pr = audio.play();
   if(pr && pr.catch) pr.catch(function(){ pintarEstado('No se pudo abrir esta canci\u00f3n.'); });
   pintarAhora(null);
+}
+/* Las de Audius que marca con el corazón. En localStorage y por persona:
+   es una ficha de cuatro campos, no hace falta la base. */
+function favAudius(){
+  try{ return JSON.parse(localStorage.getItem('mm_favau_' + yo) || '[]') || []; }catch(_){ return []; }
+}
+function guardarFavAudius(l){
+  try{ localStorage.setItem('mm_favau_' + yo, JSON.stringify(l)); }catch(_){}
+}
+function esFavAudius(id){
+  var l = favAudius();
+  for(var i=0;i<l.length;i++) if(l[i].id === id) return true;
+  return false;
+}
+function marcarAudius(p){
+  var l = favAudius(), fuera = [], habia = false;
+  for(var i=0;i<l.length;i++){
+    if(l[i].id === p.id) habia = true;
+    else fuera.push(l[i]);
+  }
+  if(!habia) fuera.unshift({id:p.id, titulo:p.titulo, artista:p.artista, dur:p.dur,
+                            caratula:p.caratula, fotos:p.fotos, genero:p.genero, url:p.url});
+  guardarFavAudius(fuera);
+  return !habia;
 }
 function filaAudius(p, i){
   var son = actual && actual.id === 'au_'+p.id;
@@ -2097,7 +2168,9 @@ function filaAudius(p, i){
   return '<div class="row'+(son?' sonando':'')+'" data-au="'+i+'">'+ cuadro +
     '<span class="r-x"><span class="r-t">'+esc(p.titulo)+'</span>'+
     '<span class="r-s"><span class="enc">'+esc(p.artista)+(p.genero?' \u00b7 '+esc(p.genero):'')+'</span>'+
-    '<span class="cal">'+tiempo(p.dur)+'</span></span></span></div>';
+    '<span class="cal">'+tiempo(p.dur)+'</span></span></span>'+
+    '<span class="r-a '+(esFavAudius(p.id)?'on':'')+'" data-au-fav="'+i+'">'+
+      (esFavAudius(p.id)?'\u2764\uFE0F':'\u2661')+'</span></div>';
 }
 function bloqueAudius(){
   var h = '';
@@ -2108,7 +2181,7 @@ function bloqueAudius(){
     return h;
   }
   if(auFallo) return '<div class="vacio"><span class="em">\uD83C\uDFB5</span>'+esc(auFallo)+'</div>';
-  return '<div class="vacio"><span class="em">\uD83C\uDFB5</span>Escribe arriba y pulsa <b>buscar</b>.</div>';
+  return '<div class="vacio"><span class="em">\uD83C\uDFB5</span>Buscando m\u00fasica\u2026</div>';
 }
 function pintarDescubrir(){
   var C = $('tab-cuerpo'), h = '';
@@ -2117,17 +2190,11 @@ function pintarDescubrir(){
     '<button class="tab'+(descFuente==='clasicos'?' on':'')+'" data-desc="clasicos">📼 Clásicos</button></div>';
 
   if(descFuente === 'hoy'){
-    h += '<div class="note bueno">Música <b>de hoy</b>, de artistas que la suben ellos mismos '+
-         '(<b>Audius</b>, 8 millones de canciones, sin cuenta ni clave).<br>'+
-         '<span style="color:var(--dim)">Se escucha aquí. Para tenerla guardada, mira los Clásicos o cómprala.</span></div>';
     h += bloqueAudius();
     C.innerHTML = h;
     return;
   }
 
-  h += '<div class="note bueno">Música <b>legal y gratis</b> que SÍ se puede guardar: discos de 78 rpm en dominio público, '+
-       'conciertos que los grupos autorizan a grabar y sellos con licencia libre.<br>'+
-       '<span style="color:var(--dim)">Aquí no hay éxitos comerciales — esos se compran.</span></div>';
   if(iaBuscando) h += '<div class="note">Buscando…</div>';
   else if(iaAbierto){
     h += '<div class="shelf-t">💿 '+esc(iaAbierto.titulo)+'</div>'+
@@ -2233,7 +2300,8 @@ function pintarBiblio(){
   if(filtro === 'favoritos'){
     var favC = CANCIONES.filter(function(c){ return c.fav; });
     var favE = listaEmisoras().filter(function(e){ return FAV_RADIO[e.nombre]; });
-    if(!favC.length && !favE.length){
+    var favA = favAudius();
+    if(!favC.length && !favE.length && !favA.length){
       C.innerHTML = '<div class="vacio"><span class="em">♥</span>Todavía no has marcado nada.<br>'+
         'Toca el ♡ de una canción o de una emisora<br>y aparecerá aquí.<br><br>'+
         '<span style="font-size:12.5px">Son tuyas: Elibel tiene las suyas.</span></div>';
@@ -2245,6 +2313,20 @@ function pintarBiblio(){
     if(favC.length) h += '<div class="city">🎵 Tus canciones · '+favC.length+'</div>' +
       favC.map(function(c){ return filaCancion(c); }).join('') +
       '<button class="btn solido" id="b-tocar-favs" style="margin-top:12px">▶&nbsp; Reproducir tus favoritas</button>';
+    if(favA.length) h += '<div class="city">🔥 De Descubrir · '+favA.length+'</div>' +
+      favA.map(function(p, i){
+        var son = actual && actual.id === 'au_'+p.id;
+        var fotos = p.fotos || (p.caratula ? [p.caratula] : []);
+        var cuadro = fotos.length
+          ? '<span class="art" style="background:'+tono(p.titulo+p.artista)+'"><img src="'+esc(fotos[0])+
+            '" data-esp="'+esc(fotos.slice(1).join('|'))+'" alt="" loading="lazy" onerror="otroEspejo(this)"></span>'
+          : '<span class="art vacia" style="background:'+tono(p.titulo+p.artista)+'">🎵</span>';
+        return '<div class="row'+(son?' sonando':'')+'" data-aufav-tocar="'+i+'">'+cuadro+
+          '<span class="r-x"><span class="r-t">'+esc(p.titulo)+'</span>'+
+          '<span class="r-s"><span class="enc">'+esc(p.artista)+' · Audius</span>'+
+          '<span class="cal">'+tiempo(p.dur)+'</span></span></span>'+
+          '<span class="r-a on" data-aufav-quitar="'+i+'">❤️</span></div>';
+      }).join('');
     C.innerHTML = h;
     return;
   }
@@ -2319,6 +2401,15 @@ async function pintarAjustes(){
       }).join('')+
     '</div></div>'+
 
+  '<div class="card"><h3>Color</h3>'+
+    '<div class="colores">'+
+      TEMAS.map(function(T){
+        return '<button class="col'+(((AJ.color||'neon')===T[0])?' on':'')+'" data-color="'+T[0]+'" '+
+          'style="background:linear-gradient(135deg,'+T[2]+','+T[3]+')" title="'+esc(T[1])+'">'+
+          '<span>'+esc(T[1])+'</span></button>';
+      }).join('')+
+    '</div></div>'+
+
   '<div class="card"><h3>Coche</h3>'+
     '<button class="btn solido" id="a-coche">🚗&nbsp; Entrar en modo coche</button>'+
     '<div class="kv"><span>Tres botones gigantes para no mirar la pantalla.</span></div>'+
@@ -2342,6 +2433,10 @@ async function pintarAjustes(){
 
   '<div class="card"><h3>Sobre la app</h3>'+
     '<div class="credito">Propiedad de la <b>Familia Díaz González</b><br>Creador: <b>Emmanuel Díaz</b><br>Versión '+APP_VERSION+'</div>'+
+    '<div class="credito" style="font-size:calc(10.5px * var(--esc));opacity:.5;margin-top:6px">'+
+      'pantalla '+screen.width+'×'+screen.height+' · ventana '+innerWidth+'×'+innerHeight+
+      ' · margen '+envReal('safe-area-inset-top')+'/'+envReal('safe-area-inset-bottom')+
+      ' · sobra '+Math.max(0, screen.height - innerHeight - envReal('safe-area-inset-top'))+'</div>'+
     '<div class="sign">Emmanuel Díaz</div></div>';
 }
 
@@ -2689,12 +2784,34 @@ document.addEventListener('click', async function(ev){
     descFuente = el.dataset.desc;
     $('q').value = '';
     if(descFuente === 'hoy' && !auResultados.length && !auBuscando) lanzarBusquedaAudius('');
+    else if(descFuente === 'clasicos' && !iaResultados.length && !iaBuscando) lanzarBusquedaArchive('bolero');
     else pintarDescubrir();
     $('v-buscar').scrollTop = 0; return;
   }
+  if((el = t.closest('[data-au-fav]'))){
+    ev.stopPropagation();
+    var pF = auResultados[+el.dataset.auFav];
+    if(pF){
+      var puesta = marcarAudius(pF);
+      pintarDescubrir();
+      toast(puesta ? 'Guardada en tus favoritas.' : 'Quitada de favoritas.', 'bueno', 2200);
+    }
+    return;
+  }
   if((el = t.closest('[data-au]'))){
     var pA = auResultados[+el.dataset.au];
-    if(pA){ tocarAudius(pA); pintarVista(); }
+    if(pA){ tocarAudius(pA, auResultados); pintarVista(); }
+    return;
+  }
+  if((el = t.closest('[data-aufav-tocar]'))){
+    var L = favAudius(), pT = L[+el.dataset.aufavTocar];
+    if(pT){ tocarAudius(pT, L); pintarVista(); }
+    return;
+  }
+  if((el = t.closest('[data-aufav-quitar]'))){
+    ev.stopPropagation();
+    var L2 = favAudius(), pQ = L2[+el.dataset.aufavQuitar];
+    if(pQ){ marcarAudius(pQ); pintarBiblio(); toast('Quitada de favoritas.', null, 1800); }
     return;
   }
   if((el = t.closest('[data-ia-sug]'))){ $('q').value = el.dataset.iaSug;
@@ -2731,6 +2848,12 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#a-exportar')){ await exportarCopia(); return; }
   if(t.closest('#a-importar')){ $('fcopia').click(); return; }
   if(t.closest('#a-diag')){ await diagnostico(); return; }
+  if((el = t.closest('[data-color]'))){
+    AJ.color = el.dataset.color; guardarAjustes(); ponerColor(AJ.color);
+    pintarAjustes(); pintarVista();
+    toast('Color ' + temaDe(AJ.color)[1].toLowerCase() + '.', 'bueno', 1700);
+    return;
+  }
   if((el = t.closest('[data-letra]'))){
     AJ.letra = el.dataset.letra; guardarAjustes(); ponerEscala(AJ.letra);
     pintarAjustes();
@@ -3068,6 +3191,7 @@ function guardarAjustes(){
 function cargarAjustes(){
   try{ AJ = JSON.parse(localStorage.getItem('mm_ajustes') || '{}') || {}; }catch(_){ AJ = {}; }
   ponerEscala(AJ.letra);
+  ponerColor(AJ.color);
 }
 /* El tamano de toda la letra de la app. Un solo numero: cada font-size del
    CSS es calc(Npx * var(--esc)), asi que esto lo mueve todo a la vez. */

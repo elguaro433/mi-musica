@@ -505,7 +505,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.7.0';
+var APP_VERSION = '1.8.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1260,7 +1260,7 @@ function cablearAudio(){
     if(actual && actual.tipo==='cancion'){
       actual.dur = audio.duration;
       $('n-b').textContent = tiempo(audio.duration);
-      if(actual.id) guardarDuracion(actual.id, audio.duration);
+      if(actual.id && !actual.remota) guardarDuracion(actual.id, audio.duration);
     }
   });
   audio.addEventListener('ended', function(){
@@ -1448,7 +1448,7 @@ async function pintarAhora(cancion){
 
   // La radio no tiene caratula dentro del archivo, pero muchas emisoras
   // tienen logo. Si lo hay, es lo que se ve (y lo que va al coche).
-  var imagen = tieneImg ? caratulaURL : (actual.tipo === 'radio' && actual.logo ? actual.logo : '');
+  var imagen = tieneImg ? caratulaURL : (actual.logo || '');
   ['n-art','m-art'].forEach(function(id){
     var el = $(id);
     if(imagen){
@@ -1478,7 +1478,7 @@ async function pintarAhora(cancion){
       // primera que consiga cargar.
       var arte = [];
       if(tieneImg) arte.push({src:caratulaURL, sizes:'512x512', type:'image/jpeg'});
-      else if(actual.tipo === 'radio' && actual.logo) arte.push({src:actual.logo, sizes:'512x512'});
+      else if(actual.logo) arte.push({src:actual.logo, sizes:'512x512'});
       arte.push({src:'icon-512.png', sizes:'512x512', type:'image/png'},
                 {src:'icon-192.png', sizes:'192x192', type:'image/png'});
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -1880,7 +1880,10 @@ function pintarBuscar(){
       bloqueMundo();
   }
   else if(pestana === 'youtube') pintarYouTube();
-  else pintarDescubrir();
+  else {
+    pintarDescubrir();
+    if(descFuente === 'hoy' && !auResultados.length && !auBuscando && !auFallo) lanzarBusquedaAudius('');
+  }
 }
 
 /* ─── YouTube: escribes y busca, sin clave de Google ─────────────── */
@@ -1944,9 +1947,127 @@ async function lanzarBusquedaYouTube(texto){
 /* ─── Descubrir: música libre y de dominio público ───────────────── */
 var iaResultados = [], iaBuscando = false, iaTexto = '', iaAbierto = null, iaFicheros = [];
 
+/* ═════════ Audius — musica de hoy, sin clave ════════════════════ */
+var AUDIUS = 'https://api.audius.co/v1';
+var APP = '&app_name=MiMusica';
+var auResultados = [], auBuscando = false, auTexto = '', auFallo = '';
+var descFuente = 'hoy';          // 'hoy' = Audius · 'clasicos' = Internet Archive
+
+function pistaAudius(x){
+  if(!x || !x.id || !x.title) return null;
+  var art = x.artwork || {};
+  var base = art['480x480'] || art['150x150'] || '';
+  // Los espejos: si el servidor que toca contesta 403, se prueba el de al lado.
+  var fotos = [];
+  if(base){
+    fotos.push(base);
+    var trozo = base.split('/content/')[1] || '';
+    (art.mirrors || []).forEach(function(m){
+      if(!trozo) return;
+      var u = String(m).replace(/\/$/, '') + '/content/' + trozo;
+      if(fotos.indexOf(u) < 0) fotos.push(u);
+    });
+  }
+  return {id: x.id,
+          titulo: String(x.title).trim(),
+          artista: ((x.user || {}).name || 'Sin nombre').trim(),
+          genero: x.genre || '',
+          dur: +x.duration || 0,
+          caratula: base, fotos: fotos,
+          escuchas: +x.play_count || 0,
+          url: AUDIUS + '/tracks/' + x.id + '/stream?1=1' + APP};
+}
+/* Se llama desde el onerror de la imagen: pasa al siguiente espejo, y si se
+   acaban deja el cuadro con su color y su nota. */
+function otroEspejo(img){
+  try{
+    var quedan = (img.getAttribute('data-esp') || '').split('|').filter(Boolean);
+    if(!quedan.length){ img.remove(); return; }
+    img.setAttribute('data-esp', quedan.slice(1).join('|'));
+    img.src = quedan[0];
+  }catch(_){ try{ img.remove(); }catch(__){} }
+}
+async function buscarAudius(texto){
+  var u = texto
+    ? AUDIUS + '/tracks/search?query=' + encodeURIComponent(texto) + '&limit=25' + APP
+    : AUDIUS + '/tracks/trending?genre=Latin&limit=25' + APP;
+  var d = await traerConLimite(u, 12000);
+  var fuera = [];
+  (d && d.data || []).forEach(function(x){
+    var p = pistaAudius(x);
+    // fuera las sesiones de DJ de una hora: esto es para oir canciones
+    if(p && p.dur > 20 && p.dur < 900) fuera.push(p);
+  });
+  return fuera;
+}
+async function lanzarBusquedaAudius(texto){
+  auTexto = String(texto || '').trim();
+  auBuscando = true; auFallo = ''; pintarDescubrir();
+  try{
+    auResultados = await buscarAudius(auTexto);
+    if(!auResultados.length) auFallo = 'Nada con ese nombre en Audius.';
+  }catch(err){
+    auResultados = []; auFallo = 'No se pudo preguntar ahora mismo.';
+    anotar('audius', err.message);
+  }
+  auBuscando = false; pintarDescubrir();
+}
+/* Suena como una cancion normal (con su barra y su duracion), pero marcada
+   como remota: no esta en la biblioteca, asi que no se le guardan veces ni
+   duracion ni se le puede dar al corazon. */
+function tocarAudius(p){
+  clearTimeout(reintento); clearTimeout(vigilante);
+  soltarURLs(); soltarCaratula();
+  fallosRadio = 0; espera = 1000; intentosVigilante = 0;
+  paradoPorMi = false; recuperarAlVolver = false; viendoVideo = false;
+  actual = {tipo:'cancion', remota:true, id:'au_'+p.id, titulo:p.titulo,
+            artista:p.artista, album:'Audius', sub:p.artista + ' \u00b7 Audius',
+            dur:p.dur, url:p.url, logo:p.caratula, cal:''};
+  cola = []; colaPos = -1;
+  audio.src = p.url;
+  var pr = audio.play();
+  if(pr && pr.catch) pr.catch(function(){ pintarEstado('No se pudo abrir esta canci\u00f3n.'); });
+  pintarAhora(null);
+}
+function filaAudius(p, i){
+  var son = actual && actual.id === 'au_'+p.id;
+  var cuadro = p.caratula
+    ? '<span class="art" style="background:'+tono(p.titulo+p.artista)+'">'+
+      '<img src="'+esc(p.fotos[0])+'" data-esp="'+esc(p.fotos.slice(1).join('|'))+'" '+
+      'alt="" loading="lazy" onerror="otroEspejo(this)"></span>'
+    : '<span class="art vacia" style="background:'+tono(p.titulo+p.artista)+'">\uD83C\uDFB5</span>';
+  return '<div class="row'+(son?' sonando':'')+'" data-au="'+i+'">'+ cuadro +
+    '<span class="r-x"><span class="r-t">'+esc(p.titulo)+'</span>'+
+    '<span class="r-s"><span class="enc">'+esc(p.artista)+(p.genero?' \u00b7 '+esc(p.genero):'')+'</span>'+
+    '<span class="cal">'+tiempo(p.dur)+'</span></span></span></div>';
+}
+function bloqueAudius(){
+  var h = '';
+  if(auBuscando) return '<div class="note">Buscando en Audius\u2026</div>';
+  if(auResultados.length){
+    h += '<div class="shelf-t">'+(auTexto ? '\uD83D\uDD0E '+esc(auTexto) : '\uD83D\uDD25 Lo que m\u00e1s suena ahora')+'</div>';
+    h += auResultados.map(function(p,i){ return filaAudius(p,i); }).join('');
+    return h;
+  }
+  if(auFallo) return '<div class="vacio"><span class="em">\uD83C\uDFB5</span>'+esc(auFallo)+'</div>';
+  return '<div class="vacio"><span class="em">\uD83C\uDFB5</span>Escribe arriba y pulsa <b>buscar</b>.</div>';
+}
 function pintarDescubrir(){
   var C = $('tab-cuerpo'), h = '';
-  h += '<div class="note bueno">Música <b>legal y gratis</b>: discos de 78 rpm en dominio público, '+
+  h += '<div class="tabs fijas" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px">'+
+    '<button class="tab'+(descFuente==='hoy'?' on':'')+'" data-desc="hoy">🔥 De hoy</button>'+
+    '<button class="tab'+(descFuente==='clasicos'?' on':'')+'" data-desc="clasicos">📼 Clásicos</button></div>';
+
+  if(descFuente === 'hoy'){
+    h += '<div class="note bueno">Música <b>de hoy</b>, de artistas que la suben ellos mismos '+
+         '(<b>Audius</b>, 8 millones de canciones, sin cuenta ni clave).<br>'+
+         '<span style="color:var(--dim)">Se escucha aquí. Para tenerla guardada, mira los Clásicos o cómprala.</span></div>';
+    h += bloqueAudius();
+    C.innerHTML = h;
+    return;
+  }
+
+  h += '<div class="note bueno">Música <b>legal y gratis</b> que SÍ se puede guardar: discos de 78 rpm en dominio público, '+
        'conciertos que los grupos autorizan a grabar y sellos con licencia libre.<br>'+
        '<span style="color:var(--dim)">Aquí no hay éxitos comerciales — esos se compran.</span></div>';
   if(iaBuscando) h += '<div class="note">Buscando…</div>';
@@ -2375,7 +2496,7 @@ document.addEventListener('click', async function(ev){
   if((el = t.closest('[data-cerrar-hoja]'))){ cerrarHoja(); return; }
   if((el = t.closest('[data-mas]'))){ ev.stopPropagation(); hojaCancion(el.dataset.mas); return; }
   if(t.closest('#now-mas')){
-    if(actual && actual.tipo === 'cancion') hojaCancion(actual.id);
+    if(actual && actual.tipo === 'cancion' && !actual.remota) hojaCancion(actual.id);
     else toast('Esto es para las canciones, no para la radio.');
     return;
   }
@@ -2506,6 +2627,18 @@ document.addEventListener('click', async function(ev){
     var eT = rbResultados[+el.dataset.rbTocar];
     if(eT){ viendoVideo = false; tocarRadio(eT); pintarVista(); }
     return; }
+  if((el = t.closest('[data-desc]'))){
+    descFuente = el.dataset.desc;
+    $('q').value = '';
+    if(descFuente === 'hoy' && !auResultados.length && !auBuscando) lanzarBusquedaAudius('');
+    else pintarDescubrir();
+    $('v-buscar').scrollTop = 0; return;
+  }
+  if((el = t.closest('[data-au]'))){
+    var pA = auResultados[+el.dataset.au];
+    if(pA){ tocarAudius(pA); pintarVista(); }
+    return;
+  }
   if((el = t.closest('[data-ia-sug]'))){ $('q').value = el.dataset.iaSug;
     await lanzarBusquedaArchive(el.dataset.iaSug); return; }
   if((el = t.closest('[data-abrir-ia]'))){ await abrirArchive(+el.dataset.abrirIa); return; }
@@ -2561,6 +2694,7 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#now-fav')){
     if(!actual) return;
     if(actual.tipo === 'cancion'){
+      if(actual.remota){ toast('Esta es de Audius: no est\u00e1 en tu biblioteca.', null, 2600); return; }
       var cc = await leer('canciones', actual.id);
       if(cc){ cc.fav = !cc.fav; await guardar('canciones', limpia(cc)); actual.fav = cc.fav;
               await cargarDatos(); }
@@ -2589,7 +2723,10 @@ $('form-q').addEventListener('submit', function(e){
   $('q').blur();                       // baja el teclado del iPhone
   var t = $('q').value;
   if(pestana === 'youtube') lanzarBusquedaYouTube(t);
-  else if(pestana === 'descubrir') lanzarBusquedaArchive(t);
+  else if(pestana === 'descubrir'){
+    if(descFuente === 'hoy') lanzarBusquedaAudius(t);
+    else lanzarBusquedaArchive(t);
+  }
   else if(pestana === 'radio') lanzarBusquedaMundo(t);
 });
 $('ffoto').addEventListener('change', async function(e){

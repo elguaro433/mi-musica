@@ -131,6 +131,54 @@ temporizador para dormir, copia de seguridad, mantener la pantalla encendida, y
 controles en la pantalla de bloqueo y en el coche (Media Session).
 
 
+## Cada cosa con su cara (v1.7.0)
+
+**Las canciones enseñan su carátula.** Hasta la v1.6 solo se veía en «Ahora
+suena»: en las listas, cada canción pintaba un cuadro de color *aunque el MP3
+trajera carátula*. Ya no. Y si el archivo no la trae, el cuadro lleva un
+**dibujo según el estilo** — trompeta para salsa y vallenato, micrófono para
+reggaetón, guitarra para rock, saxo para jazz, bailarina para bachata — que se
+deduce del género, del álbum o del título.
+
+**Las emisoras, con su logo**: 23 de las 30 de casa, y todas las del buscador
+mundial que lo tengan. Las 7 que faltan es porque no existe un logo suyo en
+`https://` que se pueda verificar, y **es mejor un color que el logo de otra**:
+a Máxima FM le tocaba el de LOS40 y se dejó fuera a propósito.
+
+**Favoritas** tiene pestaña propia, la primera de Biblioteca: tus emisoras y
+tus canciones del corazón juntas, con un botón para reproducirlas. Son de cada
+persona, no del teléfono.
+
+**Tu foto de perfil.** Cada uno la suya, encogida a 256 px. Va en
+`localStorage`, no en la base: son 4 KB y no compensa arriesgar una migración
+del esquema por una foto.
+
+---
+
+## El hueco negro de abajo, y por qué costó tanto (v1.7.0)
+
+En el iPhone quedaba una franja negra bajo la barra de Inicio/Buscar/
+Biblioteca. **En el ordenador no pasaba**, así que hubo tres arreglos a ciegas
+que no movieron nada. Lo que lo resolvió fue poner a la app a **medirse a sí
+misma** y enseñar el dato en pantalla:
+
+```
+pantalla del aparato : 393 x 852
+ventana de la app    : 393 x 793      <- 59 px menos
+safe-area arriba     : 59             <- exactamente los que faltan
+hueco bajo la barra  : 0              <- la app llegaba a su último píxel
+```
+
+Con `apple-mobile-web-app-status-bar-style: black-translucent`, iOS dibuja la
+web detrás del reloj pero le da una ventana de `alto − safe-area-inset-top` y
+la pega arriba: sobra esa altura por abajo, y **ningún CSS la alcanza**.
+
+El arreglo es una palabra: `black` en vez de `black-translucent`. La ventana
+empieza bajo el reloj pero mide lo que debe. Se pierde el fondo a sangre tras
+la hora; se gana que no sobre nada.
+
+---
+
 ## El tamaño de la letra lo eliges tú (v1.6.0)
 
 ⚙️ Ajustes → **Tamaño de la letra**: Normal, Grande o Muy grande. No es un

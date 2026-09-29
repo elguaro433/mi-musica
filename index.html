@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b0913">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Mi Música">
 <link rel="apple-touch-icon" href="icon-180.png">
 <!-- Pantallas de arranque: sin fogonazo blanco al abrir desde el icono.
@@ -79,7 +79,7 @@ button{font-family:inherit;color:inherit}
   radial-gradient(520px 320px at -14% 12%, #2a1030 0%, rgba(42,16,48,0) 58%), var(--bg)}
 
 .view{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:calc(var(--sat) + 6px) calc(var(--gutter) + var(--sar))
+  padding:calc(var(--sat) + 10px) calc(var(--gutter) + var(--sar))
           calc(var(--barra) + 84px) calc(var(--gutter) + var(--sal));
   display:none;scrollbar-width:none}
 .view::-webkit-scrollbar{display:none}
@@ -139,6 +139,8 @@ button{font-family:inherit;color:inherit}
 .art{width:54px;height:54px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
   font-size:calc(18px * var(--esc));overflow:hidden;background-size:cover;background-position:center}
 .art img{width:100%;height:100%;object-fit:cover;display:block}
+.art.vacia{font-size:calc(22px * var(--esc));text-shadow:0 2px 6px rgba(0,0,0,.35)}
+.art.vacia.g{font-size:calc(46px * var(--esc))}
 .art img.logo{object-fit:contain;padding:3px}
 .r-x{min-width:0;flex:1;overflow:hidden}
 .r-t{display:block;font-weight:500;font-size:calc(15px * var(--esc));white-space:nowrap;overflow:hidden;
@@ -173,6 +175,9 @@ button{font-family:inherit;color:inherit}
   min-height:44px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tabs.fijas{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;overflow:visible}
+.tabs.fijas.cinco{grid-template-columns:repeat(5,1fr);gap:4px}
+.tabs.fijas.cinco .tab{padding:9px 1px;font-size:calc(10.5px * min(var(--esc), 1.1))}
+@media (min-width:420px){ .tabs.fijas.cinco .tab{font-size:calc(11.5px * min(var(--esc), 1.1))} }
 .tabs.fijas .tab{padding:9px 2px;font-size:calc(11.5px * min(var(--esc), 1.14));text-align:center;min-width:0;letter-spacing:-.01em}
 @media (min-width:420px){ .tabs.fijas .tab{font-size:calc(12.5px * min(var(--esc), 1.14));padding:9px 6px} }
 .tab.on{background:var(--purple);border-color:var(--purple);color:#120e1e;font-weight:700}
@@ -213,6 +218,11 @@ button{font-family:inherit;color:inherit}
 .guia .ojo{background:rgba(11,9,19,.5);border-left:2px solid var(--gold);border-radius:8px;
   padding:9px 11px;font-size:calc(12.5px * var(--esc));margin-top:12px}
 .sign{font-family:var(--font-s);font-size:calc(27px * var(--esc));text-align:right;margin-top:8px}
+.perfil{display:flex;align-items:center;gap:14px;margin:4px 0 12px}
+.perfil-x{min-width:0;flex:1}
+.perfil-n{font-family:var(--font-d);font-weight:700;font-size:calc(18px * var(--esc));letter-spacing:-.01em}
+.perfil-s{color:var(--dim);font-size:calc(12.5px * var(--esc));margin-top:2px}
+.pista{color:var(--dim);font-size:calc(12px * var(--esc))}
 .credito{font-size:calc(12px * var(--esc));color:var(--dim);line-height:1.65}
 .credito b{color:var(--muted);font-weight:500}
 .sw{position:relative;width:46px;height:27px;border-radius:20px;background:var(--pista);
@@ -275,9 +285,13 @@ button{font-family:inherit;color:inherit}
    flex y descolocar los botones. (el hueco negro del 29/09/2026) */
 #barra::after{content:'';position:absolute;top:100%;left:0;right:0;height:180px;
   background:rgba(18,14,30,.96);pointer-events:none}
-#barra button{flex:1;background:none;border:0;color:var(--dim);font-size:calc(10.5px * var(--esc));display:flex;
-  flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-weight:500}
-#barra button .i{font-size:calc(20px * var(--esc));line-height:1}
+#barra button{flex:1;background:none;border:0;color:var(--dim);
+  font-size:calc(11px * min(var(--esc), 1.2));display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;font-weight:600}
+#barra button .i{line-height:0;display:block}
+#barra button .i svg{width:27px;height:27px;display:block;fill:none;
+  stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#barra button.on .i svg{stroke-width:2.4}
 #barra button.on{color:var(--purple)}
 
 /* ---------- sonando ahora ---------- */
@@ -407,8 +421,9 @@ body.coche #coche-salir{display:block}
   <!-- Biblioteca -->
   <div class="view" id="v-biblio">
     <div class="vhead"><div><h2>Biblioteca</h2></div><div class="gear" data-ir="ajustes">⚙️</div></div>
-    <div class="tabs fijas">
-      <button class="tab on" data-b="canciones">Canciones</button>
+    <div class="tabs fijas cinco">
+      <button class="tab on" data-b="favoritos">♥ Favoritas</button>
+      <button class="tab" data-b="canciones">Canciones</button>
       <button class="tab" data-b="artistas">Artistas</button>
       <button class="tab" data-b="albumes">Álbumes</button>
       <button class="tab" data-b="listas">Listas</button>
@@ -416,6 +431,7 @@ body.coche #coche-salir{display:block}
     <div id="bib-cuerpo"></div>
     <button class="btn" id="b-anadir">➕&nbsp; Añadir música</button>
     <input type="file" id="ficheros" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg" multiple class="oculto">
+    <input type="file" id="ffoto" accept="image/*" class="oculto">
   </div>
 
   <!-- Ajustes -->
@@ -454,9 +470,12 @@ body.coche #coche-salir{display:block}
 
   <!-- Barra inferior -->
   <div id="barra">
-    <button data-ir="inicio"><span class="i">⌂</span>Inicio</button>
-    <button data-ir="buscar"><span class="i">⌕</span>Buscar</button>
-    <button data-ir="biblio"><span class="i">☰</span>Biblioteca</button>
+    <button data-ir="inicio"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 10.6 12 3l9 7.6"/><path d="M5.5 9.6V20h13V9.6"/></svg></span>Inicio</button>
+    <button data-ir="buscar"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4 21 21"/></svg></span>Buscar</button>
+    <button data-ir="biblio"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 5.5h16"/><path d="M4 12h16"/><path d="M4 18.5h11"/></svg></span>Biblioteca</button>
   </div>
 
   <div id="toast"></div>
@@ -486,7 +505,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.6.1';
+var APP_VERSION = '1.7.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -538,10 +557,50 @@ function toast(msg, tipo, ms){
 }
 
 /* ─── emisoras de fábrica (probadas una a una) ───────────────────── */
-var EMISORAS = [{"ciudad": "Andorra", "nombre": "RNA - Radio Nacional d'Andorra", "genero": "Generalista", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-f-c0-7/restreamer/outgest/578e48f3-c654-4638-948a-be990c90807b/manifest.m3u8", "kbps": 0, "codec": "HLS"}, {"ciudad": "Andorra", "nombre": "Andorra Musica", "genero": "Musica", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-g-c0-3/restreamer/outgest/e2b4dcb0-7ae3-4335-992a-23ba82e529b3/manifest.m3u8", "kbps": 0, "codec": "HLS"}, {"ciudad": "Andorra", "nombre": "Flaix FM Andorra", "genero": "Dance, reggaeton", "url": "https://streaming.giraweb.com/8020/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://upload.wikimedia.org/wikipedia/commons/6/65/Flaixfm_logo.jpg?utm_source=de.wikipedia.org&utm_campaign=parser&utm_content=thumbnail_unscaled"}, {"ciudad": "Andorra", "nombre": "Flaixbac Andorra", "genero": "Pop", "url": "https://streaming.giraweb.com/8010/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://flaixandorra.com/continguts/multimedia/imatges/8p0oa06li8kckkwosw.png"}, {"ciudad": "Andorra", "nombre": "Radio Valira", "genero": "Variada", "url": "https://mars.streamerr.co/8022/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Andorra", "nombre": "SER Andorra", "genero": "Generalista", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_ANDORRA.mp3", "kbps": 96, "codec": "MP3"}, {"ciudad": "Barquisimeto", "nombre": "Rumba 100.1 FM", "genero": "Latin pop, variada", "url": "https://cast10.plugstreaming.com:2020/stream/r1001/;", "kbps": 64, "codec": "HE-AAC", "logo": "https://plugmedia.co/play/wp-content/uploads/2021/02/Logo_Barquisimeto.png"}, {"ciudad": "Barquisimeto", "nombre": "Fama 98.1 FM", "genero": "Variada", "url": "https://server6.globalhostla.com:9356/stream", "kbps": 64, "codec": "AAC", "logo": "https://fama.fm/wp-content/uploads/2020/07/Logo-Header-Blanco.png"}, {"ciudad": "Caracas", "nombre": "Exitos 99.9 FM", "genero": "Exitos, pop", "url": "https://acp4.lorini.net:2070/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "La Mega 107.3", "genero": "Pop, urbano", "url": "https://acp4.lorini.net:2050/stream", "kbps": 128, "codec": "MP3", "logo": "https://www.phonostar.de/images/auto_created/La_Mega_1073184x184.png"}, {"ciudad": "Caracas", "nombre": "Planeta 105.3 FM", "genero": "Romantica, pop espanol", "url": "https://cast10.plugstreaming.com:2020/stream/planetafm/;", "kbps": 96, "codec": "HE-AAC", "logo": "https://plugmedia.co/play/wp-content/uploads/2021/01/Logo-Planeta-Original-en-PNG.png"}, {"ciudad": "Caracas", "nombre": "KYS FM 101.5", "genero": "Adult contemporary", "url": "https://server6.globalhostla.com:9068/stream", "kbps": 160, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "Onda La Superestacion 107.9", "genero": "Pop", "url": "https://acp4.lorini.net:2060/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "LOS40 Colombia", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_COLOMBIAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://cdn-profiles.tunein.com/p1306541/images/logod.png"}, {"ciudad": "Bogota", "nombre": "Tropicana Estereo 102.9", "genero": "Salsa, vallenato, tropical", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_SC", "kbps": 128, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/tropicana-bogota.png"}, {"ciudad": "Bogota", "nombre": "Candela Estereo 101.9", "genero": "Salsa, tropical, latino", "url": "https://26523.live.streamtheworld.com/CANDELAESTEREO_SC", "kbps": 96, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/candela.png"}, {"ciudad": "Bogota", "nombre": "Vibra Bogota 104.9", "genero": "Salsa, vallenato, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/VIBRA_SC", "kbps": 96, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/vibra-bogota.png"}, {"ciudad": "Bogota", "nombre": "Radioacktiva 97.9", "genero": "Rock", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_ACTIVAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://www.radioacktiva.com/wp-content/uploads/2024/12/LOGO-RADIOACKTIVA-WEB-286X84.png"}, {"ciudad": "Bogota", "nombre": "Olimpica Stereo 105.9", "genero": "Salsa, vallenato, crossover", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/OLP_BOGOTAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://olimpicastereo.com.co/icon?b8748d2f62517688"}, {"ciudad": "Bogota", "nombre": "Besame Bogota 89.9", "genero": "Romantica, baladas", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/BESAME_BOGOTAAAC.aac", "kbps": 56, "codec": "HE-AAC", "logo": "https://emisorascolombianas.online/logos/besame.png"}, {"ciudad": "Espana", "nombre": "LOS 40 Principales", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Los40.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/iconos/v1.x/v1.0/touch-apple.png"}, {"ciudad": "Espana", "nombre": "LOS40 Dance", "genero": "Dance, electronica", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_DANCE.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/estaticos/recursosgraficos/v1/img/app/los40_192.png"}, {"ciudad": "Espana", "nombre": "LOS40 Urban", "genero": "Urbano, reggaeton", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_URBAN.mp3", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Cadena Dial", "genero": "Pop en espanol", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CADENADIAL.mp3", "kbps": 128, "codec": "MP3", "logo": "https://www.cadenadial.com/wp-content/uploads/2024/03/cropped-512x512_favicon_dial-180x180.png"}, {"ciudad": "Espana", "nombre": "KISS FM", "genero": "80s, 90s, 2000s", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbkissfm.kissfmradio.cires21.com/bbkissfm.mp3", "kbps": 56, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Cadena 100", "genero": "Pop", "url": "https://cadena100-cope.flumotion.com/chunks.m3u8", "kbps": 128, "codec": "HLS", "logo": "https://www.cadena100.es/estaticos/apple-touch-icon-192x192.png"}, {"ciudad": "Espana", "nombre": "Hit FM", "genero": "Exitos actuales", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbhitfm.kissfmradio.cires21.com/bbhitfm.mp3", "kbps": 56, "codec": "MP3", "logo": "https://www.hitfm.es/wp-content/uploads/2019/06/cropped-favicon-192x192.png"}, {"ciudad": "Espana", "nombre": "Rock FM", "genero": "Rock clasico", "url": "https://rockfm-cope.flumotion.com/chunks.m3u8", "kbps": 320, "codec": "HLS"}, {"ciudad": "Espana", "nombre": "Maxima FM", "genero": "Dance, electronica", "url": "https://en-directo.frequence-radio.com/amp/redirect.php?radio=maxima-fm", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Flaix FM", "genero": "Dance, reggaeton", "url": "https://stream.flaixfm.cat/icecast", "kbps": 125, "codec": "AAC", "logo": "https://flaixfm.cat/favicon.ico"}];
+var EMISORAS = [{"ciudad": "Andorra", "nombre": "RNA - Radio Nacional d'Andorra", "genero": "Generalista", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-f-c0-7/restreamer/outgest/578e48f3-c654-4638-948a-be990c90807b/manifest.m3u8", "kbps": 0, "codec": "HLS", "logo": "https://www.rtva.ad/favicon/android-chrome-192x192.png"}, {"ciudad": "Andorra", "nombre": "Andorra Musica", "genero": "Musica", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-g-c0-3/restreamer/outgest/e2b4dcb0-7ae3-4335-992a-23ba82e529b3/manifest.m3u8", "kbps": 0, "codec": "HLS"}, {"ciudad": "Andorra", "nombre": "Flaix FM Andorra", "genero": "Dance, reggaeton", "url": "https://streaming.giraweb.com/8020/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://upload.wikimedia.org/wikipedia/commons/6/65/Flaixfm_logo.jpg?utm_source=de.wikipedia.org&utm_campaign=parser&utm_content=thumbnail_unscaled"}, {"ciudad": "Andorra", "nombre": "Flaixbac Andorra", "genero": "Pop", "url": "https://streaming.giraweb.com/8010/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://flaixandorra.com/continguts/multimedia/imatges/8p0oa06li8kckkwosw.png"}, {"ciudad": "Andorra", "nombre": "Radio Valira", "genero": "Variada", "url": "https://mars.streamerr.co/8022/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Andorra", "nombre": "SER Andorra", "genero": "Generalista", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_ANDORRA.mp3", "kbps": 96, "codec": "MP3", "logo": "https://cadenaser00.epimg.net/favicon.png"}, {"ciudad": "Barquisimeto", "nombre": "Rumba 100.1 FM", "genero": "Latin pop, variada", "url": "https://cast10.plugstreaming.com:2020/stream/r1001/;", "kbps": 64, "codec": "HE-AAC", "logo": "https://plugmedia.co/play/wp-content/uploads/2021/02/Logo_Barquisimeto.png"}, {"ciudad": "Barquisimeto", "nombre": "Fama 98.1 FM", "genero": "Variada", "url": "https://server6.globalhostla.com:9356/stream", "kbps": 64, "codec": "AAC", "logo": "https://fama.fm/wp-content/uploads/2020/07/Logo-Header-Blanco.png"}, {"ciudad": "Caracas", "nombre": "Exitos 99.9 FM", "genero": "Exitos, pop", "url": "https://acp4.lorini.net:2070/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "La Mega 107.3", "genero": "Pop, urbano", "url": "https://acp4.lorini.net:2050/stream", "kbps": 128, "codec": "MP3", "logo": "https://www.phonostar.de/images/auto_created/La_Mega_1073184x184.png"}, {"ciudad": "Caracas", "nombre": "Planeta 105.3 FM", "genero": "Romantica, pop espanol", "url": "https://cast10.plugstreaming.com:2020/stream/planetafm/;", "kbps": 96, "codec": "HE-AAC", "logo": "https://plugmedia.co/play/wp-content/uploads/2021/01/Logo-Planeta-Original-en-PNG.png"}, {"ciudad": "Caracas", "nombre": "KYS FM 101.5", "genero": "Adult contemporary", "url": "https://server6.globalhostla.com:9068/stream", "kbps": 160, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "Onda La Superestacion 107.9", "genero": "Pop", "url": "https://acp4.lorini.net:2060/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "LOS40 Colombia", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_COLOMBIAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://cdn-profiles.tunein.com/p1306541/images/logod.png"}, {"ciudad": "Bogota", "nombre": "Tropicana Estereo 102.9", "genero": "Salsa, vallenato, tropical", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_SC", "kbps": 128, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/tropicana-bogota.png"}, {"ciudad": "Bogota", "nombre": "Candela Estereo 101.9", "genero": "Salsa, tropical, latino", "url": "https://26523.live.streamtheworld.com/CANDELAESTEREO_SC", "kbps": 96, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/candela.png"}, {"ciudad": "Bogota", "nombre": "Vibra Bogota 104.9", "genero": "Salsa, vallenato, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/VIBRA_SC", "kbps": 96, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/vibra-bogota.png"}, {"ciudad": "Bogota", "nombre": "Radioacktiva 97.9", "genero": "Rock", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_ACTIVAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://www.radioacktiva.com/wp-content/uploads/2024/12/LOGO-RADIOACKTIVA-WEB-286X84.png"}, {"ciudad": "Bogota", "nombre": "Olimpica Stereo 105.9", "genero": "Salsa, vallenato, crossover", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/OLP_BOGOTAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://olimpicastereo.com.co/icon?b8748d2f62517688"}, {"ciudad": "Bogota", "nombre": "Besame Bogota 89.9", "genero": "Romantica, baladas", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/BESAME_BOGOTAAAC.aac", "kbps": 56, "codec": "HE-AAC", "logo": "https://emisorascolombianas.online/logos/besame.png"}, {"ciudad": "Espana", "nombre": "LOS 40 Principales", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Los40.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/iconos/v1.x/v1.0/touch-apple.png"}, {"ciudad": "Espana", "nombre": "LOS40 Dance", "genero": "Dance, electronica", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_DANCE.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/estaticos/recursosgraficos/v1/img/app/los40_192.png"}, {"ciudad": "Espana", "nombre": "LOS40 Urban", "genero": "Urbano, reggaeton", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_URBAN.mp3", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Cadena Dial", "genero": "Pop en espanol", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CADENADIAL.mp3", "kbps": 128, "codec": "MP3", "logo": "https://www.cadenadial.com/wp-content/uploads/2024/03/cropped-512x512_favicon_dial-180x180.png"}, {"ciudad": "Espana", "nombre": "KISS FM", "genero": "80s, 90s, 2000s", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbkissfm.kissfmradio.cires21.com/bbkissfm.mp3", "kbps": 56, "codec": "MP3", "logo": "https://www.kissfm.es/wp-content/uploads/2020/09/favicon_KISS.jpg"}, {"ciudad": "Espana", "nombre": "Cadena 100", "genero": "Pop", "url": "https://cadena100-cope.flumotion.com/chunks.m3u8", "kbps": 128, "codec": "HLS", "logo": "https://www.cadena100.es/estaticos/apple-touch-icon-192x192.png"}, {"ciudad": "Espana", "nombre": "Hit FM", "genero": "Exitos actuales", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbhitfm.kissfmradio.cires21.com/bbhitfm.mp3", "kbps": 56, "codec": "MP3", "logo": "https://www.hitfm.es/wp-content/uploads/2019/06/cropped-favicon-192x192.png"}, {"ciudad": "Espana", "nombre": "Rock FM", "genero": "Rock clasico", "url": "https://rockfm-cope.flumotion.com/chunks.m3u8", "kbps": 320, "codec": "HLS", "logo": "https://www.rockfm.fm/estaticos/apple-touch-icon-120x120.png"}, {"ciudad": "Espana", "nombre": "Maxima FM", "genero": "Dance, electronica", "url": "https://en-directo.frequence-radio.com/amp/redirect.php?radio=maxima-fm", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Flaix FM", "genero": "Dance, reggaeton", "url": "https://stream.flaixfm.cat/icecast", "kbps": 125, "codec": "AAC", "logo": "https://flaixfm.cat/favicon.ico"}];
 var CIUDADES = [['Andorra','🇦🇩','Andorra'],['Barquisimeto','🇻🇪','Barquisimeto'],
                 ['Caracas','🇻🇪','Caracas'],['Bogota','🇨🇴','Bogotá'],['Espana','🇪🇸','España']];
 function plural(n, uno, varios){ return n + ' ' + (n === 1 ? uno : varios); }
+/* La foto de cada persona. Va en localStorage y no en IndexedDB a
+   propósito: son 20 KB, no hace falta tocar el esquema de la base ni
+   arriesgar una migración por una foto. */
+function fotoDe(quien){
+  try{ return localStorage.getItem('mm_foto_' + quien) || ''; }catch(_){ return ''; }
+}
+function avatarDe(quien, tam){
+  var p = PERSONAS[quien], f = fotoDe(quien);
+  var base = 'width:'+tam+'px;height:'+tam+'px;border-radius:50%;flex:0 0 auto;';
+  if(f) return '<span class="av" style="'+base+'background:#000 url('+f+') center/cover"></span>';
+  return '<span class="av" style="'+base+'background:'+p.g+';color:#120e1e;font-weight:700;'+
+         'font-family:var(--font-d);display:grid;place-items:center;'+
+         'font-size:calc('+Math.round(tam*0.42)+'px * var(--esc))">'+esc(p.corto.charAt(0))+'</span>';
+}
+/* Se encoge a 256 px antes de guardarla: una foto del carrete son 4 MB y no
+   hacen ninguna falta para un círculo de 60. */
+function guardarFoto(file){
+  return new Promise(function(res, rej){
+    var lector = new FileReader();
+    lector.onerror = function(){ rej(new Error('no se pudo leer')); };
+    lector.onload = function(){
+      var im = new Image();
+      im.onerror = function(){ rej(new Error('eso no es una imagen')); };
+      im.onload = function(){
+        try{
+          var L = 256, c = document.createElement('canvas');
+          c.width = L; c.height = L;
+          var g = c.getContext('2d');
+          var lado = Math.min(im.width, im.height);
+          g.drawImage(im, (im.width-lado)/2, (im.height-lado)/2, lado, lado, 0, 0, L, L);
+          var datos = c.toDataURL('image/jpeg', 0.86);
+          localStorage.setItem('mm_foto_' + yo, datos);
+          res(datos);
+        }catch(err){ rej(err); }
+      };
+      im.src = lector.result;
+    };
+    lector.readAsDataURL(file);
+  });
+}
 function nombreCiudad(c){
   for(var i=0;i<CIUDADES.length;i++) if(CIUDADES[i][0]===c) return CIUDADES[i][2];
   return c;
@@ -1029,7 +1088,7 @@ var LISTAS = [];
 var EMIS_CASA = [];            // emisoras añadidas a mano
 var FAV_RADIO = {};            // nombre → true (del dueño actual)
 var VIDEOS = [];
-var vistaActual = 'quien', pestana = 'mimusica', filtro = 'canciones';
+var vistaActual = 'quien', pestana = 'mimusica', filtro = 'favoritos';
 var listaAbierta = null;       // id de la lista cuya ficha estás mirando
 var AJ = {};                   // ajustes del teléfono
 
@@ -1690,6 +1749,51 @@ function saludoHora(){
 }
 // dentroDe = id de la lista que estás mirando; entonces el botón de la
 // derecha saca la canción de esa lista en vez de marcarla como favorita.
+/* Las carátulas en memoria, convertidas a direcci\u00f3n solo cuando hacen
+   falta. Antes la car\u00e1tula solo se ve\u00eda en "Ahora suena" y las listas eran
+   todas cuadros de color, que es justo de lo que se quej\u00f3. */
+var CARATS = {};
+function urlCaratula(c){
+  if(!c || !c.caratula) return '';
+  if(!CARATS[c.id]){
+    try{ CARATS[c.id] = URL.createObjectURL(c.caratula); }catch(_){ return ''; }
+  }
+  return CARATS[c.id];
+}
+function soltarCaratulas(){
+  for(var k in CARATS){ try{ URL.revokeObjectURL(CARATS[k]); }catch(_){} }
+  CARATS = {};
+}
+/* Si el MP3 no trae car\u00e1tula, al menos que el cuadro diga de qu\u00e9 va.
+   Se mira el estilo, y si no dice nada, el \u00e1lbum o el t\u00edtulo. */
+var ESTILOS = [
+  [/salsa|vallenat|tropical|cumbia|guarach|son |timba/i, '\uD83C\uDFBA'],
+  [/reggaet|urban|trap|hip.?hop|rap|dembow|perre/i,      '\uD83C\uDFA4'],
+  [/bachata|merengue|dominic/i,                          '\uD83D\uDC83'],
+  [/rock|metal|punk|grunge/i,                            '\uD83C\uDFB8'],
+  [/jazz|blues|swing|bebop/i,                            '\uD83C\uDFB7'],
+  [/electr|dance|techno|house|edm|remix|club/i,          '\uD83C\uDF9B\uFE0F'],
+  [/clasic|cl\u00e1sic|opera|\u00f3pera|sinf|piano/i,           '\uD83C\uDFBB'],
+  [/roman|balada|bolero|amor/i,                          '\uD83D\uDC9C'],
+  [/ranchera|mariachi|norte\u00f1|banda|corrido/i,           '\uD83C\uDFBA'],
+  [/pop|top 40|exitos|\u00e9xitos|hits/i,                    '\u2B50'],
+  [/reggae|ska|dancehall/i,                              '\uD83C\uDF34'],
+  [/infantil|ni\u00f1os/i,                                   '\uD83E\uDDF8']
+];
+function iconoEstilo(c){
+  var t = ((c && c.genero) || '') + ' ' + ((c && c.album) || '') + ' ' + ((c && c.titulo) || '');
+  for(var i=0;i<ESTILOS.length;i++) if(ESTILOS[i][0].test(t)) return ESTILOS[i][1];
+  return '\uD83C\uDFB5';
+}
+/* El cuadro de una canci\u00f3n: su car\u00e1tula si la trae; si no, su color con el
+   dibujo del estilo. Nunca un cuadro liso y mudo. */
+function cuadroCancion(c, grande){
+  var f = 'background:' + tono(c.titulo + c.artista);
+  var u = urlCaratula(c);
+  if(u) return '<span class="art" style="'+f+'"><img src="'+u+'" alt="" loading="lazy" onerror="this.remove()"></span>';
+  var dentro = c.falta ? '\u26A0\uFE0F' : iconoEstilo(c);
+  return '<span class="art vacia'+(grande?' g':'')+'" style="'+f+'">'+dentro+'</span>';
+}
 function filaCancion(c, dentroDe){
   // Guardián: si esta función se pasa a .map() a pelo, el segundo argumento
   // que llega es el INDICE del array, y a partir del segundo la fila sacaba
@@ -1700,7 +1804,7 @@ function filaCancion(c, dentroDe){
     ? '<span class="r-a" data-quitar="'+esc(dentroDe)+'" data-quitar-id="'+esc(c.id)+'">✕</span>'
     : '<span class="r-a '+(c.fav?'on':'')+'" data-fav="'+esc(c.id)+'">'+(c.fav?'❤️':'♡')+'</span>';
   return '<div class="row'+(son?' sonando':'')+(c.falta?' falta':'')+'" data-cancion="'+esc(c.id)+'">'+
-    '<span class="art" style="background:'+tono(c.titulo+c.artista)+'">'+(c.falta?'⚠️':'')+'</span>'+
+    cuadroCancion(c)+
     '<span class="r-x"><span class="r-t">'+esc(c.titulo)+'</span>'+
       '<span class="r-s">'+(c.falta?'':'<span class="badge">⬇️</span>')+esc(c.artista)+'</span></span>'+
     der +
@@ -1729,9 +1833,12 @@ function pintarInicio(){
   if(ult && ult.titulo){
     h += '<button class="btn suave" id="seguir" style="margin-top:4px">▶&nbsp; Seguir con «'+esc(ult.titulo)+'»</button>';
   }
-  h += '<button class="btn" id="b-coche" style="margin-top:8px">🚗&nbsp; Modo coche</button>';
+  // El modo coche se fue de Inicio: estorbaba ahi todos los dias para algo
+  // que solo se usa en el coche. Ahora se enciende desde Ajustes.
+  if(AJ.cocheEnInicio)
+    h += '<button class="btn" id="b-coche" style="margin-top:8px">🚗&nbsp; Modo coche</button>';
   h += '<div class="shelf-t">🕐 Recientes</div><div class="hscroll">' + recientes.map(function(c){
-        return '<div class="tile" data-cancion="'+esc(c.id)+'"><span class="art" style="background:'+tono(c.titulo+c.artista)+'"></span>'+
+        return '<div class="tile" data-cancion="'+esc(c.id)+'">'+cuadroCancion(c, true)+
           '<div class="t">'+esc(c.titulo)+'</div><div class="s">'+esc(c.artista)+'</div></div>'; }).join('') + '</div>';
   if(favs.length) h += '<div class="shelf-t">❤️ Tus favoritas</div>' + favs.map(function(c){ return filaCancion(c); }).join('');
   if(mas.length)  h += '<div class="shelf-t">🔥 Más escuchadas</div>' + mas.map(function(c){ return filaCancion(c); }).join('');
@@ -1936,11 +2043,30 @@ function pintarBiblio(){
   var C = $('bib-cuerpo');
   // Dentro de la ficha de una lista, el "Anadir musica" global estorba:
   // ahi lo que quieres es "Anadir canciones", que es otra cosa.
-  $('b-anadir').style.display = (filtro === 'listas' && listaAbierta) ? 'none' : '';
-  if(!CANCIONES.length){
+  $('b-anadir').style.display =
+    ((filtro === 'listas' && listaAbierta) || filtro === 'favoritos') ? 'none' : '';
+  if(!CANCIONES.length && filtro !== 'favoritos'){
     C.innerHTML = '<div class="vacio"><span class="em">➕</span>Tu biblioteca está vacía.<br>'+
       'Toca <b>Añadir música</b> y elige tus MP3<br>desde <b>Archivos</b> o <b>iCloud Drive</b>.<br><br>'+
       '<span style="font-size:calc(12.5px * var(--esc))">¿No sabes dónde guardarlos?<br>Mira <b>⚙️ Ajustes → Dónde guardar tus MP3</b>.</span></div>';
+    return;
+  }
+  if(filtro === 'favoritos'){
+    var favC = CANCIONES.filter(function(c){ return c.fav; });
+    var favE = listaEmisoras().filter(function(e){ return FAV_RADIO[e.nombre]; });
+    if(!favC.length && !favE.length){
+      C.innerHTML = '<div class="vacio"><span class="em">♥</span>Todavía no has marcado nada.<br>'+
+        'Toca el ♡ de una canción o de una emisora<br>y aparecerá aquí.<br><br>'+
+        '<span style="font-size:12.5px">Son tuyas: Elibel tiene las suyas.</span></div>';
+      return;
+    }
+    var h = '';
+    if(favE.length) h += '<div class="city">📻 Tus emisoras · '+favE.length+'</div>' +
+      favE.map(function(e){ return filaEmisora(e); }).join('');
+    if(favC.length) h += '<div class="city">🎵 Tus canciones · '+favC.length+'</div>' +
+      favC.map(function(c){ return filaCancion(c); }).join('') +
+      '<button class="btn solido" id="b-tocar-favs" style="margin-top:12px">▶&nbsp; Reproducir tus favoritas</button>';
+    C.innerHTML = h;
     return;
   }
   if(filtro === 'canciones'){
@@ -1994,76 +2120,19 @@ function pintarBiblio(){
 
 async function pintarAjustes(){
   var p = PERSONAS[yo];
-  var e = {usage:0, quota:0};
-  try{ if(navigator.storage && navigator.storage.estimate) e = await navigator.storage.estimate(); }catch(_){}
-  var persistido = false;
-  try{ if(navigator.storage && navigator.storage.persisted) persistido = await navigator.storage.persisted(); }catch(_){}
-
-  // espacio por persona
-  // El tamano lo lleva cada cancion (c.bytes); no hay que abrir los MP3.
-  var todasC = await todos('canciones');
-  var porDuenyo = {emmanuel:0, elibel:0}, cuenta = {emmanuel:0, elibel:0}, hashes = {};
-  todasC.forEach(function(c){
-    porDuenyo[c.duenyo] = (porDuenyo[c.duenyo]||0) + (c.bytes||0);
-    cuenta[c.duenyo] = (cuenta[c.duenyo]||0) + 1;
-    (hashes[c.hash] = hashes[c.hash] || []).push(c.duenyo);
-  });
-  var compartidas = Object.keys(hashes).filter(function(h){ return hashes[h].length > 1; }).length;
-  var total = e.quota || 1;
-  var pe = Math.min(100, porDuenyo.emmanuel/total*100), pl = Math.min(100, porDuenyo.elibel/total*100);
-
   var errores = [];
   try{ errores = JSON.parse(localStorage.getItem(CAJA)||'[]'); }catch(_){}
 
   $('ajustes-cuerpo').innerHTML =
-  '<div class="card" style="border-color:#a970ff"><h3>📐 Esta pantalla</h3>'+
-    '<div class="kv"><span>Ventana</span><span class="v">' + innerWidth + ' × ' + innerHeight + '</span></div>'+
-    '<div class="kv"><span>Pantalla del aparato</span><span class="v">' + screen.width + ' × ' + screen.height + '</span></div>'+
-    '<div class="kv"><span>Instalada</span><span class="v">' +
-      ((window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches) ? 'Sí' : 'NO — ábrela desde el icono') + '</span></div>'+
-    '<div class="kv"><span>Margen de seguridad ↑ / ↓</span><span class="v">' +
-      envReal('safe-area-inset-top') + ' / ' + envReal('safe-area-inset-bottom') + '</span></div>'+
-    '<div class="kv"><span>Barra de abajo</span><span class="v">' + medidaBarra() + '</span></div>'+
-    '<div class="kv" style="border:0"><span><b>Hueco debajo de la barra</b></span>' +
-      '<span class="v" style="color:' + (huecoAbajo() > 1 ? 'var(--red)' : 'var(--cyan)') +
-      ';font-weight:700;font-size:calc(15px * var(--esc))">' + huecoAbajo() + ' px</span></div>'+
-    '<div class="kv" style="border:0"><span style="font-size:calc(11.5px * var(--esc))">Si ves un hueco negro abajo y aquí pone 0, '+
-      'ese hueco lo pinta el iPhone por fuera de la app. Házle una foto a esta tarjeta y mándala.</span></div>'+
-  '</div>'+
-
   '<div class="card"><h3>Perfil</h3>'+
-    '<div class="row" style="cursor:default"><span class="art" style="border-radius:50%;background:'+p.g+';color:#120e1e;font-weight:700;font-family:var(--font-d)">'+p.corto.charAt(0)+'</span>'+
-    '<span class="r-x"><span class="r-t">'+esc(p.n)+'</span><span class="r-s">'+plural(CANCIONES.length,'canción','canciones')+' · '+plural(LISTAS.length,'lista','listas')+'</span></span></div>'+
-    '<button class="btn suave" id="a-cambiar" style="margin-top:12px">🔄&nbsp; Cambiar de persona</button></div>'+
+    '<div class="perfil">'+ avatarDe(yo, 66) +
+      '<div class="perfil-x"><div class="perfil-n">'+esc(p.n)+'</div>'+
+      '<div class="perfil-s">'+(fotoDe(yo)?'Con tu foto':'Toca para ponerte una foto')+'</div></div></div>'+
+    '<button class="btn suave" id="a-foto">📷&nbsp; '+(fotoDe(yo)?'Cambiar la foto':'Poner una foto')+'</button>'+
+    (fotoDe(yo)?'<button class="btn" id="a-quitarfoto">🗑&nbsp; Quitar la foto</button>':'')+
+    '<button class="btn" id="a-cambiar">🔄&nbsp; Cambiar de persona</button></div>'+
 
-  '<div class="card"><h3>Espacio en este teléfono</h3>'+
-    '<div class="barra"><i style="background:#a970ff;width:'+pe.toFixed(1)+'%"></i><i style="background:#ff5fa6;width:'+pl.toFixed(1)+'%"></i></div>'+
-    '<div class="leg"><span><b style="background:#a970ff"></b>Emmanuel · '+pesa(porDuenyo.emmanuel)+'</span>'+
-    '<span><b style="background:#ff5fa6"></b>Elibel · '+pesa(porDuenyo.elibel)+'</span></div>'+
-    '<div class="kv" style="margin-top:12px"><span>Tus canciones</span><span class="v">'+CANCIONES.length+'</span></div>'+
-    (compartidas?'<div class="kv"><span>Compartidas</span><span class="v">'+compartidas+' (se guardan una vez)</span></div>':'')+
-    '<div class="kv"><span>Hueco libre</span><span class="v">'+pesa((e.quota||0)-(e.usage||0))+'</span></div>'+
-    '<div class="kv"><span>Protegido del borrado</span><span class="v">'+(persistido?'✅ sí':'⚠️ no garantizado')+'</span></div></div>'+
-
-  '<div class="card"><h3>Dónde guardar tus MP3</h3>'+
-    '<div class="guia">'+
-    '<p><b>1.</b> En el iPhone abre <b>Archivos</b> → <b>iCloud Drive</b> y crea una carpeta llamada <b>Mi Música</b>.</p>'+
-    '<p><b>2.</b> En <b>Ajustes → Safari → Descargas</b>, elige <b>iCloud Drive</b>. Así todo lo que bajes cae ahí solo.</p>'+
-    '<p><b>3.</b> Cuando compres o descargues un MP3, muévelo a esa carpeta.</p>'+
-    '<p><b>4.</b> Vuelve aquí, <b>Biblioteca → ➕ Añadir música</b>, entra en <b>iCloud Drive → Mi Música</b> y selecciónalos todos.</p>'+
-    '<p class="ojo">⚠️ Al añadirlos, la app se queda con <b>su propia copia dentro del teléfono</b>. Por eso suenan sin internet y en el coche. '+
-    'Los de iCloud quedan como respaldo: si borras la app, los recuperas de ahí.</p>'+
-    '<p class="ojo">💡 Si usáis la <b>misma carpeta de iCloud</b>, los dos podéis añadir de la misma colección, '+
-    'pero cada uno elige qué mete en <i>su</i> biblioteca.</p>'+
-    '</div></div>'+
-
-  '<div class="card"><h3>Copia de seguridad</h3>'+
-    '<div class="kv"><span>Guarda tus favoritos, listas y emisoras.<br><span style="color:var(--dim);font-size:calc(12px * var(--esc))">No guarda los MP3: esos son tuyos, tenlos en el PC.</span></span></div>'+
-    '<button class="btn suave" id="a-exportar" style="margin-top:6px">💾&nbsp; Guardar copia</button>'+
-    '<button class="btn" id="a-importar">📂&nbsp; Restaurar una copia</button>'+
-    '<input type="file" id="fcopia" accept="application/json,.json" class="oculto"></div>'+
-
-  '<div class="card"><h3>Tama\u00f1o de la letra</h3>'+
+  '<div class="card"><h3>Tamaño de la letra</h3>'+
     '<div class="kv"><span>Para leerla de un vistazo, sobre todo en el coche.</span></div>'+
     '<div class="tabs fijas" style="grid-template-columns:repeat(3,1fr);margin:8px 0 0">'+
       LETRAS.map(function(L){
@@ -2071,29 +2140,21 @@ async function pintarAjustes(){
       }).join('')+
     '</div></div>'+
 
-  '<div class="card"><h3>Coche y auriculares</h3>'+
-    '<div class="kv"><span>Modo coche<br><span style="color:var(--dim);font-size:calc(12px * var(--esc))">Botones enormes para no mirar la pantalla</span></span>'+
-      '<span class="sw'+(enCoche?' on':'')+'" data-aj="coche"></span></div>'+
-    '<div class="kv"><span>Mantener la pantalla encendida<br><span style="color:var(--dim);font-size:calc(12px * var(--esc))">Con el móvil en el soporte. Gasta más batería.</span></span>'+
+  '<div class="card"><h3>Coche</h3>'+
+    '<button class="btn solido" id="a-coche">🚗&nbsp; Entrar en modo coche</button>'+
+    '<div class="kv"><span>Tres botones gigantes para no mirar la pantalla.</span></div>'+
+    '<div class="kv"><span>Ponerlo también en Inicio</span>'+
+      '<span class="sw'+(AJ.cocheEnInicio?' on':'')+'" data-aj="cocheEnInicio"></span></div>'+
+    '<div class="kv"><span>Mantener la pantalla encendida<br><span class="pista">Con el móvil en el soporte. Gasta más batería.</span></span>'+
       '<span class="sw'+(AJ.pantalla?' on':'')+'" data-aj="pantalla"></span></div>'+
-    '<div class="kv"><span>Volver sola tras una llamada<br><span style="color:var(--dim);font-size:calc(12px * var(--esc))">Siempre activo</span></span>'+
-      '<span class="sw on" style="opacity:.55"></span></div></div>'+
+    '<div class="kv"><span>Volver sola tras una llamada<br><span class="pista">Siempre activo</span></span>'+
+      '<span class="v">✅</span></div></div>'+
 
-  '<div class="card"><h3>Temporizador para dormir</h3>'+
-    '<div class="kv"><span>Apagar la música en…</span><span class="v" id="dormir-estado">'+(dormir?'activo':'apagado')+'</span></div>'+
-    '<div class="tabs" style="margin-top:8px">'+
-      [15,30,45,60].map(function(m){ return '<button class="tab" data-dormir="'+m+'">'+m+' min</button>'; }).join('')+
-      '<button class="tab" data-dormir="0">Quitar</button></div></div>'+
-
-  '<div class="card"><h3>Diagnóstico</h3>'+
-    '<div class="kv"><span>Comprueba si tu iPhone deja sonar esta app con la pantalla apagada y en el coche.</span></div>'+
-    '<button class="btn suave" id="a-diag" style="margin-top:6px">🩺&nbsp; Hacer la prueba</button>'+
-    '<div id="diag-res"></div></div>'+
-
-  '<div class="card"><h3>Fuentes</h3>'+
-    '<div class="kv"><span>📻 Radio</span><span class="v">'+listaEmisoras().length+' emisoras · sin clave</span></div>'+
-    '<div class="kv"><span>📺 YouTube</span><span class="v">vídeos, con la app abierta</span></div>'+
-    '<div class="kv"><span>💾 Tu música</span><span class="v">solo en este teléfono</span></div></div>'+
+  '<div class="card"><h3>Tus MP3</h3>'+
+    '<div class="kv"><span>Los MP3 que añades se guardan <b>solos</b> dentro de la app y suenan sin internet. '+
+      'Lo único que iOS no deja hacer solo es <b>ir a buscarlos</b>: tienes que elegirlos tú una vez, en '+
+      '<b>Biblioteca → ➕ Añadir música</b>.<br><span class="pista">Si los tienes en iCloud Drive, ahí mismo los verás.</span></span></div>'+
+    '<button class="btn suave" id="a-anadir2">➕&nbsp; Añadir música ahora</button></div>'+
 
   '<div class="card"><h3>Si algo va mal</h3>'+
     '<div class="kv"><span>Errores anotados</span><span class="v">'+errores.length+'</span></div>'+
@@ -2462,8 +2523,20 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#b-anadir')){ $('ficheros').click(); return; }
   if(t.closest('#seguir')){ desbloquear(); await retomar(); return; }
   if(t.closest('#b-emisora')){ await nuevaEmisora(); return; }
+  if(t.closest('#b-tocar-favs')){
+    var ids = CANCIONES.filter(function(c){ return c.fav && !c.falta; }).map(function(c){ return c.id; });
+    if(ids.length){ await tocarCancion(ids[0], ids); pintarVista(); }
+    else toast('No hay ninguna canción favorita que se pueda tocar.');
+    return;
+  }
   if(t.closest('#b-lista')){ await nuevaLista(); return; }
   if(t.closest('#a-cambiar')){ await cambiarPersona(); return; }
+  if(t.closest('#a-foto')){ $('ffoto').click(); return; }
+  if(t.closest('#a-quitarfoto')){
+    try{ localStorage.removeItem('mm_foto_' + yo); }catch(_){}
+    pintarAjustes(); toast('Foto quitada.', null, 1800); return;
+  }
+  if(t.closest('#a-anadir2')){ $('ficheros').click(); return; }
   if(t.closest('#a-exportar')){ await exportarCopia(); return; }
   if(t.closest('#a-importar')){ $('fcopia').click(); return; }
   if(t.closest('#a-diag')){ await diagnostico(); return; }
@@ -2483,7 +2556,7 @@ document.addEventListener('click', async function(ev){
     toast(aleatorio?'🔀 Aleatorio activado':'Aleatorio apagado', null, 1700); return; }
   if(t.closest('#b-rep')){ ciclarRepetir(); return; }
   if(t.closest('#coche-salir')){ modoCoche(false); return; }
-  if(t.closest('#b-coche')){ modoCoche(true); if(!actual) await retomar(); return; }
+  if(t.closest('#b-coche') || t.closest('#a-coche')){ modoCoche(true); if(!actual) await retomar(); return; }
   if(t.closest('#now-cerrar')){ $('now').classList.remove('on'); return; }
   if(t.closest('#now-fav')){
     if(!actual) return;
@@ -2518,6 +2591,13 @@ $('form-q').addEventListener('submit', function(e){
   if(pestana === 'youtube') lanzarBusquedaYouTube(t);
   else if(pestana === 'descubrir') lanzarBusquedaArchive(t);
   else if(pestana === 'radio') lanzarBusquedaMundo(t);
+});
+$('ffoto').addEventListener('change', async function(e){
+  var f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!f) return;
+  try{ await guardarFoto(f); pintarAjustes(); pintarVista(); toast('Foto puesta.', 'bueno', 2200); }
+  catch(err){ anotar('foto', err.message); toast('No se pudo usar esa imagen.', 'malo'); }
 });
 $('ficheros').addEventListener('change', function(e){
   anadirFicheros(Array.prototype.slice.call(e.target.files));
@@ -2777,7 +2857,7 @@ async function cambiarPersona(){
   listaAbierta = null; cerrarHoja();
   try{ audio.pause(); }catch(_){}
   clearTimeout(reintento); clearTimeout(vigilante); clearTimeout(dormir); dormir = null;
-  soltarURLs(); soltarCaratula();
+  soltarURLs(); soltarCaratula(); soltarCaratulas();
   actual = null; cola = []; colaPos = -1;
   $('mini').classList.remove('on');
   $('now').classList.remove('on');

@@ -130,6 +130,7 @@ button{font-family:inherit;color:inherit}
 .art{width:50px;height:50px;border-radius:10px;flex:0 0 auto;display:grid;place-items:center;
   font-size:18px;overflow:hidden;background-size:cover;background-position:center}
 .art img{width:100%;height:100%;object-fit:cover;display:block}
+.art img.logo{object-fit:contain;padding:3px}
 .r-x{min-width:0;flex:1;overflow:hidden}
 .r-t{display:block;font-weight:500;font-size:15px;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;font-family:var(--font-d)}
@@ -139,6 +140,9 @@ button{font-family:inherit;color:inherit}
 .cal{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--dim);
   border:1px solid var(--line);border-radius:4px;padding:0 4px;flex:0 0 auto}
 .est{font-size:11px;color:var(--cyan);flex:0 0 auto;letter-spacing:.04em}
+/* Dentro de .r-s (que es flex) un texto suelto NO se encoge, asi que empujaba
+   la calidad y las estrellas fuera de la pantalla. Esto es lo que cede. */
+.enc{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .r-a{flex:0 0 auto;color:var(--dim);font-size:17px;padding:13px 12px;margin:-13px -7px}
 .r-a.on{color:var(--pink)}
 .hscroll{display:flex;gap:13px;overflow-x:auto;scrollbar-width:none;
@@ -468,7 +472,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.4.0';
+var APP_VERSION = '1.5.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -520,7 +524,7 @@ function toast(msg, tipo, ms){
 }
 
 /* ─── emisoras de fábrica (probadas una a una) ───────────────────── */
-var EMISORAS = [{"ciudad": "Andorra", "nombre": "RNA - Radio Nacional d'Andorra", "genero": "Generalista", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-f-c0-7/restreamer/outgest/578e48f3-c654-4638-948a-be990c90807b/manifest.m3u8", "kbps": 0, "codec": "HLS"}, {"ciudad": "Andorra", "nombre": "Andorra Musica", "genero": "Musica", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-g-c0-3/restreamer/outgest/e2b4dcb0-7ae3-4335-992a-23ba82e529b3/manifest.m3u8", "kbps": 0, "codec": "HLS"}, {"ciudad": "Andorra", "nombre": "Flaix FM Andorra", "genero": "Dance, reggaeton", "url": "https://streaming.giraweb.com/8020/stream/;.mp3", "kbps": 320, "codec": "MP3"}, {"ciudad": "Andorra", "nombre": "Flaixbac Andorra", "genero": "Pop", "url": "https://streaming.giraweb.com/8010/stream/;.mp3", "kbps": 320, "codec": "MP3"}, {"ciudad": "Andorra", "nombre": "Radio Valira", "genero": "Variada", "url": "https://mars.streamerr.co/8022/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Andorra", "nombre": "SER Andorra", "genero": "Generalista", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_ANDORRA.mp3", "kbps": 96, "codec": "MP3"}, {"ciudad": "Barquisimeto", "nombre": "Rumba 100.1 FM", "genero": "Latin pop, variada", "url": "https://cast10.plugstreaming.com:2020/stream/r1001/;", "kbps": 64, "codec": "HE-AAC"}, {"ciudad": "Barquisimeto", "nombre": "Fama 98.1 FM", "genero": "Variada", "url": "https://server6.globalhostla.com:9356/stream", "kbps": 64, "codec": "AAC"}, {"ciudad": "Caracas", "nombre": "Exitos 99.9 FM", "genero": "Exitos, pop", "url": "https://acp4.lorini.net:2070/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "La Mega 107.3", "genero": "Pop, urbano", "url": "https://acp4.lorini.net:2050/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "Planeta 105.3 FM", "genero": "Romantica, pop espanol", "url": "https://cast10.plugstreaming.com:2020/stream/planetafm/;", "kbps": 96, "codec": "HE-AAC"}, {"ciudad": "Caracas", "nombre": "KYS FM 101.5", "genero": "Adult contemporary", "url": "https://server6.globalhostla.com:9068/stream", "kbps": 160, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "Onda La Superestacion 107.9", "genero": "Pop", "url": "https://acp4.lorini.net:2060/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "LOS40 Colombia", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_COLOMBIAAAC.aac", "kbps": 64, "codec": "HE-AAC"}, {"ciudad": "Bogota", "nombre": "Tropicana Estereo 102.9", "genero": "Salsa, vallenato, tropical", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_SC", "kbps": 128, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "Candela Estereo 101.9", "genero": "Salsa, tropical, latino", "url": "https://26523.live.streamtheworld.com/CANDELAESTEREO_SC", "kbps": 96, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "Vibra Bogota 104.9", "genero": "Salsa, vallenato, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/VIBRA_SC", "kbps": 96, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "Radioacktiva 97.9", "genero": "Rock", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_ACTIVAAAC.aac", "kbps": 64, "codec": "HE-AAC"}, {"ciudad": "Bogota", "nombre": "Olimpica Stereo 105.9", "genero": "Salsa, vallenato, crossover", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/OLP_BOGOTAAAC.aac", "kbps": 64, "codec": "HE-AAC"}, {"ciudad": "Bogota", "nombre": "Besame Bogota 89.9", "genero": "Romantica, baladas", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/BESAME_BOGOTAAAC.aac", "kbps": 56, "codec": "HE-AAC"}, {"ciudad": "Espana", "nombre": "LOS 40 Principales", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Los40.mp3", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "LOS40 Dance", "genero": "Dance, electronica", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_DANCE.mp3", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "LOS40 Urban", "genero": "Urbano, reggaeton", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_URBAN.mp3", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Cadena Dial", "genero": "Pop en espanol", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CADENADIAL.mp3", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "KISS FM", "genero": "80s, 90s, 2000s", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbkissfm.kissfmradio.cires21.com/bbkissfm.mp3", "kbps": 56, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Cadena 100", "genero": "Pop", "url": "https://cadena100-cope.flumotion.com/chunks.m3u8", "kbps": 128, "codec": "HLS"}, {"ciudad": "Espana", "nombre": "Hit FM", "genero": "Exitos actuales", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbhitfm.kissfmradio.cires21.com/bbhitfm.mp3", "kbps": 56, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Rock FM", "genero": "Rock clasico", "url": "https://rockfm-cope.flumotion.com/chunks.m3u8", "kbps": 320, "codec": "HLS"}, {"ciudad": "Espana", "nombre": "Maxima FM", "genero": "Dance, electronica", "url": "https://en-directo.frequence-radio.com/amp/redirect.php?radio=maxima-fm", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Flaix FM", "genero": "Dance, reggaeton", "url": "https://stream.flaixfm.cat/icecast", "kbps": 125, "codec": "AAC"}];
+var EMISORAS = [{"ciudad": "Andorra", "nombre": "RNA - Radio Nacional d'Andorra", "genero": "Generalista", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-f-c0-7/restreamer/outgest/578e48f3-c654-4638-948a-be990c90807b/manifest.m3u8", "kbps": 0, "codec": "HLS"}, {"ciudad": "Andorra", "nombre": "Andorra Musica", "genero": "Musica", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-g-c0-3/restreamer/outgest/e2b4dcb0-7ae3-4335-992a-23ba82e529b3/manifest.m3u8", "kbps": 0, "codec": "HLS"}, {"ciudad": "Andorra", "nombre": "Flaix FM Andorra", "genero": "Dance, reggaeton", "url": "https://streaming.giraweb.com/8020/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://upload.wikimedia.org/wikipedia/commons/6/65/Flaixfm_logo.jpg?utm_source=de.wikipedia.org&utm_campaign=parser&utm_content=thumbnail_unscaled"}, {"ciudad": "Andorra", "nombre": "Flaixbac Andorra", "genero": "Pop", "url": "https://streaming.giraweb.com/8010/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://flaixandorra.com/continguts/multimedia/imatges/8p0oa06li8kckkwosw.png"}, {"ciudad": "Andorra", "nombre": "Radio Valira", "genero": "Variada", "url": "https://mars.streamerr.co/8022/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Andorra", "nombre": "SER Andorra", "genero": "Generalista", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_ANDORRA.mp3", "kbps": 96, "codec": "MP3"}, {"ciudad": "Barquisimeto", "nombre": "Rumba 100.1 FM", "genero": "Latin pop, variada", "url": "https://cast10.plugstreaming.com:2020/stream/r1001/;", "kbps": 64, "codec": "HE-AAC"}, {"ciudad": "Barquisimeto", "nombre": "Fama 98.1 FM", "genero": "Variada", "url": "https://server6.globalhostla.com:9356/stream", "kbps": 64, "codec": "AAC", "logo": "https://fama.fm/wp-content/uploads/2020/07/Logo-Header-Blanco.png"}, {"ciudad": "Caracas", "nombre": "Exitos 99.9 FM", "genero": "Exitos, pop", "url": "https://acp4.lorini.net:2070/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "La Mega 107.3", "genero": "Pop, urbano", "url": "https://acp4.lorini.net:2050/stream", "kbps": 128, "codec": "MP3", "logo": "https://www.phonostar.de/images/auto_created/La_Mega_1073184x184.png"}, {"ciudad": "Caracas", "nombre": "Planeta 105.3 FM", "genero": "Romantica, pop espanol", "url": "https://cast10.plugstreaming.com:2020/stream/planetafm/;", "kbps": 96, "codec": "HE-AAC"}, {"ciudad": "Caracas", "nombre": "KYS FM 101.5", "genero": "Adult contemporary", "url": "https://server6.globalhostla.com:9068/stream", "kbps": 160, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "Onda La Superestacion 107.9", "genero": "Pop", "url": "https://acp4.lorini.net:2060/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "LOS40 Colombia", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_COLOMBIAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://cdn-profiles.tunein.com/p1306541/images/logod.png"}, {"ciudad": "Bogota", "nombre": "Tropicana Estereo 102.9", "genero": "Salsa, vallenato, tropical", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_SC", "kbps": 128, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "Candela Estereo 101.9", "genero": "Salsa, tropical, latino", "url": "https://26523.live.streamtheworld.com/CANDELAESTEREO_SC", "kbps": 96, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "Vibra Bogota 104.9", "genero": "Salsa, vallenato, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/VIBRA_SC", "kbps": 96, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "Radioacktiva 97.9", "genero": "Rock", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_ACTIVAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://www.radioacktiva.com/wp-content/uploads/2024/12/LOGO-RADIOACKTIVA-WEB-286X84.png"}, {"ciudad": "Bogota", "nombre": "Olimpica Stereo 105.9", "genero": "Salsa, vallenato, crossover", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/OLP_BOGOTAAAC.aac", "kbps": 64, "codec": "HE-AAC"}, {"ciudad": "Bogota", "nombre": "Besame Bogota 89.9", "genero": "Romantica, baladas", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/BESAME_BOGOTAAAC.aac", "kbps": 56, "codec": "HE-AAC"}, {"ciudad": "Espana", "nombre": "LOS 40 Principales", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Los40.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/iconos/v1.x/v1.0/touch-apple.png"}, {"ciudad": "Espana", "nombre": "LOS40 Dance", "genero": "Dance, electronica", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_DANCE.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/estaticos/recursosgraficos/v1/img/app/los40_192.png"}, {"ciudad": "Espana", "nombre": "LOS40 Urban", "genero": "Urbano, reggaeton", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_URBAN.mp3", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Cadena Dial", "genero": "Pop en espanol", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CADENADIAL.mp3", "kbps": 128, "codec": "MP3", "logo": "https://www.cadenadial.com/wp-content/uploads/2024/03/cropped-512x512_favicon_dial-180x180.png"}, {"ciudad": "Espana", "nombre": "KISS FM", "genero": "80s, 90s, 2000s", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbkissfm.kissfmradio.cires21.com/bbkissfm.mp3", "kbps": 56, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Cadena 100", "genero": "Pop", "url": "https://cadena100-cope.flumotion.com/chunks.m3u8", "kbps": 128, "codec": "HLS", "logo": "https://www.cadena100.es/estaticos/apple-touch-icon-192x192.png"}, {"ciudad": "Espana", "nombre": "Hit FM", "genero": "Exitos actuales", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbhitfm.kissfmradio.cires21.com/bbhitfm.mp3", "kbps": 56, "codec": "MP3", "logo": "https://www.hitfm.es/wp-content/uploads/2019/06/cropped-favicon-192x192.png"}, {"ciudad": "Espana", "nombre": "Rock FM", "genero": "Rock clasico", "url": "https://rockfm-cope.flumotion.com/chunks.m3u8", "kbps": 320, "codec": "HLS"}, {"ciudad": "Espana", "nombre": "Maxima FM", "genero": "Dance, electronica", "url": "https://en-directo.frequence-radio.com/amp/redirect.php?radio=maxima-fm", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Flaix FM", "genero": "Dance, reggaeton", "url": "https://stream.flaixfm.cat/icecast", "kbps": 125, "codec": "AAC", "logo": "https://flaixfm.cat/favicon.ico"}];
 var CIUDADES = [['Andorra','🇦🇩','Andorra'],['Barquisimeto','🇻🇪','Barquisimeto'],
                 ['Caracas','🇻🇪','Caracas'],['Bogota','🇨🇴','Bogotá'],['Espana','🇪🇸','España']];
 function nombreCiudad(c){
@@ -823,6 +827,149 @@ async function buscarYouTube(texto){
   throw ultimo || new Error('ningún servidor respondió');
 }
 
+/* ═════════ Radio Browser — las emisoras del mundo entero ════════
+   Base libre y colaborativa, SIN clave de ningún tipo. Es la respuesta a
+   "quiero música actual": una emisora de Medellín o de Santo Domingo pone
+   hoy lo que suena hoy, gratis y legal. Probado el 29/09/2026: de1 y de2
+   responden con CORS en menos de 250 ms; fi1 y at1 no. De ahí la lista
+   con respaldo, igual que con Piped.                                    */
+var RADIOBROWSER = ['https://de2.api.radio-browser.info', 'https://de1.api.radio-browser.info',
+                    'https://nl1.api.radio-browser.info', 'https://at1.api.radio-browser.info'];
+
+function bandera(cc){
+  cc = String(cc||'').toUpperCase();
+  if(!/^[A-Z]{2}$/.test(cc)) return '🌍';
+  try{
+    return String.fromCodePoint(0x1F1E6 + cc.charCodeAt(0) - 65,
+                                0x1F1E6 + cc.charCodeAt(1) - 65);
+  }catch(_){ return '🌍'; }
+}
+/* De lo que devuelve la base a lo que entiende la app. Devuelve null si no
+   nos sirve: sin https el iPhone la bloquea, y los nombres kilométricos son
+   granjas de etiquetas que solo ensucian la lista. */
+/* La base dice los paises en ingles y con articulo ("The Dominican
+   Republic"). Aqui se escuchan en espanol. */
+var PAISES = {
+  'colombia':'Colombia', 'venezuela':'Venezuela', 'spain':'España',
+  'the dominican republic':'República Dominicana', 'dominican republic':'República Dominicana',
+  'mexico':'México', 'puerto rico':'Puerto Rico', 'andorra':'Andorra',
+  'the united states of america':'Estados Unidos', 'united states of america':'Estados Unidos',
+  'argentina':'Argentina', 'peru':'Perú', 'ecuador':'Ecuador', 'chile':'Chile',
+  'panama':'Panamá', 'cuba':'Cuba', 'costa rica':'Costa Rica', 'honduras':'Honduras',
+  'guatemala':'Guatemala', 'el salvador':'El Salvador', 'nicaragua':'Nicaragua',
+  'bolivia':'Bolivia', 'uruguay':'Uruguay', 'paraguay':'Paraguay',
+  'france':'Francia', 'portugal':'Portugal', 'italy':'Italia', 'brazil':'Brasil',
+  'germany':'Alemania', 'the united kingdom of great britain and northern ireland':'Reino Unido'
+};
+function nombrePais(n){
+  var t = String(n || '').trim();
+  if(!t) return 'Del mundo';
+  var k = PAISES[t.toLowerCase()];
+  return k || t.replace(/^The\s+/i, '');
+}
+function emisoraDelMundo(x){
+  var url = String((x && (x.url_resolved || x.url)) || '');
+  if(url.indexOf('https://') !== 0) return null;
+  var nombre = String((x && x.name) || '').replace(/\s+/g, ' ').trim();
+  if(!nombre || nombre.length > 70) return null;
+  var tags = String((x && x.tags) || '').split(',')
+               .map(function(t){ return t.trim(); })
+               .filter(function(t){ return t; }).slice(0, 3).join(', ');
+  var codec = String((x && x.codec) || '').toUpperCase();
+  if(codec === 'AAC+') codec = 'HE-AAC';
+  if(esHLS(url)) codec = 'HLS';
+  // El logo de la emisora. Solo https: el iPhone bloquea las imagenes http
+  // igual que bloquea el audio http.
+  var logo = String((x && x.favicon) || '');
+  if(logo.indexOf('https://') !== 0) logo = '';
+  return {nombre: nombre,
+          ciudad: (bandera(x.countrycode) + ' ' + nombrePais(x.country)).trim(),
+          genero: tags || 'Variada', logo: logo,
+          url: url, kbps: +(x.bitrate || 0) || 0, codec: codec || 'MP3'};
+}
+async function buscarEmisorasMundo(texto){
+  var t = encodeURIComponent(String(texto).trim());
+  var cola = '&is_https=true&hidebroken=true&order=clickcount&reverse=true&limit=30';
+  var orden = servidoresPorOrden(RADIOBROWSER, 'mm_rb_ok'), ultimo = null;
+  for(var i=0;i<orden.length;i++){
+    try{
+      // Dos preguntas a la vez: por nombre ("Olimpica") y por etiqueta
+      // ("salsa"). El que escribe no tiene por qué saber cuál de las dos es.
+      var dos = await Promise.all([
+        traerConLimite(orden[i] + '/json/stations/search?name=' + t + cola, 9000),
+        traerConLimite(orden[i] + '/json/stations/search?tag='  + t + cola, 9000)
+      ]);
+      try{ localStorage.setItem('mm_rb_ok', orden[i]); }catch(_){}
+      var vistas = {}, fuera = [];
+      [].concat(dos[1] || [], dos[0] || []).forEach(function(x){
+        var e = emisoraDelMundo(x);
+        if(!e) return;
+        var k = e.url.toLowerCase();
+        if(vistas[k]) return;
+        vistas[k] = true; fuera.push(e);
+      });
+      return fuera.slice(0, 40);
+    }catch(err){ ultimo = err; anotar('radiobrowser', orden[i] + ' · ' + err.message); }
+  }
+  throw ultimo || new Error('ningún servidor respondió');
+}
+var rbResultados = [], rbBuscando = false, rbTexto = '', rbFallo = '';
+async function lanzarBusquedaMundo(texto){
+  texto = String(texto || '').trim();
+  if(!texto){ rbResultados = []; rbTexto = ''; rbFallo = ''; pintarBuscar(); return; }
+  rbBuscando = true; rbTexto = texto; rbFallo = ''; pintarBuscar();
+  try{
+    rbResultados = await buscarEmisorasMundo(texto);
+    if(!rbResultados.length) rbFallo = 'Ninguna emisora con ese nombre ni ese estilo.';
+  }catch(err){
+    rbResultados = []; rbFallo = 'No se pudo preguntar ahora mismo. Mira si tienes internet.';
+  }
+  rbBuscando = false; pintarBuscar();
+}
+/* La fila de una emisora que todavía NO es tuya: se escucha tocándola, y el
+   ➕ la guarda para siempre (y entonces la ven los dos). */
+/* El cuadrito de la izquierda. Si la emisora tiene logo, se ve su logo; si
+   no lo tiene o no carga, se queda el color con el 📻, como hasta ahora. */
+function cuadroEmisora(e){
+  var f = 'background:' + tono(e.nombre);
+  if(e.logo)
+    return '<span class="art" style="'+f+'"><img class="logo" src="'+esc(e.logo)+'" alt="" '+
+           'loading="lazy" onerror="this.remove()"></span>';
+  return '<span class="art" style="'+f+'">📻</span>';
+}
+function filaEmisoraMundo(e, i){
+  var yaEsta = false, L = listaEmisoras();
+  for(var k=0;k<L.length;k++) if(L[k].url === e.url) yaEsta = true;
+  var son = actual && actual.tipo==='radio' && actual.url === e.url;
+  var cal = (e.codec || '') + (e.kbps ? ' ' + e.kbps : '');
+  var est = estrellas(e);
+  return '<div class="row'+(son?' sonando':'')+'" data-rb-tocar="'+i+'">'+
+    cuadroEmisora(e)+
+    '<span class="r-x"><span class="r-t">'+esc(e.nombre)+'</span>'+
+      '<span class="r-s"><span class="enc">'+esc(e.ciudad)+' · '+esc(e.genero)+'</span>'+
+      (cal?'<span class="cal">'+esc(cal)+'</span>':'')+
+      (est?'<span class="est">'+est+'</span>':'')+'</span></span>'+
+    (yaEsta ? '<span class="r-a on">✓</span>'
+            : '<span class="r-a" data-rb-guardar="'+i+'">➕</span>')+'</div>';
+}
+/* El bloque que se ve debajo de tus emisoras, dentro de la pestaña Radio. */
+function bloqueMundo(){
+  var h = '<div class="city">🌍 En todo el mundo</div>';
+  if(rbBuscando) return h + '<div class="vacio"><span class="em">⏳</span>Buscando «' + esc(rbTexto) + '»…</div>';
+  if(rbFallo)    return h + '<div class="vacio"><span class="em">📻</span>' + esc(rbFallo) + '</div>';
+  if(rbResultados.length)
+    return h + '<div class="r-s" style="margin:-4px 0 8px">' + rbResultados.length +
+           ' encontradas para «' + esc(rbTexto) + '». Tócala para oírla; el ➕ la guarda.</div>' +
+           rbResultados.map(function(e, i){ return filaEmisoraMundo(e, i); }).join('');
+  return h + '<div class="vacio"><span class="em">🌍</span>' +
+    'Escribe arriba y pulsa <b>buscar</b> para rebuscar entre miles de emisoras.<br>' +
+    '<span style="font-size:12.5px">Prueba con un estilo o con una ciudad.</span></div>' +
+    '<div class="hscroll">' +
+    ['reggaeton','salsa','bachata','vallenato','merengue','Medellin','Santo Domingo','Caracas']
+      .map(function(t){ return '<button class="tab" data-rb-sug="' + esc(t) + '">' + esc(t) + '</button>'; })
+      .join('') + '</div>';
+}
+
 /* Internet Archive — solo colecciones legalmente limpias:
    georgeblood = discos de 78 rpm digitalizados (dominio público)
    etree       = conciertos de bandas que autorizan la grabación
@@ -1118,7 +1265,8 @@ function tocarRadio(e){
   fallosRadio = 0; espera = 1000; intentosVigilante = 0;
   paradoPorMi = false; recuperarAlVolver = false;
   actual = {tipo:'radio', titulo:e.nombre, sub:nombreCiudad(e.ciudad) + ' · ' + e.genero,
-            url:e.url, ciudad:e.ciudad, genero:e.genero, fav:!!FAV_RADIO[e.nombre],
+            url:e.url, ciudad:e.ciudad, genero:e.genero, logo:e.logo || '',
+            fav:!!FAV_RADIO[e.nombre],
             cal: e.kbps ? ((e.codec||'') + ' ' + e.kbps + ' kbps').trim() : ''};
   cola = []; colaPos = -1;
   audio.src = e.url;
@@ -1224,9 +1372,17 @@ async function pintarAhora(cancion){
     }catch(_){}
   }
 
+  // La radio no tiene caratula dentro del archivo, pero muchas emisoras
+  // tienen logo. Si lo hay, es lo que se ve (y lo que va al coche).
+  var imagen = tieneImg ? caratulaURL : (actual.tipo === 'radio' && actual.logo ? actual.logo : '');
   ['n-art','m-art'].forEach(function(id){
     var el = $(id);
-    if(tieneImg){ el.style.background = 'url('+caratulaURL+') center/cover'; el.textContent=''; }
+    if(imagen){
+      // La caratula de una cancion es cuadrada y llena; el logo de una
+      // emisora es de cualquier forma, asi que se ve entero sobre el color.
+      var encaje = (!tieneImg && actual.tipo === 'radio') ? 'center/contain no-repeat' : 'center/cover';
+      el.style.background = fondo + ' url("'+imagen+'") ' + encaje; el.textContent='';
+    }
     else { el.style.background = fondo; el.textContent = actual.tipo==='radio' ? '📻' : (id==='n-art'?'🎵':''); }
   });
   $('n-t').textContent = actual.titulo;
@@ -1243,10 +1399,14 @@ async function pintarAhora(cancion){
   // ─── lo que sale en el coche y en la pantalla de bloqueo ───
   if('mediaSession' in navigator){
     try{
+      // En CarPlay: la caratula si la hay, si no el logo de la emisora, y de
+      // ultimo recurso el icono de la app. El orden importa: iOS coge la
+      // primera que consiga cargar.
       var arte = [];
-      if(tieneImg) arte = [{src:caratulaURL, sizes:'512x512', type:'image/jpeg'}];
-      else arte = [{src:'icon-512.png', sizes:'512x512', type:'image/png'},
-                   {src:'icon-192.png', sizes:'192x192', type:'image/png'}];
+      if(tieneImg) arte.push({src:caratulaURL, sizes:'512x512', type:'image/jpeg'});
+      else if(actual.tipo === 'radio' && actual.logo) arte.push({src:actual.logo, sizes:'512x512'});
+      arte.push({src:'icon-512.png', sizes:'512x512', type:'image/png'},
+                {src:'icon-192.png', sizes:'192x192', type:'image/png'});
       navigator.mediaSession.metadata = new MediaMetadata({
         title: actual.titulo,
         artist: actual.tipo==='radio' ? nombreCiudad(actual.ciudad) : (actual.artista||''),
@@ -1593,8 +1753,9 @@ function pintarBuscar(){
       CIUDADES.forEach(function(c){ if(c[0]===e.ciudad) conocida = true; });
       return !conocida && (!q || (e.nombre+' '+e.genero).toLowerCase().indexOf(q) >= 0); });
     if(otras.length) h += '<div class="city">➕ Tuyas</div>' + otras.map(filaEmisora).join('');
-    C.innerHTML = (h || '<div class="vacio"><span class="em">📻</span>Ninguna emisora con ese nombre.</div>') +
-      '<button class="btn" id="b-emisora">➕&nbsp; Añadir emisora a mano</button>';
+    C.innerHTML = (h || '<div class="vacio"><span class="em">📻</span>Ninguna de las tuyas se llama así.</div>') +
+      '<button class="btn" id="b-emisora">➕&nbsp; Añadir emisora a mano</button>' +
+      bloqueMundo();
   }
   else if(pestana === 'youtube') pintarYouTube();
   else pintarDescubrir();
@@ -1743,9 +1904,9 @@ function filaEmisora(e){
   var cal = (e.codec ? e.codec : '') + (e.kbps ? ' ' + e.kbps : '');
   var est = estrellas(e);
   return '<div class="row'+(son?' sonando':'')+'" data-emisora="'+esc(e.nombre)+'">'+
-    '<span class="art" style="background:'+tono(e.nombre)+'">📻</span>'+
+    cuadroEmisora(e)+
     '<span class="r-x"><span class="r-t">'+esc(e.nombre)+'</span>'+
-      '<span class="r-s"><span class="badge">🔴</span>'+esc(e.genero)+
+      '<span class="r-s"><span class="badge">🔴</span><span class="enc">'+esc(e.genero)+'</span>'+
       (cal?'<span class="cal">'+esc(cal)+'</span>':'')+
       (est?'<span class="est">'+est+'</span>':'')+'</span></span>'+
     '<span class="r-a '+(f?'on':'')+'" data-favradio="'+esc(e.nombre)+'">'+(f?'❤️':'♡')+'</span></div>';
@@ -2228,6 +2389,24 @@ document.addEventListener('click', async function(ev){
     $('v-buscar').scrollTop = 0; return; }
   if((el = t.closest('[data-cerrar-yt]'))){
     viendoVideo = false; ytVerId = null; pintarYouTube(); return; }
+  if((el = t.closest('[data-rb-sug]'))){
+    $('q').value = el.dataset.rbSug;
+    await lanzarBusquedaMundo(el.dataset.rbSug); return; }
+  if((el = t.closest('[data-rb-guardar]'))){
+    ev.stopPropagation();
+    var eG = rbResultados[+el.dataset.rbGuardar];
+    if(eG){
+      await guardar('emisoras', {id:'e_'+Date.now(), nombre:eG.nombre, ciudad:eG.ciudad,
+                                 genero:eG.genero, url:eG.url, kbps:eG.kbps, codec:eG.codec,
+                                 logo:eG.logo || ''});
+      await cargarDatos(); pintarBuscar();
+      toast('Guardada. Ya sale con las tuyas, y la ven los dos.', 'bueno', 3500);
+    }
+    return; }
+  if((el = t.closest('[data-rb-tocar]'))){
+    var eT = rbResultados[+el.dataset.rbTocar];
+    if(eT){ viendoVideo = false; tocarRadio(eT); pintarVista(); }
+    return; }
   if((el = t.closest('[data-ia-sug]'))){ $('q').value = el.dataset.iaSug;
     await lanzarBusquedaArchive(el.dataset.iaSug); return; }
   if((el = t.closest('[data-abrir-ia]'))){ await abrirArchive(+el.dataset.abrirIa); return; }
@@ -2294,6 +2473,7 @@ $('form-q').addEventListener('submit', function(e){
   var t = $('q').value;
   if(pestana === 'youtube') lanzarBusquedaYouTube(t);
   else if(pestana === 'descubrir') lanzarBusquedaArchive(t);
+  else if(pestana === 'radio') lanzarBusquedaMundo(t);
 });
 $('ficheros').addEventListener('change', function(e){
   anadirFicheros(Array.prototype.slice.call(e.target.files));
@@ -2317,6 +2497,7 @@ function ponerPestana(t){
   viendoVideo = false;
   ytVerId = null; ytResultados = []; ytTexto = ''; ytBuscando = false;
   iaAbierto = null; iaResultados = []; iaTexto = ''; iaBuscando = false;
+  rbResultados = []; rbTexto = ''; rbBuscando = false; rbFallo = '';
   pintarBuscar();
   $('v-buscar').scrollTop = 0;
 }

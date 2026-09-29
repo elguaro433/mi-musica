@@ -51,7 +51,30 @@ etiquetas, usa el nombre "Artista - Título".
 **Un mismo MP3 se guarda una sola vez.** Si los dos tenéis *Pegao*, ocupa la
 mitad: cada uno tiene su ficha y comparten el archivo.
 
-**Radio** — 30 emisoras probadas una a una, todas en HTTPS:
+**Radio** — 30 emisoras probadas una a una, todas en HTTPS, **y un buscador
+de todas las demás** (v1.5.0). Escribe un estilo (`reggaeton`, `salsa`,
+`bachata`, `vallenato`) o una ciudad (`Medellín`, `Santo Domingo`) y pulsa
+buscar: la app pregunta a **Radio Browser**, la base libre y colaborativa de
+emisoras, **sin clave de ningún tipo**. La táctil suena al momento; el ➕ la
+guarda para siempre y entonces la ven los dos. Solo salen emisoras `https://`,
+porque las `http://` el iPhone las bloquea.
+
+Se pregunta por **nombre y por etiqueta a la vez**, porque quien escribe
+"salsa" no tiene por qué saber cuál de las dos cosas es. Los nombres de más de
+70 caracteres se descartan: son granjas de etiquetas que solo ensucian la
+lista. Cuatro servidores en fila con `AbortController`, y se recuerda el que
+funcionó en `localStorage.mm_rb_ok` — igual que con Piped. El 29/09/2026
+respondían `de1` y `de2`; `fi1` y `at1`, no.
+
+**Cada emisora con su logo** (v1.5.0). Las del buscador traen el suyo de la
+propia base. De las 30 de casa, **12 tienen logo comprobado**: se buscaron uno
+a uno exigiendo que **coincidiera el país**, no solo el nombre — sin ese filtro
+a Hit FM le tocaba un logo ucraniano y a KISS FM uno mexicano. Las otras 18 se
+quedan con su color: mejor sin logo que con el logo de otra. El logo se ve
+**entero** (`contain`), no recortado, y es lo que sale en CarPlay y en la
+pantalla de bloqueo cuando la emisora lo tiene.
+
+Las 30 de casa:
 
 | | Emisoras |
 |---|---|
@@ -188,21 +211,31 @@ restricciones del sistema.
 
 ---
 
-## ⚠️ Lo que falta: repetir la prueba del coche
+## ✅ La prueba del coche: superada
 
-Todo esto depende de una pregunta que **solo se responde probándolo**: ¿deja
-iOS que una web instalada suene con la pantalla apagada y en CarPlay?
+Durante semanas todo el proyecto dependió de una pregunta que **solo se
+respondía probándolo**: ¿deja iOS que una web instalada suene con la pantalla
+apagada y en CarPlay?
 
-> **28/09/2026 — la primera prueba salió mal, pero no valía.** Con la pantalla
+> **29/09/2026 — sí.** Emmanuel repitió la prueba en su Dacia con la v1.3.0 y
+> **la música siguió sonando con la pantalla apagada**. El riesgo que tenía el
+> proyecto en vilo desde el principio ya no existe. El **plan B** (meter los
+> MP3 en la app Música del iPhone con Dispositivos Apple) queda en el cajón:
+> no hace falta.
+
+La moraleja vale para el futuro: **la primera prueba falló y la culpa era
+nuestra, no de iOS.** Antes de acusar a Apple, mirar el registro.
+
+> **28/09/2026 — la primera prueba salió mal, y así se descubrió por qué.** Con la pantalla
 > apagada no sonaba, y el informe traía cortes de radio cada 20 s. Midiendo el
 > stream por fuera resultó que la emisora estaba perfecta (515 KB en 35 s sin
 > un corte): quien cortaba era el **guardián nº 1** de la propia app, que daba
 > la alarma a los 2,4 s sin avance y reasignaba la fuente. Arreglado en la
 > v1.2.0. **Hay que repetir la prueba.** Ahora el registro de errores marca
 > `[PANTALLA APAGADA]` en cada anotación, así que el informe lo dirá sin
-> ninguna duda.
+> ninguna duda. (Y al repetirla con la v1.3.0, sonó.)
 
-La app trae la prueba dentro: **⚙️ Ajustes → Diagnóstico → Hacer la prueba**.
+La app sigue trayendo la prueba dentro, por si alguna vez hay que repetirla: **⚙️ Ajustes → Diagnóstico → Hacer la prueba**.
 Comprueba sola lo que puede, y te da la lista de lo que tienes que mirar tú:
 
 1. Pon una canción y **apaga la pantalla** — ¿sigue sonando?

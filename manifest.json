@@ -1,18 +1,36 @@
 {
-  "name": "Mi Música — Familia Díaz González",
-  "short_name": "Mi Música",
+  "name": "Mi Música — Emmanuel Díaz",
+  "short_name": "Emmanuel",
   "description": "Tu música, tuya de verdad. Sin internet, en el coche y con tu nombre.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#120e1e",
+  "background_color": "#000000",
   "theme_color": "#0b0913",
   "lang": "es-ES",
-  "categories": ["music", "entertainment"],
+  "categories": [
+    "music",
+    "entertainment"
+  ],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }

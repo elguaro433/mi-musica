@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0b0913">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Mi Música">
+<meta name="apple-mobile-web-app-title" content="Emmanuel">
 <link rel="apple-touch-icon" href="icon-180.png">
 <!-- Pantallas de arranque: sin fogonazo blanco al abrir desde el icono.
      iOS elige la del aparato exacto segun ancho, alto y densidad. -->
@@ -512,7 +512,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.11.0';
+var APP_VERSION = '1.12.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2445,6 +2445,14 @@ async function pintarAjustes(){
       '<b>Biblioteca → ➕ Añadir música</b>.<br><span class="pista">Si los tienes en iCloud Drive, ahí mismo los verás.</span></span></div>'+
     '<button class="btn suave" id="a-anadir2">➕&nbsp; Añadir música ahora</button></div>'+
 
+  '<div class="card" style="border-color:var(--cyan)"><h3>Copia de seguridad</h3>'+
+    '<div class="kv"><span>Guarda tus emisoras, tus favoritos y tus listas en un archivo. '+
+      '<b>Hazla antes de borrar el icono</b> de la app: el iPhone se lleva los datos al desinstalarla.'+
+      '<br><span class="pista">No guarda los MP3: esos los tienes en el ordenador.</span></span></div>'+
+    '<button class="btn suave" id="a-exportar">💾&nbsp; Guardar copia</button>'+
+    '<button class="btn" id="a-importar">📂&nbsp; Restaurar una copia</button>'+
+    '<input type="file" id="fcopia" accept="application/json,.json" class="oculto"></div>'+
+
   '<div class="card"><h3>Si algo va mal</h3>'+
     '<div class="kv"><span>Errores anotados</span><span class="v">'+errores.length+'</span></div>'+
     '<button class="btn" id="a-informe">📋&nbsp; Copiar informe para Emmanuel</button>'+
@@ -3224,6 +3232,15 @@ function ponerEscala(cual){
 }
 
 /* ═════════════════ ARRANQUE ═════════════════════════════════════ */
+/* Si se abre con ?p=emmanuel o ?p=elibel, entra directa a ese perfil.
+   Es lo que hace que elibel.html sea de verdad "su" app: su icono, su
+   nombre debajo y su música, sin tener que elegir cada vez. */
+function perfilPedido(){
+  try{
+    var m = String(location.search || '').match(/[?&]p=(emmanuel|elibel)\b/i);
+    return m ? m[1].toLowerCase() : '';
+  }catch(_){ return ''; }
+}
 async function arrancar(){
   // Guardián 8 y 9: ¿falló dos veces seguidas?
   if(fallos() >= 2){
@@ -3245,8 +3262,12 @@ async function arrancar(){
       navigator.serviceWorker.register('sw.js').catch(function(err){ anotar('sw', err.message); });
     }
 
-    var guardado = null;
-    try{ guardado = localStorage.getItem('mm_perfil'); }catch(_){}
+    // La direccion manda sobre lo guardado: el icono de Elibel abre SU
+    // musica aunque el ultimo que la usara en ese telefono fuera otro.
+    var guardado = perfilPedido();
+    if(!guardado){
+      try{ guardado = localStorage.getItem('mm_perfil'); }catch(_){}
+    }
 
     $('carga').classList.add('oculto');
 

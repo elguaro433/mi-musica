@@ -145,13 +145,16 @@ No hace falta volver a suavizarlas, pero **no las contradigas**:
 - **Barquisimeto está mal cubierto**: Rumbera Network, Más Network, OK 101.5,
   Sabrosa y Durísima dan 401 o no están. Por eso existe el ➕ a mano.
 
-## Si la prueba del coche FALLA
+## Planes B y C: ya no hacen falta
 
-Plan B ya hablado: meter los MP3 en la app **Música** del iPhone (el icono rojo
-que sí está en CarPlay) con la app **Dispositivos Apple** de Windows. Pierde la
-firma y el saludo, gana el icono. ⚠️ Si tiene Apple Music con "Sincronizar
-biblioteca", hay que apagarlo.
-Plan C (app nativa, Mac + 99 €/año) **descartado**: ni así daría el icono.
+La prueba del coche salió bien el 29/09/2026, así que **no vuelvas a sacar
+esto** salvo que algún día el audio de fondo se rompa de verdad.
+
+Queda apuntado por si acaso: el **plan B** era meter los MP3 en la app
+**Música** del iPhone (el icono rojo que sí está en CarPlay) con **Dispositivos
+Apple** de Windows — gana el icono, pierde la firma y el saludo, y si tiene
+Apple Music con "Sincronizar biblioteca" hay que apagarlo primero. El **plan
+C** (app nativa, Mac + 99 €/año) estaba descartado ya: ni así daría el icono.
 
 ## Entorno
 
@@ -159,7 +162,8 @@ Plan C (app nativa, Mac + 99 €/año) **descartado**: ni así daría el icono.
 - ⚠️ **`index.html` está en CRLF.** Al parchearlo con Python, leer con
   `io.open(p, encoding='utf-8')` (traduce a `
 `) y escribir con
-  `newline='
+  `newline='
+
 '`. Y **escribir siempre a un temporal y `os.replace`**: un
   `open(p,'w')` trunca el fichero antes de fallar, y así se quedó en 0 bytes
   una vez (se recuperó con `git restore`, pero por poco).
@@ -213,3 +217,9 @@ Plan C (app nativa, Mac + 99 €/año) **descartado**: ni así daría el icono.
 - Reordenar la cola a mano.
 - Verificar las 30 emisoras periódicamente y poner en gris las muertas.
 - Normalizar el volumen entre canciones.
+- Logos para las 18 emisoras de casa que se quedaron sin él.
+- Guía de comprar MP3 paso a paso dentro de la app.
+
+**Ya hechas, no las propongas otra vez:** el buscador de emisoras del mundo
+(v1.5.0), los logos de emisora (v1.5.0) y subir el tamaño de la letra
+pequeña (v1.4.0).

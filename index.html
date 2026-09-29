@@ -38,6 +38,7 @@
      se vuelvan brillantes con el marco. */
   --bg:#0b0913; --bg2:#120e1e; --card:#1e1736; --card2:#271e47; --line:#6b5a9c;
   --pista:#352b55;
+  --glow1:#241640; --glow2:#2a1030;
   --ink:#f6f2ff; --muted:#cdc5e2; --dim:#aea4c9;
   /* La escala de la letra. 1 era el tamano de la v1.5; Emmanuel dijo que
      todo se veia pequeno, asi que el normal ahora es 1.12. El interruptor
@@ -69,14 +70,14 @@ html,body{margin:0;padding:0;height:100%;height:100svh;overflow:hidden;overscrol
    abajo, porque da una ventana 59 px mas corta que la pantalla. Por eso
    lleva el color de la BARRA: asi la barra parece llegar hasta el borde.
    (el hueco negro del 29/09/2026 — medido en su iPhone, no supuesto) */
-body{background:#120e1e;color:var(--ink);font-family:var(--font-b);line-height:1.5;
+body{background:var(--bg2);color:var(--ink);font-family:var(--font-b);line-height:1.5;
   -webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none}
 input,textarea{-webkit-user-select:text;user-select:text}
 button{font-family:inherit;color:inherit}
 
 #app{position:fixed;inset:0;z-index:0;background:
-  radial-gradient(620px 340px at 88% -8%, #241640 0%, rgba(36,22,64,0) 62%),
-  radial-gradient(520px 320px at -14% 12%, #2a1030 0%, rgba(42,16,48,0) 58%), var(--bg)}
+  radial-gradient(620px 340px at 88% -8%, var(--glow1) 0%, transparent 62%),
+  radial-gradient(520px 320px at -14% 12%, var(--glow2) 0%, transparent 58%), var(--bg)}
 
 .view{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:calc(var(--sat) + 10px) calc(var(--gutter) + var(--sar))
@@ -511,7 +512,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.10.0';
+var APP_VERSION = '1.11.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -554,6 +555,9 @@ function pesa(b){
   return (b/1073741824).toFixed(2).replace('.',',')+' GB';
 }
 function toast(msg, tipo, ms){
+  // Solo uno a la vez: se apilaban y tapaban media pantalla.
+  var caja = $('toast');
+  while(caja.firstChild) caja.removeChild(caja.firstChild);
   var d = document.createElement('div');
   d.className = 'toast' + (tipo?' '+tipo:'');
   d.innerHTML = msg;
@@ -617,14 +621,22 @@ var PERSONAS = {
   emmanuel:{n:'Emmanuel Díaz', corto:'Emmanuel', g:'linear-gradient(135deg,#a970ff,#7b4ddb)', c:'#a970ff'},
   elibel:  {n:'Elibel González', corto:'Elibel',  g:'linear-gradient(135deg,#ff5fa6,#ff8fc4)', c:'#ff5fa6'}
 };
-/* [clave, nombre, principal, segundo, acento] */
+/* Cada tema trae la paleta ENTERA, no tres acentos sueltos:
+   [clave, nombre, principal, segundo, acento,
+    fondo, fondo2, tarjeta, tarjeta2, borde, pista, resplandor1, resplandor2] */
 var TEMAS = [
-  ['neon',   'Ne\u00f3n',   '#a970ff', '#ff5fa6', '#43e0d0'],
-  ['oceano', 'Oc\u00e9ano', '#4aa3ff', '#31e0c6', '#8ad9ff'],
-  ['selva',  'Selva',  '#4bd47e', '#b9e657', '#2fd6c0'],
-  ['fuego',  'Fuego',  '#ff7a45', '#ff4d6d', '#ffc857'],
-  ['oro',    'Oro',    '#e8bf5a', '#ff9f68', '#ffe1a0'],
-  ['hielo',  'Hielo',  '#9aa8ff', '#c9a7ff', '#7fd8ff']
+  ['neon',   'Ne\u00f3n',   '#a970ff', '#ff5fa6', '#43e0d0',
+   '#0b0913', '#120e1e', '#1e1736', '#271e47', '#6b5a9c', '#352b55', '#241640', '#2a1030'],
+  ['oceano', 'Oc\u00e9ano', '#4aa3ff', '#31e0c6', '#8ad9ff',
+   '#070f1a', '#0c1826', '#132840', '#1b3653', '#4a7ba8', '#23405e', '#0e2b4d', '#0a3340'],
+  ['selva',  'Selva',  '#4bd47e', '#b9e657', '#2fd6c0',
+   '#07130d', '#0c1e15', '#133026', '#1b4133', '#4c8f6c', '#234a38', '#0f3a24', '#123f2e'],
+  ['fuego',  'Fuego',  '#ff7a45', '#ff4d6d', '#ffc857',
+   '#150809', '#211010', '#3a1a18', '#4d2521', '#9c5f4f', '#55302a', '#4a1a12', '#3d1220'],
+  ['oro',    'Oro',    '#e8bf5a', '#ff9f68', '#ffe1a0',
+   '#120f06', '#1d180c', '#332a14', '#45391d', '#8f7a44', '#4e4222', '#3f3410', '#402612'],
+  ['hielo',  'Hielo',  '#7f8dff', '#b98cff', '#5fc9ff',
+   '#090b18', '#101426', '#1b2142', '#242c56', '#5c67a8', '#2f3866', '#1a2150', '#221a52']
 ];
 function temaDe(cual){
   for(var i=0;i<TEMAS.length;i++) if(TEMAS[i][0] === cual) return TEMAS[i];
@@ -639,6 +651,13 @@ function ponerColor(cual){
     r.setProperty('--purple', p);
     r.setProperty('--pink', g);
     r.setProperty('--cyan', c);
+    r.setProperty('--bg', t[5]);     r.setProperty('--bg2', t[6]);
+    r.setProperty('--card', t[7]);   r.setProperty('--card2', t[8]);
+    r.setProperty('--line', t[9]);   r.setProperty('--pista', t[10]);
+    r.setProperty('--glow1', t[11]); r.setProperty('--glow2', t[12]);
+    // el color de la barra de estado del iPhone, a juego
+    var m = document.querySelector('meta[name="theme-color"]');
+    if(m) m.setAttribute('content', t[5]);
   }catch(_){}
   TONOS = ['linear-gradient(135deg,'+p+','+g+')', 'linear-gradient(135deg,'+c+','+p+')',
            'linear-gradient(135deg,'+g+',#ffcf5c)', 'linear-gradient(135deg,'+p+','+c+')',

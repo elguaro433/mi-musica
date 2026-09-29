@@ -261,6 +261,11 @@ button{font-family:inherit;color:inherit}
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:1px solid rgba(138,118,198,.32);display:none;z-index:45}
 #barra.on{display:flex}
+/* Por si el fondo de la barra no llegase al borde de la pantalla, esto lo
+   alarga hacia abajo. Va en absolute para NO convertirse en un hijo mas del
+   flex y descolocar los botones. (el hueco negro del 29/09/2026) */
+#barra::after{content:'';position:absolute;top:100%;left:0;right:0;height:180px;
+  background:rgba(18,14,30,.96);pointer-events:none}
 #barra button{flex:1;background:none;border:0;color:var(--dim);font-size:10.5px;display:flex;
   flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-weight:500}
 #barra button .i{font-size:20px;line-height:1}
@@ -472,7 +477,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.5.0';
+var APP_VERSION = '1.5.1';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2626,6 +2631,43 @@ async function meterEnLista(listaId, cancionId){
   await cargarDatos();
   return l;
 }
+/* Cuanto mide de verdad esta pantalla. env() no se puede leer con
+   getComputedStyle (devuelve el texto sin resolver), asi que se mide con un
+   elemento de mentira. Esto existe por el hueco negro de abajo que se ve en
+   el iPhone de Emmanuel y que NO se reproduce en el ordenador. */
+function envReal(prop){
+  try{
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:env(' + prop + ',0px)';
+    document.body.appendChild(d);
+    var h = d.getBoundingClientRect().height;
+    d.remove();
+    return Math.round(h * 10) / 10;
+  }catch(_){ return -1; }
+}
+function medidasPantalla(){
+  var b = null;
+  try{ b = $('barra').getBoundingClientRect(); }catch(_){}
+  var vv = window.visualViewport;
+  var cs = getComputedStyle(document.documentElement);
+  var L = [];
+  L.push(' ventana: ' + innerWidth + ' x ' + innerHeight);
+  L.push(' pantalla: ' + screen.width + ' x ' + screen.height + '   dpr: ' + devicePixelRatio);
+  L.push(' visualViewport: ' + (vv ? Math.round(vv.height) + ' (desplazado ' + Math.round(vv.offsetTop) + ')' : '(no hay)'));
+  L.push(' html.clientHeight: ' + document.documentElement.clientHeight +
+         '   body.clientHeight: ' + document.body.clientHeight);
+  try{ L.push(' #app alto: ' + Math.round($('app').getBoundingClientRect().height)); }
+  catch(_){ L.push(' #app alto: ?'); }
+  L.push(' safe-area arriba/abajo REAL: ' + envReal('safe-area-inset-top') + ' / ' + envReal('safe-area-inset-bottom'));
+  L.push(' --sabn: ' + cs.getPropertyValue('--sabn').trim() + '   --barra: ' + cs.getPropertyValue('--barra').trim());
+  if(b){
+    L.push(' barra: arriba ' + Math.round(b.top) + '  abajo ' + Math.round(b.bottom) + '  alto ' + Math.round(b.height));
+    L.push(' >>> HUECO DEBAJO DE LA BARRA: ' + Math.round(innerHeight - b.bottom) + ' px <<<');
+  }else{
+    L.push(' barra: no se pudo medir');
+  }
+  return L.join('\n');
+}
 function copiarInforme(){
   var e = [];
   try{ e = JSON.parse(localStorage.getItem(CAJA)||'[]'); }catch(_){}
@@ -2633,6 +2675,7 @@ function copiarInforme(){
     '\nPersona: '+yo+'\nNavegador: '+navigator.userAgent+
     '\nInstalada: '+(window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches)+
     '\nCanciones: '+CANCIONES.length+'\nOnline: '+navigator.onLine+
+    '\n\nMEDIDAS DE LA PANTALLA:\n' + medidasPantalla() +
     '\n\nÚLTIMOS ERRORES:\n' + (e.length ? e.slice(0,20).map(function(x){
       return x.f+' · '+x.o+' · '+x.m; }).join('\n') : '(ninguno)');
   if(navigator.clipboard && navigator.clipboard.writeText){

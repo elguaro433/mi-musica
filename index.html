@@ -38,7 +38,11 @@
      se vuelvan brillantes con el marco. */
   --bg:#0b0913; --bg2:#120e1e; --card:#1e1736; --card2:#271e47; --line:#6b5a9c;
   --pista:#352b55;
-  --ink:#f6f2ff; --muted:#bcb2d6; --dim:#9a90b8;
+  --ink:#f6f2ff; --muted:#cdc5e2; --dim:#aea4c9;
+  /* La escala de la letra. 1 era el tamano de la v1.5; Emmanuel dijo que
+     todo se veia pequeno, asi que el normal ahora es 1.12. El interruptor
+     de Ajustes mueve esto y no hay que tocar ni un font-size mas. */
+  --esc:1.12;
   --purple:#a970ff; --pink:#ff5fa6; --cyan:#43e0d0; --gold:#ffcf5c; --red:#ff6b6b;
   --font-d:'Sora',system-ui,-apple-system,sans-serif;
   --font-b:'DM Sans',system-ui,-apple-system,sans-serif;
@@ -80,19 +84,19 @@ button{font-family:inherit;color:inherit}
 #v-quien{padding:0}
 #v-quien.on{display:flex;flex-direction:column;justify-content:center;align-items:center;
   padding:calc(var(--sat) + 24px) calc(28px + var(--sar)) calc(var(--sab) + 24px) calc(28px + var(--sal))}
-.q-logo{font-size:46px}
-.q-title{font-family:var(--font-d);font-weight:700;font-size:30px;letter-spacing:-.02em;margin-top:6px}
-.q-sub{color:var(--muted);font-size:14px;text-align:center;margin:6px 0 26px;max-width:24ch}
+.q-logo{font-size:calc(46px * var(--esc))}
+.q-title{font-family:var(--font-d);font-weight:700;font-size:calc(30px * var(--esc));letter-spacing:-.02em;margin-top:6px}
+.q-sub{color:var(--muted);font-size:calc(14px * var(--esc));text-align:center;margin:6px 0 26px;max-width:24ch}
 .q-btn{width:100%;max-width:340px;display:flex;align-items:center;gap:14px;background:var(--card);
   border:1px solid var(--line);border-radius:17px;padding:15px 17px;margin-bottom:12px;cursor:pointer;
-  font-size:16px;text-align:left}
+  font-size:calc(16px * var(--esc));text-align:left}
 .q-btn:active{background:var(--card2);border-color:var(--purple)}
 .q-btn .av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
-  font-family:var(--font-d);font-weight:700;font-size:18px;color:#120e1e;flex:0 0 auto}
-.q-btn small{display:block;color:var(--dim);font-size:12px;font-weight:400}
+  font-family:var(--font-d);font-weight:700;font-size:calc(18px * var(--esc));color:#120e1e;flex:0 0 auto}
+.q-btn small{display:block;color:var(--dim);font-size:calc(12px * var(--esc));font-weight:400}
 .av-e{background:linear-gradient(135deg,#a970ff,#7b4ddb)}
 .av-l{background:linear-gradient(135deg,#ff5fa6,#ff8fc4)}
-.q-foot{margin-top:16px;font-size:11.5px;color:var(--dim);text-align:center;line-height:1.55}
+.q-foot{margin-top:16px;font-size:calc(11.5px * var(--esc));color:var(--dim);text-align:center;line-height:1.55}
 
 /* ---------- cabeceras ---------- */
 /* La cabecera pintaba una banda opaca del ancho del contenido ENCIMA del
@@ -115,96 +119,96 @@ button{font-family:inherit;color:inherit}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .vhead::before{background:var(--bg)}
 }
-.vhead h2{font-family:var(--font-d);font-weight:700;font-size:26px;margin:0;letter-spacing:-.02em;line-height:1.15}
-.vhead .sal{font-size:16.5px;color:var(--ink);font-weight:600;margin-bottom:2px;letter-spacing:-.01em}
+.vhead h2{font-family:var(--font-d);font-weight:700;font-size:calc(27px * var(--esc));margin:0;letter-spacing:-.02em;line-height:1.15}
+.vhead .sal{font-size:calc(16.5px * var(--esc));color:var(--ink);font-weight:600;margin-bottom:2px;letter-spacing:-.01em}
 .gear{width:44px;height:44px;flex:0 0 auto;border-radius:50%;background:var(--card);
-  border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;font-size:17px}
-.shelf-t{font-family:var(--font-d);font-weight:600;font-size:15.5px;margin:22px 0 10px;
+  border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;font-size:calc(17px * var(--esc))}
+.shelf-t{font-family:var(--font-d);font-weight:600;font-size:calc(16.5px * var(--esc));margin:24px 0 11px;
   display:flex;align-items:center;gap:8px}
 
 /* ---------- filas ---------- */
-.row{display:flex;align-items:center;gap:12px;padding:8px 0;cursor:pointer;border-radius:11px}
+.row{display:flex;align-items:center;gap:13px;padding:10px 0;cursor:pointer;border-radius:11px}
 .row:active{background:rgba(169,112,255,.1)}
 .row.sonando .r-t{color:var(--purple)}
 .row.falta{opacity:.45}
-.art{width:50px;height:50px;border-radius:10px;flex:0 0 auto;display:grid;place-items:center;
-  font-size:18px;overflow:hidden;background-size:cover;background-position:center}
+.art{width:54px;height:54px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
+  font-size:calc(18px * var(--esc));overflow:hidden;background-size:cover;background-position:center}
 .art img{width:100%;height:100%;object-fit:cover;display:block}
 .art img.logo{object-fit:contain;padding:3px}
 .r-x{min-width:0;flex:1;overflow:hidden}
-.r-t{display:block;font-weight:500;font-size:15px;white-space:nowrap;overflow:hidden;
+.r-t{display:block;font-weight:500;font-size:calc(15px * var(--esc));white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;font-family:var(--font-d)}
-.r-s{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+.r-s{font-size:calc(12.5px * var(--esc));color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   display:flex;align-items:center;gap:5px;min-width:0}
-.badge{font-size:11px;flex:0 0 auto}
-.cal{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--dim);
+.badge{font-size:calc(11px * var(--esc));flex:0 0 auto}
+.cal{font-size:calc(11px * var(--esc));font-weight:700;letter-spacing:.04em;color:var(--dim);
   border:1px solid var(--line);border-radius:4px;padding:0 4px;flex:0 0 auto}
-.est{font-size:11px;color:var(--cyan);flex:0 0 auto;letter-spacing:.04em}
+.est{font-size:calc(11px * var(--esc));color:var(--cyan);flex:0 0 auto;letter-spacing:.04em}
 /* Dentro de .r-s (que es flex) un texto suelto NO se encoge, asi que empujaba
    la calidad y las estrellas fuera de la pantalla. Esto es lo que cede. */
 .enc{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.r-a{flex:0 0 auto;color:var(--dim);font-size:17px;padding:13px 12px;margin:-13px -7px}
+.r-a{flex:0 0 auto;color:var(--dim);font-size:calc(17px * var(--esc));padding:13px 12px;margin:-13px -7px}
 .r-a.on{color:var(--pink)}
 .hscroll{display:flex;gap:13px;overflow-x:auto;scrollbar-width:none;
   margin-left:calc(-1 * (var(--gutter) + var(--sal)));margin-right:calc(-1 * (var(--gutter) + var(--sar)));
   padding:0 calc(var(--gutter) + var(--sar)) 4px calc(var(--gutter) + var(--sal))}
 .hscroll::-webkit-scrollbar{display:none}
 .tile{width:124px;flex:0 0 auto;cursor:pointer}
-.tile .art{width:124px;height:124px;font-size:38px;border-radius:13px}
-.tile .t{display:block;font-size:13px;font-weight:500;margin-top:8px;white-space:nowrap;
+.tile .art{width:124px;height:124px;font-size:calc(38px * var(--esc));border-radius:13px}
+.tile .t{display:block;font-size:calc(13px * var(--esc));font-weight:500;margin-top:8px;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis;font-family:var(--font-d)}
-.tile .s{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;
+.tile .s{display:block;font-size:calc(11.5px * var(--esc));color:var(--muted);white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis}
 
 /* ---------- pestañas y campos ---------- */
 .tabs{display:flex;gap:8px;margin:2px 0 14px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:0 0 auto;padding:8px 15px;border-radius:30px;background:var(--card);
-  border:1px solid var(--line);font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);
+  border:1px solid var(--line);font-size:calc(13px * var(--esc));font-weight:500;cursor:pointer;color:var(--muted);
   min-height:44px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tabs.fijas{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;overflow:visible}
-.tabs.fijas .tab{padding:8px 2px;font-size:11.5px;text-align:center;min-width:0;letter-spacing:-.01em}
-@media (min-width:420px){ .tabs.fijas .tab{font-size:12.5px;padding:8px 6px} }
+.tabs.fijas .tab{padding:9px 2px;font-size:calc(11.5px * min(var(--esc), 1.14));text-align:center;min-width:0;letter-spacing:-.01em}
+@media (min-width:420px){ .tabs.fijas .tab{font-size:calc(12.5px * min(var(--esc), 1.14));padding:9px 6px} }
 .tab.on{background:var(--purple);border-color:var(--purple);color:#120e1e;font-weight:700}
 .campo{width:100%;background:var(--card);border:1px solid var(--line);border-radius:13px;
-  padding:12px 14px;color:var(--ink);font-family:inherit;font-size:16px;margin-bottom:8px}
+  padding:12px 14px;color:var(--ink);font-family:inherit;font-size:calc(16px * var(--esc));margin-bottom:8px}
 .campo::placeholder{color:var(--dim)}
 .campo:focus{outline:none;border-color:var(--purple)}
-.city{font-family:var(--font-d);font-weight:600;font-size:13px;color:var(--purple);
+.city{font-family:var(--font-d);font-weight:600;font-size:calc(13px * var(--esc));color:var(--purple);
   letter-spacing:.09em;text-transform:uppercase;margin:19px 0 7px;display:flex;align-items:center;gap:7px}
 .note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);
-  border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--muted);margin:14px 0;line-height:1.55}
+  border-radius:12px;padding:12px 14px;font-size:calc(12.5px * var(--esc));color:var(--muted);margin:14px 0;line-height:1.55}
 .note b{color:var(--ink);font-weight:500}
 .note.malo{border-left-color:var(--red)}
 .note.bueno{border-left-color:var(--cyan)}
 .btn{width:100%;background:var(--card2);border:1px dashed var(--line);border-radius:14px;
-  padding:14px;color:var(--muted);font-size:14.5px;cursor:pointer;margin-top:16px;font-weight:500}
+  padding:14px;color:var(--muted);font-size:calc(14.5px * var(--esc));cursor:pointer;margin-top:16px;font-weight:500}
 .btn:active{border-color:var(--purple);color:var(--ink)}
 .btn.solido{background:var(--purple);border:0;color:#120e1e;font-weight:700}
 .btn.suave{background:linear-gradient(120deg,#2a1f47,#3a1730);border:1px solid var(--line);color:var(--ink)}
-.vacio{text-align:center;color:var(--dim);font-size:13.5px;padding:34px 14px;line-height:1.6}
-.vacio .em{font-size:36px;display:block;margin-bottom:10px}
+.vacio{text-align:center;color:var(--dim);font-size:calc(13.5px * var(--esc));padding:34px 14px;line-height:1.6}
+.vacio .em{font-size:calc(36px * var(--esc));display:block;margin-bottom:10px}
 
 /* ---------- tarjetas de ajustes ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
-.card h3{font-family:var(--font-d);font-weight:600;font-size:12.5px;margin:0 0 12px;color:var(--muted);
+.card h3{font-family:var(--font-d);font-weight:600;font-size:calc(12.5px * var(--esc));margin:0 0 12px;color:var(--muted);
   letter-spacing:.07em;text-transform:uppercase}
 .kv{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;
-  font-size:14.5px;border-bottom:1px solid rgba(44,35,66,.55)}
+  font-size:calc(14.5px * var(--esc));border-bottom:1px solid rgba(44,35,66,.55)}
 .kv:last-child{border-bottom:0}
-.kv .v{color:var(--muted);font-size:13px;text-align:right}
+.kv .v{color:var(--muted);font-size:calc(13px * var(--esc));text-align:right}
 .barra{height:8px;border-radius:5px;background:var(--pista);overflow:hidden;display:flex;margin:10px 0 8px}
 .barra i{display:block;height:100%}
-.leg{display:flex;gap:15px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.leg{display:flex;gap:15px;font-size:calc(12px * var(--esc));color:var(--muted);flex-wrap:wrap}
 .leg b{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-.guia p{margin:0 0 10px;font-size:13.5px;color:var(--muted);line-height:1.6}
+.guia p{margin:0 0 10px;font-size:calc(13.5px * var(--esc));color:var(--muted);line-height:1.6}
 .guia p:last-child{margin-bottom:0}
 .guia b{color:var(--ink);font-weight:500}
 .guia .ojo{background:rgba(11,9,19,.5);border-left:2px solid var(--gold);border-radius:8px;
-  padding:9px 11px;font-size:12.5px;margin-top:12px}
-.sign{font-family:var(--font-s);font-size:27px;text-align:right;margin-top:8px}
-.credito{font-size:12px;color:var(--dim);line-height:1.65}
+  padding:9px 11px;font-size:calc(12.5px * var(--esc));margin-top:12px}
+.sign{font-family:var(--font-s);font-size:calc(27px * var(--esc));text-align:right;margin-top:8px}
+.credito{font-size:calc(12px * var(--esc));color:var(--dim);line-height:1.65}
 .credito b{color:var(--muted);font-weight:500}
 .sw{position:relative;width:46px;height:27px;border-radius:20px;background:var(--pista);
   flex:0 0 auto;cursor:pointer;transition:.18s}
@@ -220,15 +224,15 @@ button{font-family:inherit;color:inherit}
   border:1px solid var(--line);border-radius:15px;padding:9px 11px;display:none;
   align-items:center;gap:11px;z-index:40;cursor:pointer}
 #mini.on{display:flex}
-#mini .art{width:40px;height:40px;border-radius:9px;font-size:16px}
-#mini .r-t{font-size:13.5px}
-#mini .r-s{font-size:12px}
+#mini .art{width:40px;height:40px;border-radius:9px;font-size:calc(16px * var(--esc))}
+#mini .r-t{font-size:calc(13.5px * var(--esc))}
+#mini .r-s{font-size:calc(12px * var(--esc))}
 .pp{width:36px;height:36px;flex:0 0 auto;border-radius:50%;background:var(--purple);color:#120e1e;
-  display:grid;place-items:center;font-size:14px;border:0;cursor:pointer}
+  display:grid;place-items:center;font-size:calc(14px * var(--esc));border:0;cursor:pointer}
 #mini .prog{position:absolute;left:11px;right:11px;bottom:4px;height:2px;background:var(--pista);
   border-radius:2px;overflow:hidden}
 #mini .prog i{display:block;height:100%;background:var(--purple);width:0}
-.live{font-size:9px;font-weight:700;color:#120e1e;background:var(--pink);border-radius:4px;
+.live{font-size:calc(9px * var(--esc));font-weight:700;color:#120e1e;background:var(--pink);border-radius:4px;
   padding:1px 5px;letter-spacing:.05em;flex:0 0 auto}
 .live.malo{background:var(--gold)}
 
@@ -241,16 +245,16 @@ button{font-family:inherit;color:inherit}
   padding:8px calc(var(--gutter) + var(--sar)) calc(var(--sab) + 16px) calc(var(--gutter) + var(--sal))}
 #hoja .caja::-webkit-scrollbar{display:none}
 #hoja .asa{width:38px;height:4px;border-radius:3px;background:var(--line);margin:6px auto 14px}
-#hoja h4{margin:0 0 4px;font-family:var(--font-d);font-size:17px;font-weight:700;
+#hoja h4{margin:0 0 4px;font-family:var(--font-d);font-size:calc(17px * var(--esc));font-weight:700;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#hoja .sub{color:var(--muted);font-size:12.5px;margin-bottom:13px;line-height:1.45}
+#hoja .sub{color:var(--muted);font-size:calc(12.5px * var(--esc));margin-bottom:13px;line-height:1.45}
 .opc{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:9px 12px;
   background:var(--card2);border:1px solid var(--line);border-radius:13px;margin-bottom:8px;
-  font-size:14.5px;color:var(--ink);cursor:pointer;text-align:left;font-weight:500}
-.opc .em{font-size:18px;flex:0 0 auto;width:24px;text-align:center}
+  font-size:calc(14.5px * var(--esc));color:var(--ink);cursor:pointer;text-align:left;font-weight:500}
+.opc .em{font-size:calc(18px * var(--esc));flex:0 0 auto;width:24px;text-align:center}
 .opc .tx{min-width:0;flex:1}
 .opc .tx b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
-.opc small{display:block;color:var(--dim);font-size:11.5px;font-weight:400;
+.opc small{display:block;color:var(--dim);font-size:calc(11.5px * var(--esc));font-weight:400;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .opc:active{background:rgba(169,112,255,.18)}
 .opc[disabled]{opacity:.45}
@@ -266,9 +270,9 @@ button{font-family:inherit;color:inherit}
    flex y descolocar los botones. (el hueco negro del 29/09/2026) */
 #barra::after{content:'';position:absolute;top:100%;left:0;right:0;height:180px;
   background:rgba(18,14,30,.96);pointer-events:none}
-#barra button{flex:1;background:none;border:0;color:var(--dim);font-size:10.5px;display:flex;
+#barra button{flex:1;background:none;border:0;color:var(--dim);font-size:calc(10.5px * var(--esc));display:flex;
   flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-weight:500}
-#barra button .i{font-size:20px;line-height:1}
+#barra button .i{font-size:calc(20px * var(--esc));line-height:1}
 #barra button.on{color:var(--purple)}
 
 /* ---------- sonando ahora ---------- */
@@ -277,34 +281,34 @@ button{font-family:inherit;color:inherit}
   overflow-y:auto;scrollbar-width:none}
 #now::-webkit-scrollbar{display:none}
 #now.on{display:flex}
-.now-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;
+.now-top{display:flex;justify-content:space-between;align-items:center;font-size:calc(11px * var(--esc));
   color:var(--dim);letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px;flex:0 0 auto}
-.now-top span{cursor:pointer;font-size:20px;color:var(--muted)}
-#n-art{width:100%;height:auto;aspect-ratio:1;border-radius:20px;margin-bottom:22px;font-size:72px;
+.now-top span{cursor:pointer;font-size:calc(20px * var(--esc));color:var(--muted)}
+#n-art{width:100%;height:auto;aspect-ratio:1;border-radius:20px;margin-bottom:22px;font-size:calc(72px * var(--esc));
   box-shadow:0 20px 50px rgba(0,0,0,.55);flex:0 0 auto;max-height:46vh}
-#now h3{font-family:var(--font-d);font-weight:700;font-size:21px;margin:0 0 4px;
+#now h3{font-family:var(--font-d);font-weight:700;font-size:calc(21px * var(--esc));margin:0 0 4px;
   letter-spacing:-.02em;text-align:center}
-#n-s{color:var(--muted);font-size:14px;text-align:center;min-height:21px}
-#n-cal{color:var(--cyan);font-size:10.5px;text-align:center;letter-spacing:.11em;
+#n-s{color:var(--muted);font-size:calc(14px * var(--esc));text-align:center;min-height:21px}
+#n-cal{color:var(--cyan);font-size:calc(10.5px * var(--esc));text-align:center;letter-spacing:.11em;
   text-transform:uppercase;font-weight:700;margin:6px 0 16px;min-height:13px}
 .seek{height:5px;background:#3a2f57;border-radius:3px;overflow:hidden;margin-bottom:7px;cursor:pointer}
 .seek i{display:block;height:100%;background:linear-gradient(90deg,#a970ff,#ff5fa6);width:0}
-.times{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-bottom:20px}
+.times{display:flex;justify-content:space-between;font-size:calc(11px * var(--esc));color:var(--dim);margin-bottom:20px}
 .ctrls{display:flex;align-items:center;justify-content:center;gap:26px;margin-bottom:20px}
-.ctrls button{background:none;border:0;font-size:22px;cursor:pointer;padding:4px;flex:0 0 auto}
-.ctrls .sm{font-size:16px;color:var(--dim)}
+.ctrls button{background:none;border:0;font-size:calc(22px * var(--esc));cursor:pointer;padding:4px;flex:0 0 auto}
+.ctrls .sm{font-size:calc(16px * var(--esc));color:var(--dim)}
 .ctrls .sm.on{color:var(--purple)}
 .ctrls .big{width:62px;height:62px;padding:0;border-radius:50%;background:var(--purple);color:#120e1e;
-  display:grid;place-items:center;font-size:23px}
+  display:grid;place-items:center;font-size:calc(23px * var(--esc))}
 .cola{margin-top:auto;padding-top:14px}
-.cola h4{font-family:var(--font-d);font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+.cola h4{font-family:var(--font-d);font-size:calc(11px * var(--esc));letter-spacing:.13em;text-transform:uppercase;
   color:var(--dim);margin:0 0 8px}
 
 /* ---------- avisos flotantes ---------- */
 #toast{position:fixed;left:calc(16px + var(--sal));right:calc(16px + var(--sar));bottom:calc(var(--barra) + 74px);z-index:90;
   display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast{background:rgba(31,23,51,.97);border:1px solid var(--line);border-left:3px solid var(--purple);
-  border-radius:12px;padding:11px 14px;font-size:13px;color:var(--ink);
+  border-radius:12px;padding:11px 14px;font-size:calc(13px * var(--esc));color:var(--ink);
   box-shadow:0 10px 30px rgba(0,0,0,.5);animation:sube .25s}
 .toast.malo{border-left-color:var(--red)}
 .toast.bueno{border-left-color:var(--cyan)}
@@ -315,40 +319,40 @@ button{font-family:inherit;color:inherit}
   justify-content:center;align-items:center;padding:calc(var(--sat) + 30px) 28px calc(var(--sab) + 30px);text-align:center}
 #seguro.on{display:flex}
 #seguro{padding-left:calc(28px + var(--sal));padding-right:calc(28px + var(--sar))}
-#seguro .em{font-size:48px;margin-bottom:8px}
-#seguro h2{font-family:var(--font-d);font-size:23px;margin:0 0 8px;letter-spacing:-.02em}
-#seguro p{color:var(--muted);font-size:14px;max-width:32ch;margin:0 0 24px;line-height:1.6}
+#seguro .em{font-size:calc(48px * var(--esc));margin-bottom:8px}
+#seguro h2{font-family:var(--font-d);font-size:calc(23px * var(--esc));margin:0 0 8px;letter-spacing:-.02em}
+#seguro p{color:var(--muted);font-size:calc(14px * var(--esc));max-width:32ch;margin:0 0 24px;line-height:1.6}
 #seguro .btn{max-width:320px}
 #seguro pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;
-  font-size:10px;color:var(--dim);max-width:100%;max-height:110px;overflow:auto;text-align:left;
+  font-size:calc(10px * var(--esc));color:var(--dim);max-width:100%;max-height:110px;overflow:auto;text-align:left;
   white-space:pre-wrap;word-break:break-word;margin-top:18px}
 
 /* ---------- modo coche: todo el doble de grande ---------- */
 body.coche #now{padding-left:calc(16px + var(--sal));padding-right:calc(16px + var(--sar))}
 body.coche #n-art{max-height:24vh;margin-bottom:14px}
-body.coche #now h3{font-size:30px;line-height:1.15}
-body.coche #n-s{font-size:18px}
+body.coche #now h3{font-size:calc(30px * var(--esc));line-height:1.15}
+body.coche #n-s{font-size:calc(18px * var(--esc))}
 body.coche #n-cal{display:none}
-body.coche .times{font-size:15px;margin-bottom:22px}
+body.coche .times{font-size:calc(15px * var(--esc));margin-bottom:22px}
 body.coche .seek{height:9px}
 /* Conduciendo solo hacen falta tres cosas: atras, play, adelante.
    Aleatorio y repetir se ajustan antes de arrancar, no al volante. */
 body.coche .ctrls{gap:26px;margin-bottom:24px}
 body.coche .ctrls .sm{display:none}
-body.coche .ctrls button{font-size:46px;padding:10px}
-body.coche .ctrls .big{width:112px;height:112px;font-size:44px;padding:0;flex:0 0 auto}
+body.coche .ctrls button{font-size:calc(46px * var(--esc));padding:10px}
+body.coche .ctrls .big{width:112px;height:112px;font-size:calc(44px * var(--esc));padding:0;flex:0 0 auto}
 body.coche .cola{display:none}
-body.coche .now-top span{font-size:26px}
+body.coche .now-top span{font-size:calc(26px * var(--esc))}
 #coche-salir{display:none;width:100%;background:var(--card2);border:1px solid var(--line);
-  border-radius:16px;padding:16px;color:var(--muted);font-size:17px;cursor:pointer;margin-top:auto}
+  border-radius:16px;padding:16px;color:var(--muted);font-size:calc(17px * var(--esc));cursor:pointer;margin-top:auto}
 body.coche #coche-salir{display:block}
 
 /* ---------- carga ---------- */
 #carga{position:fixed;inset:0;background:var(--bg);z-index:110;display:flex;
   flex-direction:column;justify-content:center;align-items:center;gap:14px}
-#carga .em{font-size:44px;animation:late 1.4s ease-in-out infinite}
+#carga .em{font-size:calc(44px * var(--esc));animation:late 1.4s ease-in-out infinite}
 @keyframes late{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
-#carga div{color:var(--dim);font-size:13px}
+#carga div{color:var(--dim);font-size:calc(13px * var(--esc))}
 .oculto{display:none !important}
 </style>
 </head>
@@ -417,7 +421,7 @@ body.coche #coche-salir{display:block}
 
   <!-- Sonando ahora -->
   <div id="now">
-    <div class="now-top"><span id="now-cerrar">⌄</span><span style="letter-spacing:.14em;font-size:11px;cursor:default">SONANDO AHORA</span><span style="display:flex;gap:16px;align-items:center"><span id="now-mas">⋯</span><span id="now-fav">♡</span></span></div>
+    <div class="now-top"><span id="now-cerrar">⌄</span><span style="letter-spacing:.14em;font-size:calc(11px * var(--esc));cursor:default">SONANDO AHORA</span><span style="display:flex;gap:16px;align-items:center"><span id="now-mas">⋯</span><span id="now-fav">♡</span></span></div>
     <div class="art" id="n-art"></div>
     <h3 id="n-t">—</h3>
     <div id="n-s">—</div>
@@ -477,7 +481,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.5.2';
+var APP_VERSION = '1.6.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -968,7 +972,7 @@ function bloqueMundo(){
            rbResultados.map(function(e, i){ return filaEmisoraMundo(e, i); }).join('');
   return h + '<div class="vacio"><span class="em">🌍</span>' +
     'Escribe arriba y pulsa <b>buscar</b> para rebuscar entre miles de emisoras.<br>' +
-    '<span style="font-size:12.5px">Prueba con un estilo o con una ciudad.</span></div>' +
+    '<span style="font-size:calc(12.5px * var(--esc))">Prueba con un estilo o con una ciudad.</span></div>' +
     '<div class="hscroll">' +
     ['reggaeton','salsa','bachata','vallenato','merengue','Medellin','Santo Domingo','Caracas']
       .map(function(t){ return '<button class="tab" data-rb-sug="' + esc(t) + '">' + esc(t) + '</button>'; })
@@ -1494,8 +1498,8 @@ function pintarCola(){
   }
   c.innerHTML = '<h4>A continuación</h4>' + sig.map(function(s){
     return '<div class="row" style="padding:5px 0"><span class="art" style="width:34px;height:34px;border-radius:7px;background:'+tono(s.titulo+s.artista)+'"></span>'+
-      '<span class="r-x"><span class="r-t" style="font-size:13px">'+esc(s.titulo)+'</span>'+
-      '<span class="r-s" style="font-size:11px">'+esc(s.artista)+'</span></span></div>';
+      '<span class="r-x"><span class="r-t" style="font-size:calc(13px * var(--esc))">'+esc(s.titulo)+'</span>'+
+      '<span class="r-s" style="font-size:calc(11px * var(--esc))">'+esc(s.artista)+'</span></span></div>';
   }).join('');
 }
 
@@ -1796,7 +1800,7 @@ function pintarYouTube(){
     h += '<div class="vacio"><span class="em">📺</span>Sin resultados para «'+esc(ytTexto)+'».</div>';
   }else if(!ytVerId){
     h += '<div class="vacio"><span class="em">📺</span>Escribe arriba lo que quieras ver<br>y pulsa buscar.<br>'+
-         '<span style="color:var(--dim);font-size:12px">También puedes pegar un enlace de YouTube.</span></div>';
+         '<span style="color:var(--dim);font-size:calc(12px * var(--esc))">También puedes pegar un enlace de YouTube.</span></div>';
   }
   h += '<div class="note">El vídeo <b>se para al bloquear el móvil o salir de la app</b>. Lo bloquean Apple y YouTube, no hay forma de evitarlo desde una web.<br>Para el coche: tu música descargada o la radio.</div>';
   if(VIDEOS.length){
@@ -1930,7 +1934,7 @@ function pintarBiblio(){
   if(!CANCIONES.length){
     C.innerHTML = '<div class="vacio"><span class="em">➕</span>Tu biblioteca está vacía.<br>'+
       'Toca <b>Añadir música</b> y elige tus MP3<br>desde <b>Archivos</b> o <b>iCloud Drive</b>.<br><br>'+
-      '<span style="font-size:12.5px">¿No sabes dónde guardarlos?<br>Mira <b>⚙️ Ajustes → Dónde guardar tus MP3</b>.</span></div>';
+      '<span style="font-size:calc(12.5px * var(--esc))">¿No sabes dónde guardarlos?<br>Mira <b>⚙️ Ajustes → Dónde guardar tus MP3</b>.</span></div>';
     return;
   }
   if(filtro === 'canciones'){
@@ -1950,7 +1954,7 @@ function pintarBiblio(){
         '<button class="btn suave" data-cerrar-lista="1" style="margin-bottom:12px">←&nbsp; Volver a las listas</button>'+
         '<div class="card" style="display:flex;align-items:center;gap:12px">'+
           '<span class="art" style="background:'+tono(abierta.nombre)+'">☰</span>'+
-          '<span class="r-x"><span class="r-t" style="font-size:16px">'+esc(abierta.nombre)+'</span>'+
+          '<span class="r-x"><span class="r-t" style="font-size:calc(16px * var(--esc))">'+esc(abierta.nombre)+'</span>'+
           '<span class="r-s">'+dentro.length+(dentro.length===1?' canción':' canciones')+'</span></span></div>'+
         (dentro.length ? '<button class="btn solido" data-tocar-lista="'+esc(abierta.id)+'">▶&nbsp; Reproducir la lista</button>' : '')+
         '<button class="btn" data-anadir-a="'+esc(abierta.id)+'">➕&nbsp; Añadir canciones</button>'+
@@ -2016,8 +2020,8 @@ async function pintarAjustes(){
     '<div class="kv"><span>Barra de abajo</span><span class="v">' + medidaBarra() + '</span></div>'+
     '<div class="kv" style="border:0"><span><b>Hueco debajo de la barra</b></span>' +
       '<span class="v" style="color:' + (huecoAbajo() > 1 ? 'var(--red)' : 'var(--cyan)') +
-      ';font-weight:700;font-size:15px">' + huecoAbajo() + ' px</span></div>'+
-    '<div class="kv" style="border:0"><span style="font-size:11.5px">Si ves un hueco negro abajo y aquí pone 0, '+
+      ';font-weight:700;font-size:calc(15px * var(--esc))">' + huecoAbajo() + ' px</span></div>'+
+    '<div class="kv" style="border:0"><span style="font-size:calc(11.5px * var(--esc))">Si ves un hueco negro abajo y aquí pone 0, '+
       'ese hueco lo pinta el iPhone por fuera de la app. Házle una foto a esta tarjeta y mándala.</span></div>'+
   '</div>'+
 
@@ -2048,17 +2052,25 @@ async function pintarAjustes(){
     '</div></div>'+
 
   '<div class="card"><h3>Copia de seguridad</h3>'+
-    '<div class="kv"><span>Guarda tus favoritos, listas y emisoras.<br><span style="color:var(--dim);font-size:12px">No guarda los MP3: esos son tuyos, tenlos en el PC.</span></span></div>'+
+    '<div class="kv"><span>Guarda tus favoritos, listas y emisoras.<br><span style="color:var(--dim);font-size:calc(12px * var(--esc))">No guarda los MP3: esos son tuyos, tenlos en el PC.</span></span></div>'+
     '<button class="btn suave" id="a-exportar" style="margin-top:6px">💾&nbsp; Guardar copia</button>'+
     '<button class="btn" id="a-importar">📂&nbsp; Restaurar una copia</button>'+
     '<input type="file" id="fcopia" accept="application/json,.json" class="oculto"></div>'+
 
+  '<div class="card"><h3>Tama\u00f1o de la letra</h3>'+
+    '<div class="kv"><span>Para leerla de un vistazo, sobre todo en el coche.</span></div>'+
+    '<div class="tabs fijas" style="grid-template-columns:repeat(3,1fr);margin:8px 0 0">'+
+      LETRAS.map(function(L){
+        return '<button class="tab'+(((AJ.letra||'normal')===L[0])?' on':'')+'" data-letra="'+L[0]+'">'+L[2]+'</button>';
+      }).join('')+
+    '</div></div>'+
+
   '<div class="card"><h3>Coche y auriculares</h3>'+
-    '<div class="kv"><span>Modo coche<br><span style="color:var(--dim);font-size:12px">Botones enormes para no mirar la pantalla</span></span>'+
+    '<div class="kv"><span>Modo coche<br><span style="color:var(--dim);font-size:calc(12px * var(--esc))">Botones enormes para no mirar la pantalla</span></span>'+
       '<span class="sw'+(enCoche?' on':'')+'" data-aj="coche"></span></div>'+
-    '<div class="kv"><span>Mantener la pantalla encendida<br><span style="color:var(--dim);font-size:12px">Con el móvil en el soporte. Gasta más batería.</span></span>'+
+    '<div class="kv"><span>Mantener la pantalla encendida<br><span style="color:var(--dim);font-size:calc(12px * var(--esc))">Con el móvil en el soporte. Gasta más batería.</span></span>'+
       '<span class="sw'+(AJ.pantalla?' on':'')+'" data-aj="pantalla"></span></div>'+
-    '<div class="kv"><span>Volver sola tras una llamada<br><span style="color:var(--dim);font-size:12px">Siempre activo</span></span>'+
+    '<div class="kv"><span>Volver sola tras una llamada<br><span style="color:var(--dim);font-size:calc(12px * var(--esc))">Siempre activo</span></span>'+
       '<span class="sw on" style="opacity:.55"></span></div></div>'+
 
   '<div class="card"><h3>Temporizador para dormir</h3>'+
@@ -2449,6 +2461,12 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#a-exportar')){ await exportarCopia(); return; }
   if(t.closest('#a-importar')){ $('fcopia').click(); return; }
   if(t.closest('#a-diag')){ await diagnostico(); return; }
+  if((el = t.closest('[data-letra]'))){
+    AJ.letra = el.dataset.letra; guardarAjustes(); ponerEscala(AJ.letra);
+    pintarAjustes();
+    toast('Letra ' + el.textContent.trim().toLowerCase() + '.', 'bueno', 1800);
+    return;
+  }
   if(t.closest('#a-informe')){ copiarInforme(); return; }
   if(t.closest('#a-reparar')){ if(confirm('Se limpiará la app y se recargará.\n\nTu música NO se borra.')) reparar(); return; }
 
@@ -2768,6 +2786,17 @@ function guardarAjustes(){
 }
 function cargarAjustes(){
   try{ AJ = JSON.parse(localStorage.getItem('mm_ajustes') || '{}') || {}; }catch(_){ AJ = {}; }
+  ponerEscala(AJ.letra);
+}
+/* El tamano de toda la letra de la app. Un solo numero: cada font-size del
+   CSS es calc(Npx * var(--esc)), asi que esto lo mueve todo a la vez. */
+var LETRAS = [['normal', 1.12, 'Normal'],
+              ['grande', 1.26, 'Grande'],
+              ['enorme', 1.42, 'Muy grande']];
+function ponerEscala(cual){
+  var e = 1.12;
+  for(var i=0;i<LETRAS.length;i++) if(LETRAS[i][0] === cual) e = LETRAS[i][1];
+  try{ document.documentElement.style.setProperty('--esc', e); }catch(_){}
 }
 
 /* ═════════════════ ARRANQUE ═════════════════════════════════════ */

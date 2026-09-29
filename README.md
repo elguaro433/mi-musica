@@ -131,6 +131,23 @@ temporizador para dormir, copia de seguridad, mantener la pantalla encendida, y
 controles en la pantalla de bloqueo y en el coche (Media Session).
 
 
+## El tamaño de la letra lo eliges tú (v1.6.0)
+
+⚙️ Ajustes → **Tamaño de la letra**: Normal, Grande o Muy grande. No es un
+apaño en cuatro sitios: **los 88 `font-size` de la app son
+`calc(Npx * var(--esc))`**, así que un solo número los mueve todos a la vez y
+nada se descoloca. El normal es `1.12` (un 12 % por encima de la v1.5), Grande
+`1.26` y Muy grande `1.42`. Se guarda en `mm_ajustes.letra` y se aplica en
+`cargarAjustes()`, antes de pintar nada.
+
+Las cuatro pestañas de Buscar se reparten el ancho a partes iguales, así que
+su letra crece solo hasta `1.14`: pasado eso se recortaban a "Mi mú…".
+
+Comprobado a 393×852 y 440×956 en los tres tamaños: sin desbordes, sin texto
+cortado sin querer y sin zonas de toque por debajo de 32 px.
+
+---
+
 ## Que el iPhone vaya en armonía con la app
 
 Tres cosas que no están en el código pero cambian mucho la experiencia:

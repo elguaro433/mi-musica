@@ -72,7 +72,35 @@ y Bandcamp tiene poco reggaetón comercial.
   9 pantallas y mide desbordes, letra pequeña y zonas de toque. Si tocas CSS,
   vuelve a pasarlo a 393×852 y 440×956.
 
-## Estado — 29/09/2026 (v1.5.0)
+## ⚠️ SIN RESOLVER: el hueco negro de abajo en su iPhone
+
+**El fallo que más le molesta y que sigue vivo.** En su iPhone 14 Pro queda
+una franja negra debajo de la barra de Inicio/Buscar/Biblioteca. **No se
+reproduce en el ordenador**: ahí la barra llega al borde y el hueco mide 0.
+
+Descartado, comprobado:
+- No es el colchón de la barra (se bajó de 34 a 16 px y el hueco siguió igual).
+- No es que falte fondo: la v1.5.1 alarga el fondo de la barra 180 px hacia
+  abajo con `#barra::after` y **el hueco siguió exactamente igual**. Eso
+  demuestra que **está fuera de la ventana de la app**.
+- No son las pantallas de arranque: las 6 tienen el tamaño exacto en píxeles
+  que pide cada aparato (verificado leyendo la cabecera de cada PNG).
+
+La sospecha viva: **iOS no le dio a la app la pantalla completa**. En sus
+fotos la barra mide unos 60 px en vez de 76, y 60 es justo lo que mide cuando
+`env(safe-area-inset-bottom)` vale **0**. La franja la pintaría iOS con el
+`background_color` del manifest, que es `#0b0913` — el color exacto que se ve.
+Si es eso, el arreglo es **borrar el icono y volver a añadir la app** (ese
+permiso iOS lo decide al instalar y no lo vuelve a mirar). ⚠️ Antes hay que
+hacerle **copia de seguridad**: borrar el icono puede llevarse la música.
+
+**Cómo confirmarlo:** la v1.5.2 pone las medidas A LA VISTA en la primera
+tarjeta de ⚙️ Ajustes («Esta pantalla») — él manda fotos, no textos, así que
+el dato tiene que estar donde pueda fotografiarlo. Mirar **Margen de
+seguridad ↓**: si dice **0**, es esto y toca reinstalar; si dice **34**, es
+otra cosa y hay que seguir buscando. **Pedirle esa foto antes de tocar nada.**
+
+## Estado — 29/09/2026 (v1.6.0)
 
 Publicada en https://elguaro433.github.io/mi-musica/ — repo `elguaro433/mi-musica`.
 
@@ -102,6 +130,24 @@ Publicada en https://elguaro433.github.io/mi-musica/ — repo `elguaro433/mi-mus
   Un logo se ve entero (`contain`), no recortado como una carátula.
 - `.enc` — dentro de `.r-s` (que es flex) el texto suelto no se encogía y
   empujaba la calidad fuera de la pantalla.
+
+### v1.6.0 — la letra, y que la elija él
+- Los **88 `font-size` son `calc(Npx * var(--esc))`**. Un solo número mueve
+  toda la tipografía. Eso resolvió de paso el pendiente del interruptor de
+  letra grande, que antes era caro porque "todo está en px".
+- Normal `1.12`, Grande `1.26`, Muy grande `1.42`, en ⚙️ Ajustes. Se guarda en
+  `mm_ajustes.letra` y se aplica en `cargarAjustes()`, antes de pintar nada.
+- Las pestañas fijas topan en `min(var(--esc), 1.14)`: se reparten el ancho a
+  partes iguales y pasado eso se recortaban a "Mi mú…".
+- Más aire en las filas y más contraste en `--muted` y `--dim`.
+
+### v1.5.2 — 19 logos de 30
+Segunda pasada probando variantes del nombre (sin frecuencia, sin FM, la
+palabra fuerte), **siempre exigiendo que coincida el país o que sea el mismo
+stream**. Entraron Tropicana, Olímpica, Candela, Vibra, Bésame, Rumba y
+Planeta — las suyas. Las 11 que faltan no tienen logo https en la base.
+**No aflojar el filtro de país**: sin él, a Hit FM le tocaba un logo ucraniano
+y a KISS FM uno mexicano.
 
 ### Verificado midiendo, no a ojo
 - Maquetación sin un solo problema a **393×852** y **440×956**, repasada de

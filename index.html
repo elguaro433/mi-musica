@@ -551,7 +551,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.17.0';
+var APP_VERSION = '1.17.1';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2950,14 +2950,12 @@ function avisoSelector(){
   setTimeout(function(){
     abrirHoja(
       '<h4>El iPhone cerró la app</h4>' +
-      '<div class="sub">Pasa a veces al traer muchos archivos de OneDrive de golpe. No se ha perdido nada. ' +
-      'Hay un método que no falla: copiar antes la carpeta al iPhone.</div>' +
-      '<div class="opc" style="cursor:default"><span class="em">1️⃣</span><span class="tx"><b>Abre la app «Archivos»</b>' +
-        '<small>el icono azul de carpeta del iPhone</small></span></div>' +
-      '<div class="opc" style="cursor:default"><span class="em">2️⃣</span><span class="tx"><b>Copia la carpeta «Para la app»</b>' +
-        '<small>OneDrive → Archivos → Music, mantenla pulsada → Copiar</small></span></div>' +
-      '<div class="opc" style="cursor:default"><span class="em">3️⃣</span><span class="tx"><b>Pégala en «En mi iPhone»</b>' +
-        '<small>Explorar → En mi iPhone, pulsa un hueco → Pegar</small></span></div>' +
+      '<div class="sub">Pasa a veces al elegir muchas canciones de golpe. No se ha perdido nada. ' +
+      'Prueba con menos cada vez, unas 20 o 30.</div>' +
+      '<div class="opc" style="cursor:default"><span class="em">1️⃣</span><span class="tx"><b>Guarda las canciones en «Archivos»</b>' +
+        '<small>desde Telegram o WhatsApp: Compartir → Guardar en Archivos → En mi iPhone</small></span></div>' +
+      '<div class="opc" style="cursor:default"><span class="em">2️⃣</span><span class="tx"><b>Añade de pocas en pocas</b>' +
+        '<small>la app ignora las que ya tiene</small></span></div>' +
       '<a class="btn solido" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Ver la guía paso a paso</a>' +
       '<button class="opc" data-cerrar-hoja="1" style="margin-top:8px"><span class="em">✕</span><span class="tx"><b>Cerrar</b></span></button>');
   }, 1500);
@@ -2972,7 +2970,7 @@ function guiaAnadir(){
     '<div class="opc" style="cursor:default"><span class="em">1️⃣</span><span class="tx"><b>Toca «Seleccionar archivos»</b>' +
       '<small>la última opción del menú (no Fototeca)</small></span></div>' +
     '<div class="opc" style="cursor:default"><span class="em">2️⃣</span><span class="tx"><b>Abajo, toca «Examinar»</b>' +
-      '<small>OneDrive → Archivos → Music → Para la app</small></span></div>' +
+      '<small>En mi iPhone → la carpeta donde guardaste las canciones</small></span></div>' +
     '<div class="opc" style="cursor:default"><span class="em">3️⃣</span><span class="tx"><b>Marca todas y toca «Abrir»</b>' +
       '<small>antes toca «Seleccionar», arriba a la derecha</small></span></div>' +
     '<button class="btn solido" id="guia-abrir" style="margin-top:12px">Entendido, abrir archivos</button>' +

@@ -199,6 +199,15 @@ a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box
   cursor:pointer;padding:8px 2px}
 #bib-tools .busca{margin-bottom:10px}
 
+.chk{flex:0 0 28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;
+  font-weight:800;font-size:16px;color:#120e1e;margin-right:-2px}
+.chk.on{background:var(--purple);border-color:var(--purple)}
+#bib-selbar{display:flex;gap:8px;margin:0 0 10px;justify-content:flex-end}
+.sel-b{flex:0 0 auto;min-height:40px;padding:8px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);
+  color:var(--ink);font-size:calc(13.5px * min(var(--esc), 1.14));font-weight:600;cursor:pointer}
+.sel-b.mal{background:#5a1f30;border-color:#8a2f48;color:#ffd5de;flex:1}
+.sel-b[disabled]{opacity:.45}
+
 /* ---------- pestañas y campos ---------- */
 .tabs{display:flex;gap:8px;margin:2px 0 14px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
@@ -470,6 +479,7 @@ body.coche #coche-salir{display:block}
         <button class="sg" data-b="artistas">Artistas</button>
         <button class="sg" data-b="albumes">Álbumes</button>
       </div>
+      <div id="bib-selbar"></div>
     </div>
     <div id="bib-cuerpo"></div>
     <button class="btn" id="b-anadir">➕&nbsp; Añadir música</button>
@@ -551,7 +561,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.17.1';
+var APP_VERSION = '1.18.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2925,6 +2935,73 @@ function idYouTube(t){
   if(/^[A-Za-z0-9_-]{11}$/.test(String(t).trim())) return String(t).trim();
   return null;
 }
+/* ═════════ Eliminar canciones ════════════════════════════════════
+   El audio se guarda UNA vez y lo comparten los dos perfiles: solo se borra el
+   archivo cuando ya no queda ninguna persona que tenga esa canción. */
+var bibSel = null;          // null = normal · {} = modo "Seleccionar" (id -> true)
+var pendBorrar = [];
+async function eliminarCanciones(ids){
+  var n = 0, todasLas = [];
+  try{ todasLas = await todos('canciones'); }catch(_){}
+  for(var i=0;i<ids.length;i++){
+    var c = buscarCancion(ids[i]);
+    if(!c) continue;
+    if(actual && actual.id === c.id){
+      pausarYo();
+      try{ audio.removeAttribute('src'); audio.load(); }catch(_){}
+      soltarURLs(); actual = null;
+      $('mini').classList.remove('on'); $('now').classList.remove('on');
+      try{ if('mediaSession' in navigator) navigator.mediaSession.metadata = null; }catch(_){}
+    }
+    await borrar('canciones', c.id);
+    var comparte = todasLas.some(function(x){ return x.hash === c.hash && x.id !== c.id; });
+    if(!comparte){ try{ await borrar('audios', c.hash); }catch(err){ anotarSeguro('borrar/audio', err); } }
+    n++;
+  }
+  for(var j=0;j<LISTAS.length;j++){
+    var l = LISTAS[j], ya = l.canciones || [];
+    var nuevas = ya.filter(function(id){ return ids.indexOf(id) < 0; });
+    if(nuevas.length !== ya.length){ l.canciones = nuevas; await guardar('listas', l); }
+  }
+  cola = cola.filter(function(id){ return ids.indexOf(id) < 0; });
+  colaPos = actual ? cola.indexOf(actual.id) : -1;
+  soltarCaratulas();
+  await cargarDatos();
+  guardarCola();
+  return n;
+}
+function hojaBorrar(ids, todas){
+  pendBorrar = ids.slice();
+  var uno = ids.length === 1 ? buscarCancion(ids[0]) : null;
+  var que = todas ? 'Se borran las ' + ids.length + ' canciones de ' + PERSONAS[yo].corto + ' de este teléfono.'
+          : uno ? '«' + uno.titulo + '» se borra de este teléfono.'
+          : ids.length + ' canciones se borran de este teléfono.';
+  abrirHoja(
+    '<h4>¿Eliminar' + (ids.length > 1 ? ' ' + ids.length + ' canciones' : '') + '?</h4>' +
+    '<div class="sub">' + esc(que) + ' Tus listas (sin esas canciones) y tus radios no se tocan. ' +
+    'Los archivos que tengas en el ordenador siguen allí.</div>' +
+    '<button class="btn solido" id="borrar-ok" style="background:#ff5f7a;color:#1b0a10;margin-top:6px">🗑&nbsp; Sí, eliminar</button>' +
+    '<button class="btn" data-cerrar-hoja="1">Cancelar</button>');
+}
+function filaSel(c){
+  var on = bibSel && bibSel[c.id];
+  return '<div class="row" data-selc="'+esc(c.id)+'"><span class="chk'+(on?' on':'')+'">'+(on?'✓':'')+'</span>'+
+    cuadroCancion(c)+
+    '<span class="r-x"><span class="r-t">'+esc(c.titulo)+'</span><span class="r-s">'+esc(c.artista)+'</span></span></div>';
+}
+function pintarSelbar(){
+  var b = $('bib-selbar');
+  if(!b) return;
+  if(filtro !== 'canciones' || !CANCIONES.length){ b.innerHTML = ''; return; }
+  if(!bibSel){
+    b.innerHTML = '<button class="sel-b" id="b-sel">☑️&nbsp; Seleccionar para eliminar</button>';
+    return;
+  }
+  var n = Object.keys(bibSel).length;
+  b.innerHTML = '<button class="sel-b" id="sel-todas">Todas</button>' +
+    '<button class="sel-b mal" id="sel-borrar"'+(n?'':' disabled')+'>🗑&nbsp; Eliminar'+(n?' ('+n+')':'')+'</button>' +
+    '<button class="sel-b" id="sel-listo">Listo</button>';
+}
 function grupoBib(f){ return (f === 'artistas' || f === 'albumes' || f === 'canciones') ? 'canciones' : f; }
 function marcarBib(){
   var bs = document.querySelectorAll('#v-biblio [data-b]');
@@ -2981,6 +3058,8 @@ function guiaAnadir(){
 function pintarBiblio(){
   var C = $('bib-cuerpo');
   marcarBib();
+  if(filtro !== 'canciones') bibSel = null;
+  pintarSelbar();
   var ql = (bibQ || '').toLowerCase().trim();
   var LC = ql ? CANCIONES.filter(function(c){
     return (c.titulo+' '+c.artista+' '+c.album+' '+c.genero).toLowerCase().indexOf(ql) >= 0; }) : CANCIONES;
@@ -3037,7 +3116,7 @@ function pintarBiblio(){
     return;
   }
   if(filtro === 'canciones'){
-    C.innerHTML = LC.length ? LC.map(function(c){ return filaCancion(c); }).join('')
+    C.innerHTML = LC.length ? LC.map(function(c){ return bibSel ? filaSel(c) : filaCancion(c); }).join('')
       : '<div class="vacio"><span class="em">🔎</span>Nada con ese nombre en tu música.</div>';
     return; }
   if(filtro === 'listas'){
@@ -3129,6 +3208,7 @@ async function pintarAjustes(){
     '<a class="btn" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Cómo traer mi música del PC</a>'+
     '<button class="btn" id="a-exportar">💾&nbsp; Guardar copia de seguridad</button>'+
     '<button class="btn" id="a-importar">📂&nbsp; Restaurar una copia</button>'+
+    '<button class="btn" id="a-borrar-todo" style="color:#ff9bb0;border-color:#6b2a3a">🗑&nbsp; Borrar toda mi música</button>'+
     '<div class="kv"><span class="pista">Haz la copia antes de borrar el icono: el iPhone se lleva los datos. No incluye los MP3.</span></div>'+
     '<input type="file" id="fcopia" accept="application/json,.json" class="oculto"></div>'+
 
@@ -3318,6 +3398,34 @@ function pintarVista(){
 document.addEventListener('click', async function(ev){
   var t = ev.target, el;
 
+  // eliminar canciones
+  if((el = t.closest('[data-borrar-pedir]'))){ hojaBorrar([el.dataset.borrarPedir]); return; }
+  if(t.closest('#borrar-ok')){
+    var ids = pendBorrar.slice(); cerrarHoja();
+    var n = await eliminarCanciones(ids);
+    bibSel = null; pendBorrar = [];
+    toast(n + (n === 1 ? ' canción eliminada.' : ' canciones eliminadas.'), 'bueno', 3000);
+    pintarVista(); return;
+  }
+  if(t.closest('#b-sel')){ bibSel = {}; pintarBiblio(); return; }
+  if(t.closest('#sel-listo')){ bibSel = null; pintarBiblio(); return; }
+  if(t.closest('#sel-todas')){
+    var ql2 = (bibQ || '').toLowerCase().trim();
+    bibSel = bibSel || {};
+    CANCIONES.forEach(function(c){
+      if(!ql2 || (c.titulo+' '+c.artista+' '+c.album+' '+c.genero).toLowerCase().indexOf(ql2) >= 0) bibSel[c.id] = true; });
+    pintarBiblio(); return;
+  }
+  if(t.closest('#sel-borrar')){ var ks = Object.keys(bibSel || {}); if(ks.length) hojaBorrar(ks); return; }
+  if((el = t.closest('[data-selc]'))){
+    if(bibSel){ var k = el.dataset.selc; if(bibSel[k]) delete bibSel[k]; else bibSel[k] = true; pintarBiblio(); }
+    return;
+  }
+  if(t.closest('#a-borrar-todo')){
+    if(!CANCIONES.length){ toast('No hay música que borrar.', null, 2500); return; }
+    hojaBorrar(CANCIONES.map(function(c){ return c.id; }), true); return;
+  }
+
   if((el = t.closest('[data-p]'))){ await entrar(el.dataset.p); return; }
   if((el = t.closest('[data-ir]'))){
     // "Buscar" en la barra, viniendo de Radio, vuelve a la búsqueda de música
@@ -3327,7 +3435,7 @@ document.addEventListener('click', async function(ev){
   if((el = t.closest('[data-t]'))){ ponerPestana(el.dataset.t); return; }
   if((el = t.closest('[data-b]'))){
     filtro = el.dataset.b;
-    listaAbierta = null;
+    listaAbierta = null; bibSel = null;
     pintarBiblio(); return;
   }
 
@@ -3778,6 +3886,8 @@ function hojaCancion(id){
       '<span class="tx"><b>Ponerla a continuación</b><small>suena justo después de la de ahora</small></span></button>' +
     '<button class="opc" data-hoja-fav="'+esc(c.id)+'"><span class="em">'+(c.fav?'❤️':'♡')+'</span>' +
       '<span class="tx"><b>'+(c.fav?'Quitar de favoritos':'Marcar como favorita')+'</b></span></button>' +
+    '<button class="opc" data-borrar-pedir="'+esc(c.id)+'"><span class="em">🗑</span>' +
+      '<span class="tx"><b>Eliminar de la app</b><small>se borra de este teléfono</small></span></button>' +
     '<button class="opc" data-cerrar-hoja="1"><span class="em">✕</span>' +
       '<span class="tx"><b>Cerrar</b></span></button>');
 }

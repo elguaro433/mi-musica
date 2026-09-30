@@ -527,7 +527,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.14.3';
+var APP_VERSION = '1.14.4';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2499,11 +2499,16 @@ function pintarBuscar(){
       var mo = masOidas();
       if(mo.length) arriba += estante('⭐ Las que más oyes', 'mo', mo);
     }
-    C.innerHTML = arriba + bloqueMundo() +
-      (h ? '<div class="city">⭐ Tus emisoras guardadas</div>' + h : '') +
+    var botones =
       '<button class="btn solido" id="b-buscar-radio">🔎&nbsp; Buscar cualquier emisora del mundo</button>' +
       '<button id="b-emisora" style="display:block;margin:12px auto 4px;background:none;border:0;color:var(--dim);'+
         'font-size:calc(12.5px * var(--esc));text-decoration:underline;padding:10px">o añádela pegando su enlace</button>';
+    var propias = h ? '<div class="city">⭐ Tus emisoras guardadas</div>' + h : '';
+    // Buscando: los resultados arriba. En reposo: tus emisoras, el botón de buscar,
+    // y debajo de todo lo demás (radios de éxitos, estilos, países).
+    C.innerHTML = arriba
+      ? propias + botones + arriba + bloqueMundo()
+      : bloqueMundo() + propias + botones;
   }
   else if(pestana === 'youtube') pintarYouTube();
   else {

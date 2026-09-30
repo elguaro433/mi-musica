@@ -117,8 +117,8 @@ button{font-family:inherit;color:inherit}
    texto, y por eso el saludo con su nombre salia lavado y no habia forma de
    leerlo. (fallo del 29/09/2026) */
 .vhead::before{content:'';position:absolute;inset:0;z-index:-1;
-  background:rgba(11,9,19,.8);
-  background:color-mix(in srgb, var(--bg) 84%, transparent);
+  background:rgba(11,9,19,.96);
+  background:color-mix(in srgb, var(--bg) 96%, transparent);
   backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
   -webkit-mask-image:linear-gradient(to bottom,#000 66%,rgba(0,0,0,0));
           mask-image:linear-gradient(to bottom,#000 66%,rgba(0,0,0,0))}
@@ -444,12 +444,11 @@ body.coche #coche-salir{display:block}
 
   <!-- Buscar -->
   <div class="view" id="v-buscar">
-    <div class="vhead"><div><h2>Buscar</h2></div><div class="gear" data-ir="ajustes">⚙️</div></div>
+    <div class="vhead"><div><h2 id="buscar-titulo">Buscar</h2></div><div class="gear" data-ir="ajustes">⚙️</div></div>
     <form id="form-q" autocomplete="off"><div class="busca"><span class="lupa">⌕</span><input class="campo" id="q" type="search" enterkeyhint="search"
       placeholder="Cantante, grupo o canción" autocomplete="off" autocorrect="off" autocapitalize="off"></div></form>
-    <div class="tabs fijas tres" id="tabs-b">
+    <div class="tabs fijas" id="tabs-b" style="grid-template-columns:repeat(2,1fr)">
       <button class="tab on" data-t="musica">🎧 Música</button>
-      <button class="tab" data-t="radio"><svg class="ti" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 8 17 3" stroke="#ff8a4c" stroke-width="1.8" stroke-linecap="round"/><rect x="2" y="8" width="20" height="13" rx="3.2" fill="#ff8a4c"/><circle cx="8" cy="14.5" r="3.2" fill="#fff" opacity=".93"/><rect x="13" y="12" width="6.2" height="1.8" rx=".9" fill="#fff"/><rect x="13" y="15.6" width="6.2" height="1.8" rx=".9" fill="#fff" opacity=".7"/></svg>Radio</button>
       <button class="tab" data-t="youtube"><svg class="ti" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="1.2" y="4.6" width="21.6" height="14.8" rx="4.4" fill="#ff1f1f"/><path d="M10 8.9v6.2l5.3-3.1z" fill="#fff"/></svg>YouTube</button>
     </div>
     <div id="tab-cuerpo"></div>
@@ -518,6 +517,9 @@ body.coche #coche-salir{display:block}
       <path d="M3 10.6 12 3l9 7.6"/><path d="M5.5 9.6V20h13V9.6"/></svg></span>Inicio</button>
     <button data-ir="buscar"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4 21 21"/></svg></span>Buscar</button>
+    <button data-ir-tab="radio" data-barra="radio"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="1.8"/><path d="M8 8a5.7 5.7 0 0 0 0 8"/><path d="M16 8a5.7 5.7 0 0 1 0 8"/>
+      <path d="M5 5a10 10 0 0 0 0 14"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></span>Radio</button>
     <button data-ir="biblio"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M4 5.5h16"/><path d="M4 12h16"/><path d="M4 18.5h11"/></svg></span>Biblioteca</button>
   </div>
@@ -549,7 +551,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.16.4';
+var APP_VERSION = '1.17.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -3135,7 +3137,7 @@ async function pintarAjustes(){
   '<div class="card"><h3>Sobre la app</h3>'+
     '<div class="credito">Propiedad de la <b>Familia Díaz González</b><br>Creador: <b>Emmanuel Díaz</b><br>Versión '+APP_VERSION+'</div>'+
     '<div class="sign">Emmanuel Díaz</div>'+
-    '<button class="btn" id="a-informe">📋&nbsp; Copiar informe de errores'+(errores.length ? ' ('+errores.length+')' : '')+'</button>'+
+    '<button class="btn" id="a-informe">📋&nbsp; Copiar informe para soporte</button>'+
     '<button class="btn" id="a-reparar">🛟&nbsp; Reparar la app (conserva la música)</button></div>';
 }
 
@@ -3288,14 +3290,23 @@ function modoCoche(activar){
 }
 
 /* ═════════════════ NAVEGACIÓN ═══════════════════════════════════ */
+/* La barra de abajo y el título: Radio vive dentro de Buscar, pero para quien mira es otra pantalla. */
+function marcarBarra(){
+  var donde = (vistaActual === 'buscar' && pestana === 'radio') ? 'radio' : vistaActual;
+  var bs = document.querySelectorAll('#barra button');
+  for(var k=0;k<bs.length;k++)
+    bs[k].classList.toggle('on', bs[k].dataset.ir === donde || bs[k].dataset.barra === donde);
+  var enRadio = vistaActual === 'buscar' && pestana === 'radio';
+  var t = $('buscar-titulo'); if(t) t.textContent = enRadio ? 'Radio' : 'Buscar';
+  var tb = $('tabs-b'); if(tb) tb.style.display = enRadio ? 'none' : '';
+}
 function ir(v){
   vistaActual = v;
   var vs = document.querySelectorAll('.view');
   for(var i=0;i<vs.length;i++) vs[i].classList.remove('on');
   var el = $('v-'+v);
   if(el){ el.classList.add('on'); el.scrollTop = 0; }
-  var bs = document.querySelectorAll('#barra button');
-  for(var k=0;k<bs.length;k++) bs[k].classList.toggle('on', bs[k].dataset.ir === v);
+  marcarBarra();
   pintarVista();
 }
 function pintarVista(){
@@ -3310,7 +3321,10 @@ document.addEventListener('click', async function(ev){
   var t = ev.target, el;
 
   if((el = t.closest('[data-p]'))){ await entrar(el.dataset.p); return; }
-  if((el = t.closest('[data-ir]'))){ ir(el.dataset.ir); return; }
+  if((el = t.closest('[data-ir]'))){
+    // "Buscar" en la barra, viniendo de Radio, vuelve a la búsqueda de música
+    if(el.dataset.ir === 'buscar' && el.closest('#barra') && pestana === 'radio') ponerPestana('musica');
+    ir(el.dataset.ir); return; }
   if((el = t.closest('[data-ir-tab]'))){ ir('buscar'); ponerPestana(el.dataset.irTab); return; }
   if((el = t.closest('[data-t]'))){ ponerPestana(el.dataset.t); return; }
   if((el = t.closest('[data-b]'))){
@@ -3678,6 +3692,7 @@ $('n-seek-caja').addEventListener('click', function(e){
 
 function ponerPestana(t){
   pestana = t;
+  marcarBarra();
   var bs = document.querySelectorAll('[data-t]');
   for(var i=0;i<bs.length;i++) bs[i].classList.toggle('on', bs[i].dataset.t === t);
   $('q').value = '';

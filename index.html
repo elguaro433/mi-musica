@@ -181,6 +181,7 @@ button{font-family:inherit;color:inherit}
   color:transparent;width:70%;margin-top:8px}
 @keyframes pulso{0%,100%{opacity:.55}50%{opacity:1}}
 a.opc{text-decoration:none;color:inherit}
+a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box}
 
 .tab svg.ti{vertical-align:-4px;margin-right:5px}
 /* Favoritas: la pestaña del corazon, mas grande que las otras */
@@ -548,7 +549,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.16.0';
+var APP_VERSION = '1.16.1';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2945,7 +2946,8 @@ function pintarBiblio(){
     C.innerHTML = '<div class="vacio"><span class="em">➕</span>Tu biblioteca está vacía.<br>'+
       'Toca <b>Añadir música</b> y elige tus MP3<br>desde <b>Archivos</b> o <b>iCloud Drive</b>.<br><br>'+
       '<span style="font-size:calc(12.5px * var(--esc))">¿No sabes dónde guardarlos?<br>Mira <b>⚙️ Ajustes → Dónde guardar tus MP3</b>.</span></div>'+
-      '<button class="btn solido" data-ir-tab="musica">🎧&nbsp; Buscar un cantante</button>'+
+      '<a class="btn solido" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Cómo traer mi música del PC</a>'+
+      '<button class="btn" data-ir-tab="musica">🎧&nbsp; Buscar un cantante</button>'+
       '<button class="btn" data-ir-tab="radio">📻&nbsp; Ir a la radio</button>';
     return;
   }
@@ -3078,6 +3080,7 @@ async function pintarAjustes(){
 
   '<div class="card"><h3>Tus datos</h3>'+
     '<button class="btn suave" id="a-anadir2" style="margin-top:0">➕&nbsp; Añadir mis MP3</button>'+
+    '<a class="btn" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Cómo traer mi música del PC</a>'+
     '<button class="btn" id="a-exportar">💾&nbsp; Guardar copia de seguridad</button>'+
     '<button class="btn" id="a-importar">📂&nbsp; Restaurar una copia</button>'+
     '<div class="kv"><span class="pista">Haz la copia antes de borrar el icono: el iPhone se lleva los datos. No incluye los MP3.</span></div>'+

@@ -117,7 +117,8 @@ button{font-family:inherit;color:inherit}
    texto, y por eso el saludo con su nombre salia lavado y no habia forma de
    leerlo. (fallo del 29/09/2026) */
 .vhead::before{content:'';position:absolute;inset:0;z-index:-1;
-  background:rgba(11,9,19,.55);
+  background:rgba(11,9,19,.8);
+  background:color-mix(in srgb, var(--bg) 84%, transparent);
   backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
   -webkit-mask-image:linear-gradient(to bottom,#000 66%,rgba(0,0,0,0));
           mask-image:linear-gradient(to bottom,#000 66%,rgba(0,0,0,0))}
@@ -471,11 +472,11 @@ body.coche #coche-salir{display:block}
     <div class="seek" id="n-seek-caja"><i id="n-seek"></i></div>
     <div class="times"><span id="n-a">0:00</span><span id="n-b">—</span></div>
     <div class="ctrls">
-      <button class="sm" id="b-shuf">🔀</button>
+      <button class="sm" id="b-shuf" aria-label="Aleatorio"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg></button>
       <button id="b-prev">⏮</button>
       <button class="big" id="b-pp">▶</button>
       <button id="b-next">⏭</button>
-      <button class="sm" id="b-rep">🔁</button>
+      <button class="sm" id="b-rep" aria-label="Repetir"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg></button>
     </div>
     <div class="cola" id="cola"></div>
     <button id="coche-salir">✕&nbsp; Salir del modo coche</button>
@@ -526,7 +527,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.14.1';
+var APP_VERSION = '1.14.3';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1129,7 +1130,7 @@ function cuadroEmisora(e){
   var f = 'background:' + tono(e.nombre);
   if(e.logo)
     return '<span class="art" style="'+f+'"><img class="logo" src="'+esc(e.logo)+'" alt="" '+
-           'loading="lazy" onerror="this.remove()"></span>';
+           'loading="lazy" onerror="this.parentNode.textContent=&quot;📻&quot;"></span>';
   return '<span class="art" style="'+f+'">📻</span>';
 }
 function filaEmisoraMundo(e, i){
@@ -1588,8 +1589,8 @@ async function pintarAhora(cancion){
     if(imagen){
       // La caratula de una cancion es cuadrada y llena; el logo de una
       // emisora es de cualquier forma, asi que se ve entero sobre el color.
-      var encaje = (!tieneImg && actual.tipo === 'radio') ? 'center/contain no-repeat' : 'center/cover';
-      el.style.background = fondo + ' url("'+imagen+'") ' + encaje; el.textContent='';
+      var encaje = (!tieneImg && actual.tipo === 'radio') ? 'center/contain' : 'center/cover';
+      el.style.background = 'url("'+imagen+'") ' + encaje + ' no-repeat, ' + fondo; el.textContent='';
     }
     else { el.style.background = fondo; el.textContent = actual.tipo==='radio' ? '📻' : (id==='n-art'?'🎵':''); }
   });
@@ -2024,9 +2025,9 @@ function filaCancion(c, dentroDe){
    Apple publica sin clave y con CORS (probado el 30/09/2026):
    · /{pais}/rss/topsongs/.../genre=12/json  -> los éxitos latinos de hoy
    · /search?term=...&entity=song            -> las canciones de un cantante
-   Dan carátula, 30 s de vista previa y el enlace para comprarla. La canción
-   entera no se puede dar desde aquí: para eso está YouTube (se oye, no se
-   baja) o comprarla (sin candado). */
+   Dan carátula y 30 s de vista previa. La canción entera no se puede dar
+   desde aquí: para eso está YouTube (se oye, no se baja). El usuario NO quiere
+   enlaces de compra (Apple, Amazon, Qobuz): los quitó el 30/09/2026. */
 var PAISES_INI = [['es','🇪🇸','España'], ['ve','🇻🇪','Venezuela'], ['co','🇨🇴','Colombia'],
                   ['mx','🇲🇽','México'], ['us','🇺🇸','EE. UU.']];
 var RB_PAIS = {es:'ES', ve:'VE', co:'CO', mx:'MX', us:'US'};
@@ -2275,7 +2276,7 @@ function cuadroHisto(h){
   if(h.k === 'r') return cuadroEmisora({nombre:h.titulo, logo:h.img});
   if(h.k === 'y')
     return '<span class="art" style="background-image:' + (h.img ? "url('"+esc(h.img)+"')," : '') + tono(h.titulo) +
-           ';background-size:cover;background-position:center">' + (h.img ? '' : '▶') + '</span>';
+           ';background-size:cover;background-position:center">' + (h.img ? '' : '📺') + '</span>';
   return cuadroPista({titulo:h.titulo, artista:h.artista || '', caratula:h.img, fotos:h.img ? [h.img] : []});
 }
 function tile(g, i, p){
@@ -2367,7 +2368,6 @@ function pintarInicio(){
 /* ── la hoja de una canción de Apple ── */
 function hojaApple(p, lista){
   apAbierta = {p:p, lista:lista || [p]};
-  var q = encodeURIComponent(p.artista + ' ' + p.titulo);
   var fav = esFavAudius(p.id);
   abrirHoja(
     '<h4>'+esc(p.titulo)+'</h4><div class="sub">'+esc(p.artista)+(p.genero?' · '+esc(p.genero):'')+'</div>' +
@@ -2377,13 +2377,6 @@ function hojaApple(p, lista){
       '<small>suena aquí y con la pantalla apagada</small></span></button>' : '') +
     '<button class="opc" data-ap-fav="1"><span class="em">'+(fav?'❤️':'♡')+'</span><span class="tx"><b>'+
       (fav?'Quitar de favoritas':'Guardar en favoritas')+'</b></span></button>' +
-    '<div class="city" style="margin:12px 0 4px">⬇️ Tenerla en MP3 (de pago, sin candado)</div>' +
-    (p.web ? '<a class="opc" href="'+esc(p.web)+'" target="_blank" rel="noopener"><span class="em">🍎</span><span class="tx"><b>Apple Music / iTunes</b>'+
-      '<small>'+(p.precio ? esc(p.precio) + ' · ' : '')+'la compras y la bajas</small></span></a>' : '') +
-    '<a class="opc" href="https://www.amazon.es/s?k='+q+'&i=digital-music" target="_blank" rel="noopener"><span class="em">🛒</span><span class="tx"><b>Amazon Música Digital</b>'+
-      '<small>MP3 suelto, sin candado</small></span></a>' +
-    '<a class="opc" href="https://www.qobuz.com/es-es/search?q='+q+'" target="_blank" rel="noopener"><span class="em">💿</span><span class="tx"><b>Qobuz</b>'+
-      '<small>MP3 o calidad de estudio</small></span></a>' +
     '<button class="opc" data-cerrar-hoja="1"><span class="em">✕</span><span class="tx"><b>Cerrar</b></span></button>');
 }
 /* Un vídeo a la vista: manda el vídeo, se para lo demás. */
@@ -2446,7 +2439,6 @@ function pintarMusica(){
     GR.mu = mu.res;
     if(mu.res.length){
       h = '<div class="shelf-t">🎤 '+esc(mu.texto)+'</div>' + mu.res.map(function(p, i){ return filaApple(p, 'mu', i); }).join('');
-      h += '<div class="note">Toca una canción: <b>entera en YouTube</b>, <b>30 s aquí</b> o <b>cómprala en MP3</b>.</div>';
     }
     if(mu.au.length)
       h += '<div class="shelf-t">🎧 Completas y gratis · Audius</div>' + mu.au.map(function(p, i){ return filaAudius(p, i); }).join('');
@@ -2562,10 +2554,19 @@ function pintarYouTube(){
   }else if(ytTexto){
     h += '<div class="vacio"><span class="em">📺</span>Sin resultados para «'+esc(ytTexto)+'».</div>';
   }else if(!ytVerId){
-    h += '<div class="vacio"><span class="em">📺</span>Escribe arriba lo que quieras ver<br>y pulsa buscar.<br>'+
-         '<span style="color:var(--dim);font-size:calc(12px * var(--esc))">También puedes pegar un enlace de YouTube.</span></div>';
+    h += '<div class="hscroll" style="margin-top:2px">' + ARTISTAS_SUG.map(function(n){
+           return '<button class="tab" data-yt-sug="'+esc(n)+'">'+esc(n)+'</button>'; }).join('') + '</div>';
+    if(INI.apple.length){
+      GR.yt = INI.apple;
+      h += '<div class="shelf-t">🔥 Éxitos de hoy · toca para verlos</div>' +
+        INI.apple.map(function(p, i){
+          return '<div class="row" data-yt-cancion="'+i+'">' + cuadroPista(p) +
+            '<span class="r-x"><span class="r-t">'+esc(p.titulo)+'</span><span class="r-s"><span class="enc">'+esc(p.artista)+'</span></span></span>' +
+            '<span class="r-a">▶︎</span></div>'; }).join('');
+    }else if(!INI.cargando && !INI.fallo) cargarInicio();
+    h += '<div class="note">También puedes escribir arriba o pegar un enlace de YouTube.</div>';
   }
-  h += '<div class="note">El vídeo <b>se para al bloquear el móvil o salir de la app</b>. Lo bloquean Apple y YouTube, no hay forma de evitarlo desde una web.<br>Para el coche: tu música descargada o la radio.</div>';
+  h += '<div class="note">El vídeo <b>se para al bloquear el móvil o salir de la app</b>. Es una limitación de iOS y de YouTube, no de la app.<br>Para el coche: tu música descargada o la radio.</div>';
   if(VIDEOS.length){
     h += '<div class="shelf-t">❤️ Tus vídeos favoritos</div>' + VIDEOS.map(filaVideoFav).join('');
   }
@@ -2659,13 +2660,14 @@ async function lanzarBusquedaAudius(texto){
    como remota: no esta en la biblioteca, asi que no se le guardan veces ni
    duracion ni se le puede dar al corazon. */
 var colaAu = [], colaAuPos = -1;
+function etiquetaFuente(p){ return p && p.fuente === 'Apple' ? 'Vista previa' : ((p && p.fuente) || 'Audius'); }
 function tocarAudius(p, lista){
   clearTimeout(reintento); clearTimeout(vigilante);
   soltarURLs(); soltarCaratula();
   fallosRadio = 0; espera = 1000; intentosVigilante = 0;
   paradoPorMi = false; recuperarAlVolver = false; viendoVideo = false;
   actual = {tipo:'cancion', remota:true, id:'au_'+p.id, titulo:p.titulo,
-            artista:p.artista, album:p.fuente || 'Audius', sub:p.artista + ' \u00b7 ' + (p.fuente || 'Audius'),
+            artista:p.artista, album:etiquetaFuente(p), sub:p.artista + ' \u00b7 ' + etiquetaFuente(p),
             dur:p.dur, url:p.url, logo:p.caratula, cal:''};
   cola = []; colaPos = -1;
   if(lista && lista.length){
@@ -2867,7 +2869,7 @@ function pintarBiblio(){
           : '<span class="art vacia" style="background:'+tono(p.titulo+p.artista)+'">🎵</span>';
         return '<div class="row'+(son?' sonando':'')+'" data-aufav-tocar="'+i+'">'+cuadro+
           '<span class="r-x"><span class="r-t">'+esc(p.titulo)+'</span>'+
-          '<span class="r-s"><span class="enc">'+esc(p.artista)+' · '+esc(p.fuente || 'Audius')+'</span>'+
+          '<span class="r-s"><span class="enc">'+esc(p.artista)+' · '+esc(etiquetaFuente(p))+'</span>'+
           '<span class="cal">'+tiempo(p.dur)+'</span></span></span>'+
           '<span class="r-a on" data-aufav-quitar="'+i+'">❤️</span></div>';
       }).join('');
@@ -3077,7 +3079,7 @@ function ciclarRepetir(){
 function pintarModos(){
   $('b-shuf').classList.toggle('on', aleatorio);
   var r = $('b-rep');
-  r.textContent = repetir === 2 ? '🔂' : '🔁';
+  r.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>' + (repetir === 2 ? '<path d="M11 10h1v4"/>' : '') + '</svg>';
   r.classList.toggle('on', repetir > 0);
 }
 
@@ -3273,6 +3275,10 @@ document.addEventListener('click', async function(ev){
     return;
   }
 
+  if((el = t.closest('[data-yt-sug]'))){
+    $('q').value = el.dataset.ytSug; lanzarBusquedaYouTube(el.dataset.ytSug + ' éxitos'); return; }
+  if((el = t.closest('[data-yt-cancion]'))){
+    var pY = INI.apple[+el.dataset.ytCancion]; if(pY) escucharCompleta(pY); return; }
   if((el = t.closest('[data-estilo]'))){ radioPorEstilo(el.dataset.estilo, el.dataset.nombre || el.dataset.estilo); return; }
   if((el = t.closest('[data-pais]'))){
     try{ localStorage.setItem('mm_pais_' + yo, el.dataset.pais); }catch(_){}

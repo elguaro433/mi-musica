@@ -206,6 +206,8 @@ a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box
 .sel-b{flex:0 0 auto;min-height:40px;padding:8px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);
   color:var(--ink);font-size:calc(13.5px * min(var(--esc), 1.14));font-weight:600;cursor:pointer}
 .sel-b.mal{background:#5a1f30;border-color:#8a2f48;color:#ffd5de;flex:1}
+.sel-b.solido{flex:1;background:var(--purple);border:0;color:#120e1e;font-weight:700;display:flex;align-items:center;justify-content:center}
+#bib-selbar{justify-content:stretch}
 .sel-b[disabled]{opacity:.45}
 
 /* ---------- pestañas y campos ---------- */
@@ -561,7 +563,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.19.3';
+var APP_VERSION = '1.20.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1247,6 +1249,7 @@ var AJ = {};                   // ajustes del teléfono
 var audio = $('audio');
 var actual = null;             // {tipo:'cancion'|'radio', ...}
 var cola = [], colaPos = -1, aleatorio = false, repetir = false;
+var sigPre = null;          // {id, a}: el audio de la canción que toca después, ya leído de la base
 var urlActual = null;          // objectURL que hay que revocar
 var caratulaURL = null;
 var dormir = null;             // temporizador
@@ -1444,6 +1447,18 @@ function soltarCaratula(){
   if(caratulaURL){ try{ URL.revokeObjectURL(caratulaURL); }catch(_){} caratulaURL = null; }
 }
 
+/* Mientras suena una canción se deja lista la siguiente, así el cambio no espera a la base de datos. */
+async function precargarSiguiente(){
+  try{
+    if(aleatorio || repetir === 2 || !actual || actual.tipo !== 'cancion' || cola.length < 2) return;
+    var id = cola[(colaPos + 1) % cola.length];
+    if(!id || (sigPre && sigPre.id === id)) return;
+    var c = buscarCancion(id);
+    if(!c || c.falta) return;
+    var a = await leer('audios', c.hash);
+    if(a && a.blob && cola[(colaPos + 1) % cola.length] === id) sigPre = {id:id, a:a};
+  }catch(_){}
+}
 async function tocarCancion(id, listaIds){
   var c = null;
   for(var i=0;i<CANCIONES.length;i++) if(CANCIONES[i].id === id) c = CANCIONES[i];
@@ -1455,7 +1470,8 @@ async function tocarCancion(id, listaIds){
   else colaPos = cola.indexOf(id);
 
   try{
-    var a = await leer('audios', c.hash);
+    var a = (sigPre && sigPre.id === c.id) ? sigPre.a : await leer('audios', c.hash);
+    sigPre = null;
     if(!a || !a.blob){
       c.falta = true; await guardar('canciones', limpia(c));
       toast('El archivo de «'+esc(c.titulo)+'» ya no está. Vuelve a añadirla.', 'malo', 5000);
@@ -1480,6 +1496,7 @@ async function tocarCancion(id, listaIds){
     guardarUltimo(); guardarCola();
     anotarHisto({k:'c', key:'c'+c.id, titulo:c.titulo, sub:c.artista, artista:c.artista, dat:c.id});
     await pintarAhora(c);
+    precargarSiguiente();
   }catch(err){
     anotar('tocarCancion', err.message);
     toast('No se pudo abrir la canción.', 'malo');
@@ -3029,14 +3046,15 @@ function pintarSelbar(){
   var b = $('bib-selbar');
   if(!b) return;
   if(filtro !== 'canciones' || !CANCIONES.length){ b.innerHTML = ''; return; }
-  if(!bibSel){
-    b.innerHTML = '<button class="sel-b" id="b-sel">☑️&nbsp; Seleccionar para eliminar</button>';
-    return;
-  }
-  var n = Object.keys(bibSel).length;
-  b.innerHTML = '<button class="sel-b" id="sel-todas">Todas</button>' +
-    '<button class="sel-b mal" id="sel-borrar"'+(n?'':' disabled')+'>🗑&nbsp; Eliminar'+(n?' ('+n+')':'')+'</button>' +
-    '<button class="sel-b" id="sel-listo">Listo</button>';
+  var ic = function(d){ return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
+  b.innerHTML =
+    '<button class="sel-b solido" id="b-reproducir">' + ic('<path d="M7 4.5v15l12-7.5z" fill="currentColor"/>') + '&nbsp; Reproducir</button>' +
+    '<button class="sel-b solido" id="b-aleatorio">' + ic('<path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/>') + '&nbsp; Aleatorio</button>';
+}
+function barajar(l){
+  var a = l.slice();
+  for(var i=a.length-1;i>0;i--){ var j = Math.floor(Math.random()*(i+1)), t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
 }
 function grupoBib(f){ return (f === 'artistas' || f === 'albumes' || f === 'canciones') ? 'canciones' : f; }
 function marcarBib(){
@@ -3462,6 +3480,19 @@ document.addEventListener('click', async function(ev){
     var n = await eliminarCanciones(ids);
     bibSel = null; pendBorrar = [];
     toast(n + (n === 1 ? ' canción eliminada.' : ' canciones eliminadas.'), 'bueno', 3000);
+    pintarVista(); return;
+  }
+  if(t.closest('#b-reproducir') || t.closest('#b-aleatorio')){
+    var alea = !!t.closest('#b-aleatorio'), qq = (bibQ || '').toLowerCase().trim();
+    var lista = CANCIONES.filter(function(c){
+      return !c.falta && (!qq || (c.titulo+' '+c.artista+' '+c.album+' '+c.genero).toLowerCase().indexOf(qq) >= 0); })
+      .map(function(c){ return c.id; });
+    if(!lista.length) return;
+    aleatorio = false;                    // si es aleatorio, la cola ya va barajada: sin repetir ninguna
+    pintarModos();
+    var ids2 = alea ? barajar(lista) : lista;
+    viendoVideo = false;
+    await tocarCancion(ids2[0], ids2);
     pintarVista(); return;
   }
   if(t.closest('#b-sel')){ bibSel = {}; pintarBiblio(); return; }
@@ -3942,18 +3973,9 @@ function buscarLista(id){
 function hojaCancion(id){
   var c = buscarCancion(id);
   if(!c) return;
-  var cuantas = LISTAS.length
-    ? LISTAS.length + (LISTAS.length === 1 ? ' lista tuya' : ' listas tuyas')
-    : 'todavía no tienes ninguna';
   abrirHoja(
     '<h4>' + esc(c.titulo) + '</h4>' +
     '<div class="sub">' + esc(c.artista) + ' · ' + esc(c.album) + '</div>' +
-    '<button class="opc" data-elegir-lista="'+esc(c.id)+'"><span class="em">➕</span>' +
-      '<span class="tx"><b>Añadir a una lista</b><small>'+cuantas+'</small></span></button>' +
-    '<button class="opc" data-luego="'+esc(c.id)+'"><span class="em">⏭</span>' +
-      '<span class="tx"><b>Ponerla a continuación</b><small>suena justo después de la de ahora</small></span></button>' +
-    '<button class="opc" data-hoja-fav="'+esc(c.id)+'"><span class="em">'+(c.fav?'❤️':'♡')+'</span>' +
-      '<span class="tx"><b>'+(c.fav?'Quitar de favoritos':'Marcar como favorita')+'</b></span></button>' +
     '<button class="opc" data-borrar-pedir="'+esc(c.id)+'"><span class="em">🗑</span>' +
       '<span class="tx"><b>Eliminar de la app</b><small>se borra de este teléfono</small></span></button>' +
     '<button class="opc" data-cerrar-hoja="1"><span class="em">✕</span>' +

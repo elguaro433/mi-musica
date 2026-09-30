@@ -182,6 +182,12 @@ button{font-family:inherit;color:inherit}
 @keyframes pulso{0%,100%{opacity:.55}50%{opacity:1}}
 a.opc{text-decoration:none;color:inherit}
 
+.tab svg.ti{vertical-align:-4px;margin-right:5px}
+/* Favoritas: la pestaña del corazon, mas grande que las otras */
+.tabs.fijas.cinco .tab.fav{font-size:calc(13px * min(var(--esc), 1.1));font-weight:700}
+.tabs.fijas.cinco .tab.fav svg{vertical-align:-4px;margin-right:4px}
+.r-a[data-fav],.r-a.on[data-au-fav],.r-a.on[data-fav-video],.r-a.on[data-aufav-quitar]{font-size:calc(23px * var(--esc))}
+
 /* ---------- pestañas y campos ---------- */
 .tabs{display:flex;gap:8px;margin:2px 0 14px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
@@ -190,7 +196,7 @@ a.opc{text-decoration:none;color:inherit}
   min-height:44px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tabs.fijas{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;overflow:visible}
-.tabs.fijas.cinco{grid-template-columns:repeat(5,1fr);gap:4px}
+.tabs.fijas.cinco{grid-template-columns:1.4fr repeat(4,1fr);gap:4px}
 .tabs.fijas.cinco .tab{padding:9px 1px;font-size:calc(10.5px * min(var(--esc), 1.1))}
 @media (min-width:420px){ .tabs.fijas.cinco .tab{font-size:calc(11.5px * min(var(--esc), 1.1))} }
 .tabs.fijas .tab{padding:9px 2px;font-size:calc(11.5px * min(var(--esc), 1.14));text-align:center;min-width:0;letter-spacing:-.01em}
@@ -433,8 +439,8 @@ body.coche #coche-salir{display:block}
     <div class="tabs" id="tabs-b">
       <button class="tab on" data-t="musica">🎧 Música</button>
       <button class="tab" data-t="mimusica">🎵 Mi música</button>
-      <button class="tab" data-t="radio">📻 Radio</button>
-      <button class="tab" data-t="youtube">▶︎ YouTube</button>
+      <button class="tab" data-t="radio"><svg class="ti" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 8 17 3" stroke="#ff8a4c" stroke-width="1.8" stroke-linecap="round"/><rect x="2" y="8" width="20" height="13" rx="3.2" fill="#ff8a4c"/><circle cx="8" cy="14.5" r="3.2" fill="#fff" opacity=".93"/><rect x="13" y="12" width="6.2" height="1.8" rx=".9" fill="#fff"/><rect x="13" y="15.6" width="6.2" height="1.8" rx=".9" fill="#fff" opacity=".7"/></svg>Radio</button>
+      <button class="tab" data-t="youtube"><svg class="ti" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="1.2" y="4.6" width="21.6" height="14.8" rx="4.4" fill="#ff1f1f"/><path d="M10 8.9v6.2l5.3-3.1z" fill="#fff"/></svg>YouTube</button>
       <button class="tab" data-t="descubrir">📼 Clásicos</button>
     </div>
     <div id="tab-cuerpo"></div>
@@ -444,7 +450,7 @@ body.coche #coche-salir{display:block}
   <div class="view" id="v-biblio">
     <div class="vhead"><div><h2>Biblioteca</h2></div><div class="gear" data-ir="ajustes">⚙️</div></div>
     <div class="tabs fijas cinco">
-      <button class="tab on" data-b="favoritos">♥ Favoritas</button>
+      <button class="tab fav on" data-b="favoritos"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.6 4.5c2 0 3.6 1.1 5.4 3.2 1.8-2.1 3.4-3.2 5.4-3.2 3.6 0 5.7 3.8 4.2 7.2C19.5 16.4 12 21 12 21z" fill="#ff4d8d"/></svg>Favoritas</button>
       <button class="tab" data-b="canciones">Canciones</button>
       <button class="tab" data-b="artistas">Artistas</button>
       <button class="tab" data-b="albumes">Álbumes</button>
@@ -527,7 +533,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.14.4';
+var APP_VERSION = '1.15.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2156,11 +2162,11 @@ function pistaDeBusqueda(x){
   return pistaApple(x.trackId, x.trackName, x.artistName, grande(x.artworkUrl100),
                     x.previewUrl, x.trackViewUrl, pr, x.primaryGenreName);
 }
-async function exitosApple(cc){
+async function exitosAppleDirecto(cc){
   var d = await traerConLimite('https://itunes.apple.com/' + cc + '/rss/topsongs/limit=25/genre=12/json', 12000);
   return [].concat((d.feed || {}).entry || []).map(pistaDeLista).filter(Boolean);
 }
-async function buscarApple(texto, cc){
+async function buscarAppleDirecto(texto, cc){
   var d = await traerConLimite('https://itunes.apple.com/search?term=' + encodeURIComponent(texto) +
     '&media=music&entity=song&limit=40&country=' + (cc || 'es'), 12000);
   var vistas = {}, fuera = [];
@@ -2170,6 +2176,62 @@ async function buscarApple(texto, cc){
     vistas[k] = true; fuera.push(p);
   });
   return fuera;
+}
+/* Un segundo proveedor por si Apple no contesta (limites por direccion en datos
+   moviles, o lo que sea): Deezer, tambien sin clave. No deja leer con fetch, asi
+   que se pregunta con JSONP (una etiqueta <script>). */
+function jsonp(url, ms){
+  return new Promise(function(ok, mal){
+    var cb = 'mmjp' + Date.now() + Math.floor(Math.random() * 1e4), sc = document.createElement('script'), t;
+    function limpiar(){ clearTimeout(t); try{ delete window[cb]; }catch(_){ window[cb] = undefined; } sc.remove(); }
+    window[cb] = function(d){ limpiar(); ok(d); };
+    sc.onerror = function(){ limpiar(); mal(new Error('Deezer no responde')); };
+    t = setTimeout(function(){ limpiar(); mal(new Error('Deezer tarda demasiado')); }, ms || 9000);
+    sc.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'output=jsonp&callback=' + cb;
+    document.head.appendChild(sc);
+  });
+}
+function pistaDeDeezer(x){
+  if(!x || !x.title) return null;
+  var img = (x.album && (x.album.cover_big || x.album.cover_medium)) || '';
+  return pistaApple('dz' + x.id, x.title_short || x.title, (x.artist && x.artist.name) || '', img, x.preview || '', x.link || '', '', '');
+}
+async function buscarDeezer(texto){
+  var d = await jsonp('https://api.deezer.com/search?q=' + encodeURIComponent(texto) + '&limit=40', 9000);
+  var vistas = {}, fuera = [];
+  ((d && d.data) || []).map(pistaDeDeezer).filter(Boolean).forEach(function(p){
+    var k = (p.artista + '|' + p.titulo).toLowerCase().replace(/\s*[\(\[].*$/, '');
+    if(vistas[k]) return;
+    vistas[k] = true; fuera.push(p);
+  });
+  return fuera;
+}
+var CACHE_MU = {};
+async function buscarApple(texto, cc){
+  var k = sinTildes(texto) + '|' + cc, c = CACHE_MU[k];
+  if(c && Date.now() - c.t < 6 * 3600e3) return c.r;
+  var res = null, e1 = null;
+  try{ res = await buscarAppleDirecto(texto, cc); }
+  catch(err){
+    e1 = err; anotar('apple', err.message);
+    try{ await new Promise(function(q){ setTimeout(q, 1200); }); res = await buscarAppleDirecto(texto, cc); e1 = null; }
+    catch(err2){ e1 = err2; }
+  }
+  if(!res || !res.length){
+    try{ var d = await buscarDeezer(texto); if(d.length) res = d; }
+    catch(err3){ if(!res) throw new Error((e1 ? e1.message : 'sin respuesta') + ' / ' + err3.message); }
+  }
+  res = res || [];
+  CACHE_MU[k] = {t:Date.now(), r:res};
+  return res;
+}
+async function exitosApple(cc){
+  try{ return await exitosAppleDirecto(cc); }
+  catch(err){
+    anotar('apple', err.message);
+    var d = await jsonp('https://api.deezer.com/chart/0/tracks?limit=25', 9000);
+    return ((d && d.data) || []).map(pistaDeDeezer).filter(Boolean);
+  }
 }
 async function radiosTop(cc){
   var orden = servidoresPorOrden(RADIOBROWSER, 'mm_rb_ok'), ultimo = null;
@@ -2417,7 +2479,7 @@ function abrirItem(it, lista){
 /* ── la pestaña Buscar → Música ── */
 async function lanzarBusquedaMusica(texto){
   texto = String(texto || '').trim();
-  if(!texto){ mu.res = []; mu.texto = ''; mu.fallo = ''; pintarBuscar(); return; }
+  if(!texto){ mu.res = []; mu.au = []; mu.texto = ''; mu.fallo = ''; pintarBuscar(); return; }
   mu.buscando = true; mu.texto = texto; mu.fallo = ''; mu.au = []; pintarBuscar();
   var pAp = buscarApple(texto, paisIni()), pAu = buscarAudius(texto).catch(function(){ return []; });
   try{
@@ -2426,7 +2488,7 @@ async function lanzarBusquedaMusica(texto){
     auResultados = mu.au;
     if(!mu.res.length && !mu.au.length) mu.fallo = 'No aparece nada con ese nombre. Prueba con otra forma de escribirlo.';
   }catch(err){
-    mu.res = []; mu.fallo = 'No se pudo preguntar ahora mismo. ¿Tienes internet?';
+    mu.res = []; mu.fallo = 'No se pudo preguntar ahora mismo. ¿Tienes internet? (' + String(err.message).slice(0, 80) + ')';
     anotar('apple', err.message);
   }
   mu.buscando = false; pintarBuscar();
@@ -2940,14 +3002,13 @@ async function pintarAjustes(){
   '<div class="card"><h3>Perfil</h3>'+
     '<div class="perfil">'+ avatarDe(yo, 66) +
       '<div class="perfil-x"><div class="perfil-n">'+esc(p.n)+'</div>'+
-      '<div class="perfil-s">'+(fotoDe(yo)?'Con tu foto':'Toca para ponerte una foto')+'</div></div></div>'+
+      '</div></div>'+
     '<button class="btn suave" id="a-foto">📷&nbsp; '+(fotoDe(yo)?'Cambiar la foto':'Poner una foto')+'</button>'+
     (fotoDe(yo)?'<button class="btn" id="a-quitarfoto">🗑&nbsp; Quitar la foto</button>':'')+
     '<button class="btn" id="a-cambiar">🔄&nbsp; Cambiar de persona</button></div>'+
 
   '<div class="card"><h3>Tamaño de la letra</h3>'+
-    '<div class="kv"><span>Para leerla de un vistazo, sobre todo en el coche.</span></div>'+
-    '<div class="tabs fijas" style="grid-template-columns:repeat(3,1fr);margin:8px 0 0">'+
+    '<div class="tabs fijas" style="grid-template-columns:repeat(3,1fr);margin:4px 0 0">'+
       LETRAS.map(function(L){
         return '<button class="tab'+(((AJ.letra||'normal')===L[0])?' on':'')+'" data-letra="'+L[0]+'">'+L[2]+'</button>';
       }).join('')+
@@ -2963,41 +3024,24 @@ async function pintarAjustes(){
     '</div></div>'+
 
   '<div class="card"><h3>Coche</h3>'+
-    '<button class="btn solido" id="a-coche">🚗&nbsp; Entrar en modo coche</button>'+
-    '<div class="kv"><span>Tres botones gigantes para no mirar la pantalla.</span></div>'+
-    '<div class="kv"><span>Ponerlo también en Inicio</span>'+
+    '<button class="btn solido" id="a-coche" style="margin-top:0">🚗&nbsp; Entrar en modo coche</button>'+
+    '<div class="kv"><span>Modo coche también en Inicio</span>'+
       '<span class="sw'+(AJ.cocheEnInicio?' on':'')+'" data-aj="cocheEnInicio"></span></div>'+
-    '<div class="kv"><span>Mantener la pantalla encendida<br><span class="pista">Con el móvil en el soporte. Gasta más batería.</span></span>'+
-      '<span class="sw'+(AJ.pantalla?' on':'')+'" data-aj="pantalla"></span></div>'+
-    '<div class="kv"><span>Volver sola tras una llamada<br><span class="pista">Siempre activo</span></span>'+
-      '<span class="v">✅</span></div></div>'+
+    '<div class="kv"><span>Pantalla siempre encendida</span>'+
+      '<span class="sw'+(AJ.pantalla?' on':'')+'" data-aj="pantalla"></span></div></div>'+
 
-  '<div class="card"><h3>Tus MP3</h3>'+
-    '<div class="kv"><span>Los MP3 que añades se guardan <b>solos</b> dentro de la app y suenan sin internet. '+
-      'Lo único que iOS no deja hacer solo es <b>ir a buscarlos</b>: tienes que elegirlos tú una vez, en '+
-      '<b>Biblioteca → ➕ Añadir música</b>.<br><span class="pista">Si los tienes en iCloud Drive, ahí mismo los verás.</span></span></div>'+
-    '<button class="btn suave" id="a-anadir2">➕&nbsp; Añadir música ahora</button></div>'+
-
-  '<div class="card" style="border-color:var(--cyan)"><h3>Copia de seguridad</h3>'+
-    '<div class="kv"><span>Guarda tus emisoras, favoritos (canciones, radios y vídeos), listas, historial, foto y ajustes en un archivo. '+
-      '<b>Hazla antes de borrar el icono</b> de la app: el iPhone se lleva los datos al desinstalarla.'+
-      '<br><span class="pista">No guarda los MP3: esos los tienes en el ordenador.</span></span></div>'+
-    '<button class="btn suave" id="a-exportar">💾&nbsp; Guardar copia</button>'+
+  '<div class="card"><h3>Tus datos</h3>'+
+    '<button class="btn suave" id="a-anadir2" style="margin-top:0">➕&nbsp; Añadir mis MP3</button>'+
+    '<button class="btn" id="a-exportar">💾&nbsp; Guardar copia de seguridad</button>'+
     '<button class="btn" id="a-importar">📂&nbsp; Restaurar una copia</button>'+
+    '<div class="kv"><span class="pista">Haz la copia antes de borrar el icono: el iPhone se lleva los datos. No incluye los MP3.</span></div>'+
     '<input type="file" id="fcopia" accept="application/json,.json" class="oculto"></div>'+
-
-  '<div class="card"><h3>Si algo va mal</h3>'+
-    '<div class="kv"><span>Errores anotados</span><span class="v">'+errores.length+'</span></div>'+
-    '<button class="btn" id="a-informe">📋&nbsp; Copiar informe para Emmanuel</button>'+
-    '<button class="btn" id="a-reparar">🛟&nbsp; Reparar la app (conserva la música)</button></div>'+
 
   '<div class="card"><h3>Sobre la app</h3>'+
     '<div class="credito">Propiedad de la <b>Familia Díaz González</b><br>Creador: <b>Emmanuel Díaz</b><br>Versión '+APP_VERSION+'</div>'+
-    '<div class="credito" style="font-size:calc(10.5px * var(--esc));opacity:.5;margin-top:6px">'+
-      'pantalla '+screen.width+'×'+screen.height+' · ventana '+innerWidth+'×'+innerHeight+
-      ' · margen '+envReal('safe-area-inset-top')+'/'+envReal('safe-area-inset-bottom')+
-      ' · sobra '+Math.max(0, screen.height - innerHeight - envReal('safe-area-inset-top'))+'</div>'+
-    '<div class="sign">Emmanuel Díaz</div></div>';
+    '<div class="sign">Emmanuel Díaz</div>'+
+    '<button class="btn" id="a-informe">📋&nbsp; Copiar informe de errores'+(errores.length ? ' ('+errores.length+')' : '')+'</button>'+
+    '<button class="btn" id="a-reparar">🛟&nbsp; Reparar la app (conserva la música)</button></div>';
 }
 
 /* ═════════ Diagnóstico (la prueba del coche, dentro de la app) ══ */
@@ -3541,7 +3585,7 @@ function ponerPestana(t){
   ytVerId = null; ytResultados = []; ytTexto = ''; ytBuscando = false;
   iaAbierto = null; iaResultados = []; iaTexto = ''; iaBuscando = false;
   rbResultados = []; rbTexto = ''; rbBuscando = false; rbFallo = '';
-  mu.res = []; mu.texto = ''; mu.buscando = false; mu.fallo = '';
+  mu.res = []; mu.au = []; mu.texto = ''; mu.buscando = false; mu.fallo = '';
   pintarBuscar();
   $('v-buscar').scrollTop = 0;
 }

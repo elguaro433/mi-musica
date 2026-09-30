@@ -8,6 +8,18 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
+## 🆕 Sesión del 30/09/2026 (v1.13.0 → v1.14.0) — LEER ANTES QUE LO DE ABAJO
+
+Lo de abajo es de la v1.7.0; esto es lo que cambió después y manda sobre ello.
+- **Inicio ya no depende de los MP3.** Trae éxitos de hoy (Apple, `itunes.apple.com/{pais}/rss/topsongs/.../genre=12/json`, con CORS), Audius, emisoras top de Radio Browser y «Porque escuchas a…» (saca el artista del historial). Caché en `mm_ini_<pais>`, 30 min. País elegible (`mm_pais_<yo>`).
+- **Historial** (`mm_hist_<yo>`, `anotarHisto`) y **emisoras más oídas** (`mm_radio_n_<yo>`, `contarRadio`).
+- **Buscar → 🎧 Música** (primera pestaña): artista en Apple iTunes Search (carátula + 30 s de vista previa + enlaces de compra Apple/Amazon/Qobuz) y debajo las completas de Audius. «Escucharla entera» abre el vídeo de YouTube. **Descubrir pasó a ser solo «📼 Clásicos»** (Internet Archive).
+- **Radio:** busca sola mientras escribes (nombre, ciudad/estado, país, etiqueta; «Líder» sí sale). Arriba: «Radios de éxitos», «Por estilo» (un toque = suena la más escuchada) y «Las que más oyes». KYS FM 101.5 quitada (caída).
+- **YouTube:** ya no dice «Guardar vídeo» (era mentira: solo guardaba el enlace). Es un ❤️; salen en Biblioteca → Favoritas.
+- **Copia de seguridad** ahora guarda también corazones de Audius/Apple, vídeos, historial, emisoras más oídas, país, foto y ajustes.
+- **LO QUE EL USUARIO PIDIÓ Y NO SE HIZO (decidido, no volver a ofrecer):** bajar audio de YouTube a MP3 / webs «YouTube to MP3», aunque sea «uso personal» y firme un documento. No se construye. Tampoco sugerir Apple Music/Spotify como «solución»: lo vivió como que no respondía a lo que pedía. Lo legal que sí hay: comprar MP3 (Amazon/Qobuz/Apple), radio, Audius.
+- **Siguiente (propuesto, sin hacer):** seguir cantantes + «novedades» en Inicio (iTunes `lookup ... sort=recent`), página de cantante con discos, «Reproducir éxitos» en cadena con YouTube (solo pantalla encendida), lista «Por comprar».
+
 ## 👉 EMPIEZA AQUÍ (tras la sesión del 29/09/2026 noche, v1.7.0)
 
 **La prueba del coche está SUPERADA.** El 29/09 Emmanuel la repitió en su

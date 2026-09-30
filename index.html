@@ -155,7 +155,7 @@ button{font-family:inherit;color:inherit}
 /* Dentro de .r-s (que es flex) un texto suelto NO se encoge, asi que empujaba
    la calidad y las estrellas fuera de la pantalla. Esto es lo que cede. */
 .enc{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.r-a{flex:0 0 auto;color:var(--dim);font-size:calc(17px * var(--esc));padding:13px 12px;margin:-13px -7px}
+.r-a{flex:0 0 auto;color:var(--dim);font-size:calc(17px * var(--esc));padding:13px 12px;margin:-13px -7px;min-width:46px;box-sizing:border-box;text-align:center}
 .r-a.on{color:var(--pink)}
 .hscroll{display:flex;gap:13px;overflow-x:auto;scrollbar-width:none;
   margin-left:calc(-1 * (var(--gutter) + var(--sal)));margin-right:calc(-1 * (var(--gutter) + var(--sar)));
@@ -167,6 +167,19 @@ button{font-family:inherit;color:inherit}
   overflow:hidden;text-overflow:ellipsis;font-family:var(--font-d)}
 .tile .s{display:block;font-size:calc(11.5px * var(--esc));color:var(--muted);white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis}
+
+/* ---------- buscador (arriba de Buscar) ---------- */
+.busca{position:relative;margin:0 0 12px}
+.busca .lupa{position:absolute;left:17px;top:50%;transform:translateY(-54%);font-size:calc(22px * var(--esc));
+  color:var(--dim);pointer-events:none;line-height:1}
+.busca .campo{margin:0;padding:14px 16px 14px 46px;border-radius:30px;background:var(--card2);
+  border:1px solid var(--line);min-height:50px}
+.busca .campo::-webkit-search-cancel-button{-webkit-appearance:none}
+.tile.sk .art{background:var(--card2);animation:pulso 1.3s ease-in-out infinite}
+.tile.sk .t,.tile.sk .s{background:var(--card2);border-radius:6px;animation:pulso 1.3s ease-in-out infinite;
+  color:transparent;width:70%;margin-top:8px}
+@keyframes pulso{0%,100%{opacity:.55}50%{opacity:1}}
+a.opc{text-decoration:none;color:inherit}
 
 /* ---------- pestañas y campos ---------- */
 .tabs{display:flex;gap:8px;margin:2px 0 14px;overflow-x:auto;scrollbar-width:none}
@@ -414,14 +427,15 @@ body.coche #coche-salir{display:block}
   <!-- Buscar -->
   <div class="view" id="v-buscar">
     <div class="vhead"><div><h2>Buscar</h2></div><div class="gear" data-ir="ajustes">⚙️</div></div>
-    <div class="tabs fijas">
-      <button class="tab on" data-t="mimusica">🎵 Mi música</button>
+    <form id="form-q" autocomplete="off"><div class="busca"><span class="lupa">⌕</span><input class="campo" id="q" type="search" enterkeyhint="search"
+      placeholder="Cantante, grupo o canción" autocomplete="off" autocorrect="off" autocapitalize="off"></div></form>
+    <div class="tabs" id="tabs-b">
+      <button class="tab on" data-t="musica">🎧 Música</button>
+      <button class="tab" data-t="mimusica">🎵 Mi música</button>
       <button class="tab" data-t="radio">📻 Radio</button>
       <button class="tab" data-t="youtube">▶︎ YouTube</button>
-      <button class="tab" data-t="descubrir">🔎 Descubrir</button>
+      <button class="tab" data-t="descubrir">📼 Clásicos</button>
     </div>
-    <form id="form-q" autocomplete="off"><input class="campo" id="q" type="search" enterkeyhint="search"
-      placeholder="Buscar…" autocomplete="off" autocorrect="off" autocapitalize="off"></form>
     <div id="tab-cuerpo"></div>
   </div>
 
@@ -512,7 +526,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.12.0';
+var APP_VERSION = '1.14.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -567,7 +581,7 @@ function toast(msg, tipo, ms){
 }
 
 /* ─── emisoras de fábrica (probadas una a una) ───────────────────── */
-var EMISORAS = [{"ciudad": "Andorra", "nombre": "RNA - Radio Nacional d'Andorra", "genero": "Generalista", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-f-c0-7/restreamer/outgest/578e48f3-c654-4638-948a-be990c90807b/manifest.m3u8", "kbps": 0, "codec": "HLS", "logo": "https://www.rtva.ad/favicon/android-chrome-192x192.png"}, {"ciudad": "Andorra", "nombre": "Andorra Musica", "genero": "Musica", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-g-c0-3/restreamer/outgest/e2b4dcb0-7ae3-4335-992a-23ba82e529b3/manifest.m3u8", "kbps": 0, "codec": "HLS"}, {"ciudad": "Andorra", "nombre": "Flaix FM Andorra", "genero": "Dance, reggaeton", "url": "https://streaming.giraweb.com/8020/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://upload.wikimedia.org/wikipedia/commons/6/65/Flaixfm_logo.jpg?utm_source=de.wikipedia.org&utm_campaign=parser&utm_content=thumbnail_unscaled"}, {"ciudad": "Andorra", "nombre": "Flaixbac Andorra", "genero": "Pop", "url": "https://streaming.giraweb.com/8010/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://flaixandorra.com/continguts/multimedia/imatges/8p0oa06li8kckkwosw.png"}, {"ciudad": "Andorra", "nombre": "Radio Valira", "genero": "Variada", "url": "https://mars.streamerr.co/8022/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Andorra", "nombre": "SER Andorra", "genero": "Generalista", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_ANDORRA.mp3", "kbps": 96, "codec": "MP3", "logo": "https://cadenaser00.epimg.net/favicon.png"}, {"ciudad": "Barquisimeto", "nombre": "Rumba 100.1 FM", "genero": "Latin pop, variada", "url": "https://cast10.plugstreaming.com:2020/stream/r1001/;", "kbps": 64, "codec": "HE-AAC", "logo": "https://plugmedia.co/play/wp-content/uploads/2021/02/Logo_Barquisimeto.png"}, {"ciudad": "Barquisimeto", "nombre": "Fama 98.1 FM", "genero": "Variada", "url": "https://server6.globalhostla.com:9356/stream", "kbps": 64, "codec": "AAC", "logo": "https://fama.fm/wp-content/uploads/2020/07/Logo-Header-Blanco.png"}, {"ciudad": "Caracas", "nombre": "Exitos 99.9 FM", "genero": "Exitos, pop", "url": "https://acp4.lorini.net:2070/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "La Mega 107.3", "genero": "Pop, urbano", "url": "https://acp4.lorini.net:2050/stream", "kbps": 128, "codec": "MP3", "logo": "https://www.phonostar.de/images/auto_created/La_Mega_1073184x184.png"}, {"ciudad": "Caracas", "nombre": "Planeta 105.3 FM", "genero": "Romantica, pop espanol", "url": "https://cast10.plugstreaming.com:2020/stream/planetafm/;", "kbps": 96, "codec": "HE-AAC", "logo": "https://plugmedia.co/play/wp-content/uploads/2021/01/Logo-Planeta-Original-en-PNG.png"}, {"ciudad": "Caracas", "nombre": "KYS FM 101.5", "genero": "Adult contemporary", "url": "https://server6.globalhostla.com:9068/stream", "kbps": 160, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "Onda La Superestacion 107.9", "genero": "Pop", "url": "https://acp4.lorini.net:2060/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "LOS40 Colombia", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_COLOMBIAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://cdn-profiles.tunein.com/p1306541/images/logod.png"}, {"ciudad": "Bogota", "nombre": "Tropicana Estereo 102.9", "genero": "Salsa, vallenato, tropical", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_SC", "kbps": 128, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/tropicana-bogota.png"}, {"ciudad": "Bogota", "nombre": "Candela Estereo 101.9", "genero": "Salsa, tropical, latino", "url": "https://26523.live.streamtheworld.com/CANDELAESTEREO_SC", "kbps": 96, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/candela.png"}, {"ciudad": "Bogota", "nombre": "Vibra Bogota 104.9", "genero": "Salsa, vallenato, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/VIBRA_SC", "kbps": 96, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/vibra-bogota.png"}, {"ciudad": "Bogota", "nombre": "Radioacktiva 97.9", "genero": "Rock", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_ACTIVAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://www.radioacktiva.com/wp-content/uploads/2024/12/LOGO-RADIOACKTIVA-WEB-286X84.png"}, {"ciudad": "Bogota", "nombre": "Olimpica Stereo 105.9", "genero": "Salsa, vallenato, crossover", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/OLP_BOGOTAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://olimpicastereo.com.co/icon?b8748d2f62517688"}, {"ciudad": "Bogota", "nombre": "Besame Bogota 89.9", "genero": "Romantica, baladas", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/BESAME_BOGOTAAAC.aac", "kbps": 56, "codec": "HE-AAC", "logo": "https://emisorascolombianas.online/logos/besame.png"}, {"ciudad": "Espana", "nombre": "LOS 40 Principales", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Los40.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/iconos/v1.x/v1.0/touch-apple.png"}, {"ciudad": "Espana", "nombre": "LOS40 Dance", "genero": "Dance, electronica", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_DANCE.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/estaticos/recursosgraficos/v1/img/app/los40_192.png"}, {"ciudad": "Espana", "nombre": "LOS40 Urban", "genero": "Urbano, reggaeton", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_URBAN.mp3", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Cadena Dial", "genero": "Pop en espanol", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CADENADIAL.mp3", "kbps": 128, "codec": "MP3", "logo": "https://www.cadenadial.com/wp-content/uploads/2024/03/cropped-512x512_favicon_dial-180x180.png"}, {"ciudad": "Espana", "nombre": "KISS FM", "genero": "80s, 90s, 2000s", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbkissfm.kissfmradio.cires21.com/bbkissfm.mp3", "kbps": 56, "codec": "MP3", "logo": "https://www.kissfm.es/wp-content/uploads/2020/09/favicon_KISS.jpg"}, {"ciudad": "Espana", "nombre": "Cadena 100", "genero": "Pop", "url": "https://cadena100-cope.flumotion.com/chunks.m3u8", "kbps": 128, "codec": "HLS", "logo": "https://www.cadena100.es/estaticos/apple-touch-icon-192x192.png"}, {"ciudad": "Espana", "nombre": "Hit FM", "genero": "Exitos actuales", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbhitfm.kissfmradio.cires21.com/bbhitfm.mp3", "kbps": 56, "codec": "MP3", "logo": "https://www.hitfm.es/wp-content/uploads/2019/06/cropped-favicon-192x192.png"}, {"ciudad": "Espana", "nombre": "Rock FM", "genero": "Rock clasico", "url": "https://rockfm-cope.flumotion.com/chunks.m3u8", "kbps": 320, "codec": "HLS", "logo": "https://www.rockfm.fm/estaticos/apple-touch-icon-120x120.png"}, {"ciudad": "Espana", "nombre": "Maxima FM", "genero": "Dance, electronica", "url": "https://en-directo.frequence-radio.com/amp/redirect.php?radio=maxima-fm", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Flaix FM", "genero": "Dance, reggaeton", "url": "https://stream.flaixfm.cat/icecast", "kbps": 125, "codec": "AAC", "logo": "https://flaixfm.cat/favicon.ico"}];
+var EMISORAS = [{"ciudad": "Andorra", "nombre": "RNA - Radio Nacional d'Andorra", "genero": "Generalista", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-f-c0-7/restreamer/outgest/578e48f3-c654-4638-948a-be990c90807b/manifest.m3u8", "kbps": 0, "codec": "HLS", "logo": "https://www.rtva.ad/favicon/android-chrome-192x192.png"}, {"ciudad": "Andorra", "nombre": "Andorra Musica", "genero": "Musica", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-g-c0-3/restreamer/outgest/e2b4dcb0-7ae3-4335-992a-23ba82e529b3/manifest.m3u8", "kbps": 0, "codec": "HLS"}, {"ciudad": "Andorra", "nombre": "Flaix FM Andorra", "genero": "Dance, reggaeton", "url": "https://streaming.giraweb.com/8020/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://upload.wikimedia.org/wikipedia/commons/6/65/Flaixfm_logo.jpg?utm_source=de.wikipedia.org&utm_campaign=parser&utm_content=thumbnail_unscaled"}, {"ciudad": "Andorra", "nombre": "Flaixbac Andorra", "genero": "Pop", "url": "https://streaming.giraweb.com/8010/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://flaixandorra.com/continguts/multimedia/imatges/8p0oa06li8kckkwosw.png"}, {"ciudad": "Andorra", "nombre": "Radio Valira", "genero": "Variada", "url": "https://mars.streamerr.co/8022/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Andorra", "nombre": "SER Andorra", "genero": "Generalista", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_ANDORRA.mp3", "kbps": 96, "codec": "MP3", "logo": "https://cadenaser00.epimg.net/favicon.png"}, {"ciudad": "Barquisimeto", "nombre": "Rumba 100.1 FM", "genero": "Latin pop, variada", "url": "https://cast10.plugstreaming.com:2020/stream/r1001/;", "kbps": 64, "codec": "HE-AAC", "logo": "https://plugmedia.co/play/wp-content/uploads/2021/02/Logo_Barquisimeto.png"}, {"ciudad": "Barquisimeto", "nombre": "Fama 98.1 FM", "genero": "Variada", "url": "https://server6.globalhostla.com:9356/stream", "kbps": 64, "codec": "AAC", "logo": "https://fama.fm/wp-content/uploads/2020/07/Logo-Header-Blanco.png"}, {"ciudad": "Caracas", "nombre": "Exitos 99.9 FM", "genero": "Exitos, pop", "url": "https://acp4.lorini.net:2070/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Caracas", "nombre": "La Mega 107.3", "genero": "Pop, urbano", "url": "https://acp4.lorini.net:2050/stream", "kbps": 128, "codec": "MP3", "logo": "https://www.phonostar.de/images/auto_created/La_Mega_1073184x184.png"}, {"ciudad": "Caracas", "nombre": "Planeta 105.3 FM", "genero": "Romantica, pop espanol", "url": "https://cast10.plugstreaming.com:2020/stream/planetafm/;", "kbps": 96, "codec": "HE-AAC", "logo": "https://plugmedia.co/play/wp-content/uploads/2021/01/Logo-Planeta-Original-en-PNG.png"}, {"ciudad": "Caracas", "nombre": "Onda La Superestacion 107.9", "genero": "Pop", "url": "https://acp4.lorini.net:2060/stream", "kbps": 128, "codec": "MP3"}, {"ciudad": "Bogota", "nombre": "LOS40 Colombia", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_COLOMBIAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://cdn-profiles.tunein.com/p1306541/images/logod.png"}, {"ciudad": "Bogota", "nombre": "Tropicana Estereo 102.9", "genero": "Salsa, vallenato, tropical", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_SC", "kbps": 128, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/tropicana-bogota.png"}, {"ciudad": "Bogota", "nombre": "Candela Estereo 101.9", "genero": "Salsa, tropical, latino", "url": "https://26523.live.streamtheworld.com/CANDELAESTEREO_SC", "kbps": 96, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/candela.png"}, {"ciudad": "Bogota", "nombre": "Vibra Bogota 104.9", "genero": "Salsa, vallenato, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/VIBRA_SC", "kbps": 96, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/vibra-bogota.png"}, {"ciudad": "Bogota", "nombre": "Radioacktiva 97.9", "genero": "Rock", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_ACTIVAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://www.radioacktiva.com/wp-content/uploads/2024/12/LOGO-RADIOACKTIVA-WEB-286X84.png"}, {"ciudad": "Bogota", "nombre": "Olimpica Stereo 105.9", "genero": "Salsa, vallenato, crossover", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/OLP_BOGOTAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://olimpicastereo.com.co/icon?b8748d2f62517688"}, {"ciudad": "Bogota", "nombre": "Besame Bogota 89.9", "genero": "Romantica, baladas", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/BESAME_BOGOTAAAC.aac", "kbps": 56, "codec": "HE-AAC", "logo": "https://emisorascolombianas.online/logos/besame.png"}, {"ciudad": "Espana", "nombre": "LOS 40 Principales", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Los40.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/iconos/v1.x/v1.0/touch-apple.png"}, {"ciudad": "Espana", "nombre": "LOS40 Dance", "genero": "Dance, electronica", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_DANCE.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/estaticos/recursosgraficos/v1/img/app/los40_192.png"}, {"ciudad": "Espana", "nombre": "LOS40 Urban", "genero": "Urbano, reggaeton", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_URBAN.mp3", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Cadena Dial", "genero": "Pop en espanol", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CADENADIAL.mp3", "kbps": 128, "codec": "MP3", "logo": "https://www.cadenadial.com/wp-content/uploads/2024/03/cropped-512x512_favicon_dial-180x180.png"}, {"ciudad": "Espana", "nombre": "KISS FM", "genero": "80s, 90s, 2000s", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbkissfm.kissfmradio.cires21.com/bbkissfm.mp3", "kbps": 56, "codec": "MP3", "logo": "https://www.kissfm.es/wp-content/uploads/2020/09/favicon_KISS.jpg"}, {"ciudad": "Espana", "nombre": "Cadena 100", "genero": "Pop", "url": "https://cadena100-cope.flumotion.com/chunks.m3u8", "kbps": 128, "codec": "HLS", "logo": "https://www.cadena100.es/estaticos/apple-touch-icon-192x192.png"}, {"ciudad": "Espana", "nombre": "Hit FM", "genero": "Exitos actuales", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbhitfm.kissfmradio.cires21.com/bbhitfm.mp3", "kbps": 56, "codec": "MP3", "logo": "https://www.hitfm.es/wp-content/uploads/2019/06/cropped-favicon-192x192.png"}, {"ciudad": "Espana", "nombre": "Rock FM", "genero": "Rock clasico", "url": "https://rockfm-cope.flumotion.com/chunks.m3u8", "kbps": 320, "codec": "HLS", "logo": "https://www.rockfm.fm/estaticos/apple-touch-icon-120x120.png"}, {"ciudad": "Espana", "nombre": "Maxima FM", "genero": "Dance, electronica", "url": "https://en-directo.frequence-radio.com/amp/redirect.php?radio=maxima-fm", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Flaix FM", "genero": "Dance, reggaeton", "url": "https://stream.flaixfm.cat/icecast", "kbps": 125, "codec": "AAC", "logo": "https://flaixfm.cat/favicon.ico"}];
 var CIUDADES = [['Andorra','🇦🇩','Andorra'],['Barquisimeto','🇻🇪','Barquisimeto'],
                 ['Caracas','🇻🇪','Caracas'],['Bogota','🇨🇴','Bogotá'],['Espana','🇪🇸','España']];
 function plural(n, uno, varios){ return n + ' ' + (n === 1 ? uno : varios); }
@@ -986,7 +1000,8 @@ var PAISES = {
   'guatemala':'Guatemala', 'el salvador':'El Salvador', 'nicaragua':'Nicaragua',
   'bolivia':'Bolivia', 'uruguay':'Uruguay', 'paraguay':'Paraguay',
   'france':'Francia', 'portugal':'Portugal', 'italy':'Italia', 'brazil':'Brasil',
-  'germany':'Alemania', 'the united kingdom of great britain and northern ireland':'Reino Unido'
+  'bolivarian republic of venezuela':'Venezuela', 'türkiye':'Turquía', 'turkey':'Turquía',
+  'belarus':'Bielorrusia', 'canada':'Canadá', 'germany':'Alemania', 'the united kingdom of great britain and northern ireland':'Reino Unido'
 };
 function nombrePais(n){
   var t = String(n || '').trim();
@@ -1010,48 +1025,101 @@ function emisoraDelMundo(x){
   var logo = String((x && x.favicon) || '');
   if(logo.indexOf('https://') !== 0) logo = '';
   return {nombre: nombre,
-          ciudad: (bandera(x.countrycode) + ' ' + nombrePais(x.country)).trim(),
+          ciudad: (bandera(x.countrycode) + ' ' + nombrePais(x.country)).trim() +
+                  (x.state ? ' \u00b7 ' + String(x.state).split(',')[0].trim() : ''),
           genero: tags || 'Variada', logo: logo,
           url: url, kbps: +(x.bitrate || 0) || 0, codec: codec || 'MP3'};
 }
+var CODIGOS_PAIS = {
+  'colombia':'CO', 'venezuela':'VE', 'espana':'ES', 'spain':'ES', 'republica dominicana':'DO',
+  'dominicana':'DO', 'mexico':'MX', 'puerto rico':'PR', 'andorra':'AD', 'estados unidos':'US',
+  'usa':'US', 'eeuu':'US', 'argentina':'AR', 'peru':'PE', 'ecuador':'EC', 'chile':'CL',
+  'panama':'PA', 'cuba':'CU', 'costa rica':'CR', 'honduras':'HN', 'guatemala':'GT',
+  'el salvador':'SV', 'nicaragua':'NI', 'bolivia':'BO', 'uruguay':'UY', 'paraguay':'PY',
+  'francia':'FR', 'portugal':'PT', 'italia':'IT', 'brasil':'BR', 'alemania':'DE',
+  'reino unido':'GB', 'inglaterra':'GB', 'canada':'CA', 'japon':'JP', 'china':'CN'
+};
+function sinTildes(t){
+  try{ return String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+  catch(_){ return String(t).toLowerCase(); }
+}
+/* Escribes "Líder", "Barquisimeto", "Venezuela" o "Líder Venezuela" y se
+   busca por nombre, por etiqueta, por estado/ciudad y por país a la vez. Las
+   que más palabras aciertan salen primero. */
 async function buscarEmisorasMundo(texto){
-  var t = encodeURIComponent(String(texto).trim());
-  var cola = '&is_https=true&hidebroken=true&order=clickcount&reverse=true&limit=30';
+  var norm = sinTildes(texto).replace(/\s+/g, ' ').trim();
+  var palabras = norm.split(' ').filter(Boolean);
+  var cc = '', resto = palabras.slice();
+  if(CODIGOS_PAIS[norm]){ cc = CODIGOS_PAIS[norm]; resto = []; }
+  else{
+    for(var n = 2; n >= 1 && !cc; n--)
+      for(var i = 0; i + n <= palabras.length && !cc; i++){
+        var f = palabras.slice(i, i + n).join(' ');
+        if(CODIGOS_PAIS[f]){ cc = CODIGOS_PAIS[f]; resto = palabras.slice(0, i).concat(palabras.slice(i + n)); }
+      }
+  }
+  var pedidos = [], T = encodeURIComponent(String(texto).trim()), R = encodeURIComponent(resto.join(' '));
+  if(cc){
+    if(resto.length){
+      pedidos.push('name=' + R + '&countrycode=' + cc);
+      pedidos.push('state=' + R + '&countrycode=' + cc);
+      pedidos.push('tag=' + R + '&countrycode=' + cc);
+    }else pedidos.push('countrycode=' + cc);
+  }else{
+    pedidos.push('name=' + T); pedidos.push('tag=' + T); pedidos.push('state=' + T);
+    if(palabras.length > 1) palabras.forEach(function(w){
+      if(w.length > 2) pedidos.push('name=' + encodeURIComponent(w)); });
+  }
+  var cola = '&is_https=true&hidebroken=true&order=clickcount&reverse=true&limit=40';
   var orden = servidoresPorOrden(RADIOBROWSER, 'mm_rb_ok'), ultimo = null;
-  for(var i=0;i<orden.length;i++){
+  for(var s2 = 0; s2 < orden.length; s2++){
     try{
-      // Dos preguntas a la vez: por nombre ("Olimpica") y por etiqueta
-      // ("salsa"). El que escribe no tiene por qué saber cuál de las dos es.
-      var dos = await Promise.all([
-        traerConLimite(orden[i] + '/json/stations/search?name=' + t + cola, 9000),
-        traerConLimite(orden[i] + '/json/stations/search?tag='  + t + cola, 9000)
-      ]);
-      try{ localStorage.setItem('mm_rb_ok', orden[i]); }catch(_){}
-      var vistas = {}, fuera = [];
-      [].concat(dos[1] || [], dos[0] || []).forEach(function(x){
-        var e = emisoraDelMundo(x);
-        if(!e) return;
-        var k = e.url.toLowerCase();
-        if(vistas[k]) return;
-        vistas[k] = true; fuera.push(e);
+      var varias = await Promise.all(pedidos.map(function(q, k){
+        var pr = traerConLimite(orden[s2] + '/json/stations/search?' + q + cola, 9000);
+        return k === 0 ? pr : pr.catch(function(){ return []; });   // si falla la primera, se prueba otro servidor
+      }));
+      try{ localStorage.setItem('mm_rb_ok', orden[s2]); }catch(_){}
+      var vistas = {}, lista = [];
+      varias.forEach(function(arr){
+        (arr || []).forEach(function(x){
+          var e = emisoraDelMundo(x);
+          if(!e) return;
+          var k2 = e.url.toLowerCase();
+          if(vistas[k2]) return;
+          vistas[k2] = true;
+          var pajar = sinTildes(x.name + ' ' + (x.state || '') + ' ' + (x.tags || '') + ' ' + (x.country || ''));
+          var pts = 0;
+          palabras.forEach(function(w){ if(pajar.indexOf(w) >= 0) pts++; });
+          if(cc && String(x.countrycode).toUpperCase() === cc) pts++;
+          // entre empatadas, primero las de casa: Venezuela y Colombia, y luego el resto de habla hispana
+          var pc = String(x.countrycode).toUpperCase();
+          if(pc === 'VE' || pc === 'CO') pts += 0.4;
+          else if(/^(ES|DO|MX|PR|AR|PE|EC|CL|PA|CU|CR|HN|GT|SV|NI|BO|UY|PY|AD)$/.test(pc)) pts += 0.2;
+          lista.push({e:e, pts:pts, i:lista.length});
+        });
       });
-      return fuera.slice(0, 40);
-    }catch(err){ ultimo = err; anotar('radiobrowser', orden[i] + ' · ' + err.message); }
+      lista.sort(function(a, b){ return (b.pts - a.pts) || (a.i - b.i); });
+      return lista.map(function(o){ return o.e; }).slice(0, 50);
+    }catch(err){ ultimo = err; anotar('radiobrowser', orden[s2] + ' \u00b7 ' + err.message); }
   }
   throw ultimo || new Error('ningún servidor respondió');
 }
 var rbResultados = [], rbBuscando = false, rbTexto = '', rbFallo = '';
+var rbTurno = 0;
 async function lanzarBusquedaMundo(texto){
   texto = String(texto || '').trim();
-  if(!texto){ rbResultados = []; rbTexto = ''; rbFallo = ''; pintarBuscar(); return; }
+  var turno = ++rbTurno;
+  if(!texto){ rbResultados = []; rbTexto = ''; rbFallo = ''; rbBuscando = false; pintarBuscar(); return; }
   rbBuscando = true; rbTexto = texto; rbFallo = ''; pintarBuscar();
+  var res = [], fallo = '';
   try{
-    rbResultados = await buscarEmisorasMundo(texto);
-    if(!rbResultados.length) rbFallo = 'Ninguna emisora con ese nombre ni ese estilo.';
+    res = await buscarEmisorasMundo(texto);
+    if(!res.length) fallo = 'Ninguna emisora con ese nombre, ciudad o país.';
   }catch(err){
-    rbResultados = []; rbFallo = 'No se pudo preguntar ahora mismo. Mira si tienes internet.';
+    res = []; fallo = 'No se pudo preguntar ahora mismo. Mira si tienes internet.';
   }
-  rbBuscando = false; pintarBuscar();
+  if(turno !== rbTurno) return;          // ya escribió otra cosa: esta respuesta llega tarde
+  rbResultados = res; rbFallo = fallo; rbBuscando = false; pintarBuscar();
 }
 /* La fila de una emisora que todavía NO es tuya: se escucha tocándola, y el
    ➕ la guarda para siempre (y entonces la ven los dos). */
@@ -1081,14 +1149,14 @@ function filaEmisoraMundo(e, i){
 }
 /* El bloque que se ve debajo de tus emisoras, dentro de la pestaña Radio. */
 function bloqueMundo(){
-  var h = '<div class="city">🌍 En todo el mundo</div>';
+  var h = '<div class="city">🌍 Emisoras de todo el mundo</div>';
   if(rbBuscando) return h + '<div class="vacio"><span class="em">⏳</span>Buscando «' + esc(rbTexto) + '»…</div>';
   if(rbFallo)    return h + '<div class="vacio"><span class="em">📻</span>' + esc(rbFallo) + '</div>';
   if(rbResultados.length)
     return h + rbResultados.map(function(e, i){ return filaEmisoraMundo(e, i); }).join('');
   return h +
     '<div class="hscroll" style="margin-top:2px">' +
-    ['reggaeton','salsa','bachata','vallenato','merengue','Medellin','Santo Domingo','Caracas']
+    ['Venezuela','Colombia','España','Andorra','Barquisimeto','Caracas','Medellín','Santo Domingo','Líder']
       .map(function(t){ return '<button class="tab" data-rb-sug="' + esc(t) + '">' + esc(t) + '</button>'; })
       .join('') + '</div>';
 }
@@ -1137,7 +1205,7 @@ var LISTAS = [];
 var EMIS_CASA = [];            // emisoras añadidas a mano
 var FAV_RADIO = {};            // nombre → true (del dueño actual)
 var VIDEOS = [];
-var vistaActual = 'quien', pestana = 'mimusica', filtro = 'favoritos';
+var vistaActual = 'quien', pestana = 'musica', filtro = 'favoritos';
 var listaAbierta = null;       // id de la lista cuya ficha estás mirando
 var AJ = {};                   // ajustes del teléfono
 
@@ -1375,6 +1443,7 @@ async function tocarCancion(id, listaIds){
     c.veces = (c.veces||0) + 1; c.ultima = Date.now();
     guardar('canciones', limpia(c));
     guardarUltimo(); guardarCola();
+    anotarHisto({k:'c', key:'c'+c.id, titulo:c.titulo, sub:c.artista, artista:c.artista, dat:c.id});
     await pintarAhora(c);
   }catch(err){
     anotar('tocarCancion', err.message);
@@ -1399,6 +1468,10 @@ function tocarRadio(e){
     else programarReconexion();
   });
   guardarUltimo();
+  contarRadio(e);
+  anotarHisto({k:'r', key:'r'+e.url, titulo:e.nombre, sub:nombreCiudad(e.ciudad), img:e.logo || '',
+               dat:{nombre:e.nombre, ciudad:e.ciudad, genero:e.genero, url:e.url, logo:e.logo || '',
+                    kbps:e.kbps || 0, codec:e.codec || '', tipo:'radio'}});
   pintarAhora(null);
 }
 
@@ -1751,7 +1824,9 @@ async function exportarCopia(){
         return {hash:c.hash, titulo:c.titulo, artista:c.artista, album:c.album,
                 genero:c.genero, anio:c.anio, fav:!!c.fav, veces:c.veces||0}; }),
       listas: ls.map(function(l){ return {nombre:l.nombre, canciones:l.canciones}; }),
-      emisoras: em, favRadio: fr, videos: vs.map(function(v){ return {vid:v.vid, titulo:v.titulo}; })
+      emisoras: em, favRadio: fr, videos: vs.map(function(v){ return {vid:v.vid, titulo:v.titulo, canal:v.canal || ''}; }),
+      favAu: favAudius(), hist: histo(), radioN: conteoRadio(), pais: paisIni(),
+      foto: fotoDe(yo), ajustes: AJ
     };
     var b = new Blob([JSON.stringify(datos, null, 1)], {type:'application/json'});
     var u = URL.createObjectURL(b);
@@ -1785,6 +1860,23 @@ async function importarCopia(file){
     for(var k=0;k<(d.emisoras||[]).length;k++) await guardar('emisoras', d.emisoras[k]);
     for(var m=0;m<(d.favRadio||[]).length;m++)
       await guardar('favradio', {k: yo+'|'+d.favRadio[m], duenyo:yo, nombre:d.favRadio[m]});
+    for(var v2=0;v2<(d.videos||[]).length;v2++){
+      var vv = d.videos[v2];
+      if(vv && vv.vid) await guardar('videos', {id:yo+'_'+vv.vid, duenyo:yo, vid:vv.vid, titulo:vv.titulo, canal:vv.canal || ''});
+    }
+    // lo que vive en localStorage: corazones de Audius/Apple, historial, emisoras más oídas, país, foto, ajustes
+    try{
+      if(d.favAu && d.favAu.length){
+        var ya = favAudius(), ids = {};
+        ya.forEach(function(x){ ids[x.id] = true; });
+        guardarFavAudius(ya.concat(d.favAu.filter(function(x){ return !ids[x.id]; })));
+      }
+      if(d.hist && d.hist.length && !histo().length) localStorage.setItem('mm_hist_' + yo, JSON.stringify(d.hist));
+      if(d.radioN) localStorage.setItem('mm_radio_n_' + yo, JSON.stringify(d.radioN));
+      if(d.pais) localStorage.setItem('mm_pais_' + yo, d.pais);
+      if(d.foto) localStorage.setItem('mm_foto_' + yo, d.foto);
+      if(d.ajustes){ localStorage.setItem('mm_ajustes', JSON.stringify(d.ajustes)); cargarAjustes(); }
+    }catch(_){}
     await cargarDatos(); pintarVista();
     toast('Copia restaurada · ' + rec + ' canciones reconocidas.', 'bueno', 5000);
   }catch(err){ anotar('importar', err.message); toast('No se pudo leer la copia.', 'malo'); }
@@ -1928,49 +2020,461 @@ function filaCancion(c, dentroDe){
     der +
     '<span class="r-a" data-mas="'+esc(c.id)+'">⋯</span></div>';
 }
+/* ═════════ Música de hoy: éxitos y cantantes (Apple) + historial ═════
+   Apple publica sin clave y con CORS (probado el 30/09/2026):
+   · /{pais}/rss/topsongs/.../genre=12/json  -> los éxitos latinos de hoy
+   · /search?term=...&entity=song            -> las canciones de un cantante
+   Dan carátula, 30 s de vista previa y el enlace para comprarla. La canción
+   entera no se puede dar desde aquí: para eso está YouTube (se oye, no se
+   baja) o comprarla (sin candado). */
+var PAISES_INI = [['es','🇪🇸','España'], ['ve','🇻🇪','Venezuela'], ['co','🇨🇴','Colombia'],
+                  ['mx','🇲🇽','México'], ['us','🇺🇸','EE. UU.']];
+var RB_PAIS = {es:'ES', ve:'VE', co:'CO', mx:'MX', us:'US'};
+var ARTISTAS_SUG = ['Bad Bunny','Karol G','Manuel Turizo','CNCO','Marc Anthony','Romeo Santos',
+                    'Maluma','Feid','Shakira','Juan Luis Guerra','Rauw Alejandro','Peso Pluma',
+                    'Daddy Yankee','Ozuna','Anuel AA','Rosalía'];
+var GR = {};                      // lo que hay pintado, por grupo: 'ex', 'au', 'rb', 'hi', 'mu'...
+var INI = {cc:'', t:0, apple:[], au:[], rb:[], art:{}, nombres:[], cargando:false, fallo:false, yo:''};
+var mu = {res:[], au:[], texto:'', buscando:false, fallo:''};
+var apAbierta = null;
+
+/* ── Radio para el coche ── */
+var HITS_RADIO = ['Hit FM','LOS40 Urban','LOS 40 Principales','Flaix FM','Cadena Dial','Exitos 99.9 FM',
+                  'La Mega 107.3','Onda La Superestacion 107.9','Olimpica Stereo 105.9',
+                  'Tropicana Estereo 102.9','Vibra Bogota 104.9','Candela Estereo 101.9'];
+var ESTILOS_RADIO = [['Reggaetón','reggaeton'],['Salsa','salsa'],['Bachata','bachata'],['Vallenato','vallenato'],
+                     ['Merengue','merengue'],['Pop latino','latin pop'],['Urbano','urbano'],['Rock','rock'],['Dance','dance']];
+function conteoRadio(){
+  try{ return JSON.parse(localStorage.getItem('mm_radio_n_' + yo) || '{}') || {}; }catch(_){ return {}; }
+}
+function contarRadio(e){
+  if(!yo || !e || !e.url) return;
+  var c = conteoRadio(), x = c[e.url] || {n:0};
+  x.n++; x.t = Date.now();
+  x.e = {nombre:e.nombre, ciudad:e.ciudad, genero:e.genero, url:e.url, logo:e.logo || '',
+         kbps:e.kbps || 0, codec:e.codec || '', tipo:'radio'};
+  c[e.url] = x;
+  var claves = Object.keys(c);
+  if(claves.length > 60){
+    claves.sort(function(a, b){ return c[a].n - c[b].n; });
+    delete c[claves[0]];
+  }
+  try{ localStorage.setItem('mm_radio_n_' + yo, JSON.stringify(c)); }catch(_){}
+}
+/* Las que más oyes: a partir de la segunda vez. */
+function masOidas(){
+  var c = conteoRadio();
+  return Object.keys(c).filter(function(k){ return c[k].n >= 2 && c[k].e; })
+    .sort(function(a, b){ return (c[b].n - c[a].n) || (c[b].t - c[a].t); })
+    .slice(0, 8).map(function(k){ return c[k].e; });
+}
+function radiosDeExitos(){
+  var L = listaEmisoras(), r = [];
+  HITS_RADIO.forEach(function(n){
+    for(var i=0;i<L.length;i++) if(L[i].nombre === n){
+      var o = {}; for(var k in L[i]) o[k] = L[i][k]; o.tipo = 'radio'; r.push(o); break; }
+  });
+  return r;
+}
+/* Un toque en el estilo: se busca y ya suena la más escuchada; las demás quedan debajo. */
+async function radioPorEstilo(tag, nombre){
+  rbBuscando = true; rbTexto = nombre; rbFallo = ''; rbResultados = []; pintarBuscar();
+  var turno = ++rbTurno, res = [], fallo = '';
+  try{
+    var orden = servidoresPorOrden(RADIOBROWSER, 'mm_rb_ok'), ultimo = null, d = null;
+    for(var i=0;i<orden.length && !d;i++){
+      try{
+        d = await traerConLimite(orden[i] + '/json/stations/search?tag=' + encodeURIComponent(tag) +
+          '&language=spanish&is_https=true&hidebroken=true&order=clickcount&reverse=true&limit=40', 9000);
+        try{ localStorage.setItem('mm_rb_ok', orden[i]); }catch(_){}
+      }catch(err){ ultimo = err; }
+    }
+    if(!d) throw ultimo || new Error('sin servidor');
+    var vistas = {};
+    d.forEach(function(x){
+      var e = emisoraDelMundo(x);
+      if(!e || vistas[e.url.toLowerCase()]) return;
+      vistas[e.url.toLowerCase()] = true; res.push(e);
+    });
+    if(!res.length) fallo = 'No encontré emisoras de ' + nombre + ' ahora mismo.';
+  }catch(err){ fallo = 'No se pudo preguntar ahora mismo. Mira si tienes internet.'; }
+  if(turno !== rbTurno) return;
+  rbResultados = res; rbFallo = fallo; rbBuscando = false;
+  if(res.length){ viendoVideo = false; tocarRadio(res[0]); }
+  pintarBuscar();
+}
+
+function paisIni(){
+  try{ return localStorage.getItem('mm_pais_' + yo) || 'es'; }catch(_){ return 'es'; }
+}
+/* ── historial: todo lo que suena, venga de donde venga ── */
+function histo(){
+  try{ return JSON.parse(localStorage.getItem('mm_hist_' + yo) || '[]') || []; }catch(_){ return []; }
+}
+function anotarHisto(o){
+  if(!yo || !o || !o.key) return;
+  var l = histo().filter(function(x){ return x.key !== o.key; });
+  o.t = Date.now();
+  l.unshift(o);
+  try{ localStorage.setItem('mm_hist_' + yo, JSON.stringify(l.slice(0, 40))); }catch(_){}
+}
+function histoDePista(p){
+  var k = p.fuente === 'Apple' ? 'a' : 'u';
+  anotarHisto({k:k, key:k + p.id, titulo:p.titulo, sub:p.artista, artista:p.artista,
+               img:p.caratula || '', dat:p});
+}
+
+/* ── pistas de Apple ── */
+function pistaApple(id, titulo, artista, img, previa, web, precio, genero){
+  var p = {tipo:'apple', fuente:'Apple', id:'ap' + id, titulo:String(titulo || '').trim(),
+           artista:String(artista || '').trim(), dur:30, caratula:img || '',
+           fotos:img ? [img] : [], url:previa || '', web:web || '',
+           precio:precio || '', genero:genero || ''};
+  if(!p.titulo) return null;
+  return p;
+}
+function grande(u){ return String(u || '').replace(/\/\d+x\d+bb\.(png|jpg)$/i, '/400x400bb.jpg'); }
+function pistaDeLista(e){
+  try{
+    var prev = '', web = '';
+    [].concat(e.link || []).forEach(function(l){
+      var a = l.attributes || {};
+      if(a['im:assetType'] === 'preview') prev = a.href;
+      else if(a.rel === 'alternate') web = a.href;
+    });
+    var ims = e['im:image'] || [];
+    return pistaApple(e.id.attributes['im:id'], e['im:name'].label, e['im:artist'].label,
+      ims.length ? grande(ims[ims.length - 1].label) : '', prev, web,
+      e['im:price'] ? e['im:price'].label : '',
+      e.category && e.category.attributes ? e.category.attributes.label : '');
+  }catch(_){ return null; }
+}
+function pistaDeBusqueda(x){
+  if(!x || x.kind !== 'song') return null;
+  var pr = x.trackPrice > 0 ? String(x.trackPrice).replace('.', ',') + ' ' + (x.currency === 'EUR' ? '€' : x.currency) : '';
+  return pistaApple(x.trackId, x.trackName, x.artistName, grande(x.artworkUrl100),
+                    x.previewUrl, x.trackViewUrl, pr, x.primaryGenreName);
+}
+async function exitosApple(cc){
+  var d = await traerConLimite('https://itunes.apple.com/' + cc + '/rss/topsongs/limit=25/genre=12/json', 12000);
+  return [].concat((d.feed || {}).entry || []).map(pistaDeLista).filter(Boolean);
+}
+async function buscarApple(texto, cc){
+  var d = await traerConLimite('https://itunes.apple.com/search?term=' + encodeURIComponent(texto) +
+    '&media=music&entity=song&limit=40&country=' + (cc || 'es'), 12000);
+  var vistas = {}, fuera = [];
+  ((d && d.results) || []).map(pistaDeBusqueda).filter(Boolean).forEach(function(p){
+    var k = (p.artista + '|' + p.titulo).toLowerCase().replace(/\s*[\(\[].*$/, '');
+    if(vistas[k]) return;
+    vistas[k] = true; fuera.push(p);
+  });
+  return fuera;
+}
+async function radiosTop(cc){
+  var orden = servidoresPorOrden(RADIOBROWSER, 'mm_rb_ok'), ultimo = null;
+  for(var i=0;i<orden.length;i++){
+    try{
+      var d = await traerConLimite(orden[i] + '/json/stations/search?countrycode=' + cc +
+        '&order=clickcount&reverse=true&limit=40&is_https=true&hidebroken=true', 9000);
+      try{ localStorage.setItem('mm_rb_ok', orden[i]); }catch(_){}
+      return (d || []).map(emisoraDelMundo).filter(Boolean).slice(0, 14)
+        .map(function(e){ e.tipo = 'radio'; return e; });
+    }catch(err){ ultimo = err; anotar('radiobrowser', orden[i] + ' · ' + err.message); }
+  }
+  throw ultimo || new Error('ningún servidor respondió');
+}
+
+/* Los cantantes que tocan en "Porque escuchas a…": el que más suena en su
+   historial, favoritos y biblioteca, y otro que rota cada día. */
+function nombresParaTi(){
+  var cuenta = {};
+  function suma(n, peso){
+    n = String(n || '').split(/,| & | feat\.?| ft\.?| x /i)[0].trim();
+    if(n && n.length < 40 && peso) cuenta[n] = (cuenta[n] || 0) + peso;
+  }
+  histo().forEach(function(h){ if(h.k !== 'r' && h.k !== 'y') suma(h.artista, 2); });
+  CANCIONES.forEach(function(c){ suma(c.artista, c.fav ? 3 : (c.veces ? 1 : 0)); });
+  favAudius().forEach(function(p){ suma(p.artista, 3); });
+  var top = '', mejor = 0;
+  for(var n in cuenta) if(cuenta[n] > mejor){ mejor = cuenta[n]; top = n; }
+  var dia = Math.floor(Date.now() / 864e5), r = [];
+  if(top) r.push({n:top, por:true});
+  for(var k=0; r.length < 2 && k < ARTISTAS_SUG.length; k++){
+    var a = ARTISTAS_SUG[(dia + k) % ARTISTAS_SUG.length];
+    if(a.toLowerCase() !== top.toLowerCase()) r.push({n:a, por:false});
+  }
+  return r;
+}
+function delCantante(lista, n){
+  var m = n.toLowerCase();
+  var suyas = lista.filter(function(p){ return p.artista.toLowerCase().indexOf(m) >= 0; });
+  return (suyas.length >= 3 ? suyas : lista).slice(0, 14);
+}
+
+/* Los cantantes de "Porque escuchas a…": cada uno se pregunta una sola vez. */
+async function cargarArtistas(cc){
+  var faltan = INI.nombres.filter(function(o){ return !INI.art[o.n]; });
+  if(!faltan.length || INI.cargandoArt) return;
+  INI.cargandoArt = true;
+  await Promise.all(faltan.map(function(o){
+    return buscarApple(o.n, cc)
+      .then(function(x){ INI.art[o.n] = delCantante(x, o.n); repintarInicio(); })
+      .catch(function(e){ INI.art[o.n] = []; anotar('apple', e.message); });
+  }));
+  INI.cargandoArt = false;
+}
+async function cargarInicio(forzar){
+  if(INI.cargando) return;
+  var cc = paisIni();
+  if(INI.yo !== yo){ INI.yo = yo; INI.art = {}; INI.t = 0; }
+  if(INI.cc !== cc){
+    INI.cc = cc; INI.t = 0; INI.apple = []; INI.au = []; INI.rb = [];
+    try{
+      var c = JSON.parse(localStorage.getItem('mm_ini_' + cc) || 'null');
+      if(c && c.apple){ INI.apple = c.apple; INI.au = c.au || []; INI.rb = c.rb || []; INI.t = c.t || 0; }
+    }catch(_){}
+    // Lo de la última vez sale al instante, aunque haya que refrescarlo luego.
+    if(INI.apple.length) repintarInicio();
+  }
+  if(!forzar && INI.t && (Date.now() - INI.t) < 30 * 60 * 1000){ cargarArtistas(cc); return; }
+  INI.cargando = true; INI.fallo = false;
+  repintarInicio();
+  var bien = 0;
+  function ok(f){ return function(x){ f(x); bien++; repintarInicio(); }; }
+  var tareas = [
+    exitosApple(cc).then(ok(function(x){ INI.apple = x; })),
+    buscarAudius('').then(ok(function(x){ INI.au = x.slice(0, 14).map(function(p){ p.tipo = 'audius'; return p; }); })),
+    radiosTop(RB_PAIS[cc]).then(ok(function(x){ INI.rb = x; }))
+  ];
+  tareas.push(cargarArtistas(cc).then(function(){ bien++; }));
+  await Promise.all(tareas.map(function(p){ return p.catch(function(e){ anotar('inicio', e.message); }); }));
+  INI.cargando = false;
+  if(bien){
+    INI.t = Date.now();
+    try{ localStorage.setItem('mm_ini_' + cc, JSON.stringify({t:INI.t, apple:INI.apple, au:INI.au, rb:INI.rb})); }catch(_){}
+  }else INI.fallo = true;
+  repintarInicio();
+}
+function repintarInicio(){
+  if(vistaActual === 'inicio') pintarInicio();
+  else if(vistaActual === 'buscar' && pestana === 'musica' && !mu.res.length && !mu.buscando) pintarMusica();
+}
+
+/* ── piezas para pintar ── */
+function cuadroPista(p){
+  var f = 'background:' + tono(p.titulo + p.artista);
+  if(p.tipo === 'radio') return cuadroEmisora(p);
+  var fotos = p.fotos && p.fotos.length ? p.fotos : (p.caratula ? [p.caratula] : []);
+  if(fotos.length)
+    return '<span class="art" style="'+f+'"><img src="'+esc(fotos[0])+'" data-esp="'+esc(fotos.slice(1).join('|'))+
+           '" alt="" loading="lazy" onerror="otroEspejo(this)"></span>';
+  return '<span class="art vacia" style="'+f+'">🎵</span>';
+}
+function cuadroHisto(h){
+  if(h.k === 'c'){ var c = buscarCancion(h.dat); if(c) return cuadroCancion(c); }
+  if(h.k === 'r') return cuadroEmisora({nombre:h.titulo, logo:h.img});
+  if(h.k === 'y')
+    return '<span class="art" style="background-image:' + (h.img ? "url('"+esc(h.img)+"')," : '') + tono(h.titulo) +
+           ';background-size:cover;background-position:center">' + (h.img ? '' : '▶') + '</span>';
+  return cuadroPista({titulo:h.titulo, artista:h.artista || '', caratula:h.img, fotos:h.img ? [h.img] : []});
+}
+function tile(g, i, p){
+  var tt, ss, cu;
+  if(p.tipo === 'radio'){ tt = p.nombre; ss = nombreCiudad(p.ciudad); cu = cuadroEmisora(p); }
+  else if(p.tipo === 'hist'){ tt = p.titulo; ss = p.sub; cu = cuadroHisto(p); }
+  else { tt = p.titulo; ss = p.artista; cu = cuadroPista(p); }
+  return '<div class="tile" data-gr="'+g+'|'+i+'">'+cu+'<div class="t">'+esc(tt)+'</div><div class="s">'+esc(ss)+'</div></div>';
+}
+function estante(titulo, g, lista){
+  GR[g] = lista;
+  return '<div class="shelf-t">'+titulo+'</div><div class="hscroll">' +
+    lista.map(function(p, i){ return tile(g, i, p); }).join('') + '</div>';
+}
+function esqueleto(titulo){
+  var t = '<div class="tile sk"><span class="art"></span><div class="t">&nbsp;</div><div class="s">&nbsp;</div></div>';
+  return '<div class="shelf-t">'+titulo+'</div><div class="hscroll">' + t+t+t+t + '</div>';
+}
+function filaApple(p, g, i){
+  var son = actual && actual.id === 'au_' + p.id;
+  return '<div class="row'+(son?' sonando':'')+'" data-gr="'+g+'|'+i+'">' + cuadroPista(p) +
+    '<span class="r-x"><span class="r-t">'+esc(p.titulo)+'</span>'+
+    '<span class="r-s"><span class="enc">'+esc(p.artista)+(p.genero?' · '+esc(p.genero):'')+'</span></span></span>'+
+    '<span class="r-a">⋯</span></div>';
+}
+
 function pintarInicio(){
   $('saludo').textContent = saludoHora() + ', ' + PERSONAS[yo].corto;
-  var C = $('inicio-cuerpo');
-  if(!CANCIONES.length){
-    C.innerHTML =
-      '<div class="vacio"><span class="em">🎶</span>Todavía no has añadido música.<br>'+
-      'Ve a <b>Biblioteca → ➕ Añadir música</b> y elige tus MP3.<br><br>'+
-      'Mientras tanto, tienes <b>'+listaEmisoras().length+' emisoras de radio</b> esperándote.</div>'+
-      '<button class="btn solido" data-ir-tab="radio">📻&nbsp; Ir a la radio</button>';
-    return;
-  }
-  var recientes = CANCIONES.slice().sort(function(a,b){ return (b.ultima||b.anadida||0)-(a.ultima||a.anadida||0); }).slice(0,8);
-  var favs = CANCIONES.filter(function(c){ return c.fav; }).slice(0,5);
-  var mas  = CANCIONES.slice().sort(function(a,b){ return (b.veces||0)-(a.veces||0); })
-                      .filter(function(c){ return c.veces; }).slice(0,5);
-  var favR = listaEmisoras().filter(function(e){ return FAV_RADIO[e.nombre]; }).slice(0,8);
-
-  var h = '';
+  var C = $('inicio-cuerpo'), h = '';
+  GR = {};
+  INI.nombres = nombresParaTi();
   var ult = null;
   try{ ult = JSON.parse(localStorage.getItem('mm_ultimo_'+yo)||'null'); }catch(_){}
-  if(ult && ult.titulo){
-    h += '<button class="btn suave" id="seguir" style="margin-top:4px">▶&nbsp; Seguir con «'+esc(ult.titulo)+'»</button>';
-  }
-  // El modo coche se fue de Inicio: estorbaba ahi todos los dias para algo
-  // que solo se usa en el coche. Ahora se enciende desde Ajustes.
+  if(ult && ult.titulo)
+    h += '<button class="btn suave" id="seguir" style="margin-top:2px">▶&nbsp; Seguir con «'+esc(ult.titulo)+'»</button>';
   if(AJ.cocheEnInicio)
     h += '<button class="btn" id="b-coche" style="margin-top:8px">🚗&nbsp; Modo coche</button>';
-  h += '<div class="shelf-t">🕐 Recientes</div><div class="hscroll">' + recientes.map(function(c){
-        return '<div class="tile" data-cancion="'+esc(c.id)+'">'+cuadroCancion(c, true)+
-          '<div class="t">'+esc(c.titulo)+'</div><div class="s">'+esc(c.artista)+'</div></div>'; }).join('') + '</div>';
+
+  // De qué país quieres los éxitos
+  h += '<div class="tabs" style="margin-top:14px">' + PAISES_INI.map(function(p){
+    return '<button class="tab'+(p[0] === paisIni() ? ' on' : '')+'" data-pais="'+p[0]+'">'+p[1]+' '+p[2]+'</button>'; }).join('') + '</div>';
+
+  if(INI.apple.length) h += estante('🔥 Éxitos ahora', 'ex', INI.apple);
+  else if(INI.cargando) h += esqueleto('🔥 Éxitos ahora');
+
+  var hi = histo().slice(0, 14).map(function(x){ var o = {}; for(var k in x) o[k] = x[k]; o.tipo = 'hist'; return o; });
+  if(hi.length) h += estante('🕐 Lo último que has oído', 'hi', hi);
+
+  var moI = masOidas();
+  if(moI.length) h += estante('⭐ Las que más oyes', 'mo', moI);
+
+  var estArt = function(i){
+    var o = INI.nombres[i], l = o && INI.art[o.n];
+    return (l && l.length) ? estante((o.por ? '✨ Porque escuchas a ' : '🎲 Prueba con ') + esc(o.n), 'ar' + i, l) : '';
+  };
+  h += estArt(0);
+
+  if(INI.au.length) h += estante('🎧 Lo que más suena en Audius', 'au', INI.au);
+  else if(INI.cargando) h += esqueleto('🎧 Lo que más suena en Audius');
+
+  var pn = '';
+  PAISES_INI.forEach(function(p){ if(p[0] === paisIni()) pn = p[2]; });
+  if(INI.rb.length) h += estante('📻 Emisoras más escuchadas · ' + esc(pn), 'rb', INI.rb);
+  else if(INI.cargando) h += esqueleto('📻 Emisoras más escuchadas');
+
+  h += estArt(1);
+
+  // Y lo de casa, si hay
+  var favs = CANCIONES.filter(function(c){ return c.fav; }).slice(0, 5);
+  var mas  = CANCIONES.slice().sort(function(a,b){ return (b.veces||0)-(a.veces||0); })
+                      .filter(function(c){ return c.veces; }).slice(0, 5);
+  var favR = listaEmisoras().filter(function(e){ return FAV_RADIO[e.nombre]; }).slice(0, 8);
   if(favs.length) h += '<div class="shelf-t">❤️ Tus favoritas</div>' + favs.map(function(c){ return filaCancion(c); }).join('');
-  if(mas.length)  h += '<div class="shelf-t">🔥 Más escuchadas</div>' + mas.map(function(c){ return filaCancion(c); }).join('');
+  if(mas.length)  h += '<div class="shelf-t">🔥 Tus más escuchadas</div>' + mas.map(function(c){ return filaCancion(c); }).join('');
   if(favR.length) h += '<div class="shelf-t">📻 Tus emisoras</div>' + favR.map(function(e){
-        return '<div class="row" data-emisora="'+esc(e.nombre)+'">'+
-          '<span class="art" style="background:'+tono(e.nombre)+'">📻</span>'+
+        return '<div class="row" data-emisora="'+esc(e.nombre)+'">'+ cuadroEmisora(e) +
           '<span class="r-x"><span class="r-t">'+esc(e.nombre)+'</span>'+
           '<span class="r-s">'+esc(nombreCiudad(e.ciudad))+'</span></span></div>'; }).join('');
+  if(!CANCIONES.length)
+    h += '<div class="note">Tus MP3 salen aquí cuando los añadas en <b>Biblioteca → ➕ Añadir música</b>.</div>';
+
+  if(INI.fallo && !INI.apple.length && !INI.au.length && !INI.rb.length)
+    h += '<div class="vacio"><span class="em">📡</span>No se pudo traer lo de hoy. ¿Tienes internet?</div>';
+  h += '<button class="btn" data-ini-refresh="1">'+(INI.cargando ? '⏳&nbsp; Actualizando…' : '↻&nbsp; Actualizar')+'</button>';
+  C.innerHTML = h;
+  if(!INI.cargando && !INI.fallo) cargarInicio();
+}
+
+/* ── la hoja de una canción de Apple ── */
+function hojaApple(p, lista){
+  apAbierta = {p:p, lista:lista || [p]};
+  var q = encodeURIComponent(p.artista + ' ' + p.titulo);
+  var fav = esFavAudius(p.id);
+  abrirHoja(
+    '<h4>'+esc(p.titulo)+'</h4><div class="sub">'+esc(p.artista)+(p.genero?' · '+esc(p.genero):'')+'</div>' +
+    '<button class="opc" data-ap-yt="1"><span class="em">▶️</span><span class="tx"><b>Escucharla entera</b>'+
+      '<small>en YouTube, dentro de la app · no se baja</small></span></button>' +
+    (p.url ? '<button class="opc" data-ap-previa="1"><span class="em">🎧</span><span class="tx"><b>Vista previa de 30 s</b>'+
+      '<small>suena aquí y con la pantalla apagada</small></span></button>' : '') +
+    '<button class="opc" data-ap-fav="1"><span class="em">'+(fav?'❤️':'♡')+'</span><span class="tx"><b>'+
+      (fav?'Quitar de favoritas':'Guardar en favoritas')+'</b></span></button>' +
+    '<div class="city" style="margin:12px 0 4px">⬇️ Tenerla en MP3 (de pago, sin candado)</div>' +
+    (p.web ? '<a class="opc" href="'+esc(p.web)+'" target="_blank" rel="noopener"><span class="em">🍎</span><span class="tx"><b>Apple Music / iTunes</b>'+
+      '<small>'+(p.precio ? esc(p.precio) + ' · ' : '')+'la compras y la bajas</small></span></a>' : '') +
+    '<a class="opc" href="https://www.amazon.es/s?k='+q+'&i=digital-music" target="_blank" rel="noopener"><span class="em">🛒</span><span class="tx"><b>Amazon Música Digital</b>'+
+      '<small>MP3 suelto, sin candado</small></span></a>' +
+    '<a class="opc" href="https://www.qobuz.com/es-es/search?q='+q+'" target="_blank" rel="noopener"><span class="em">💿</span><span class="tx"><b>Qobuz</b>'+
+      '<small>MP3 o calidad de estudio</small></span></a>' +
+    '<button class="opc" data-cerrar-hoja="1"><span class="em">✕</span><span class="tx"><b>Cerrar</b></span></button>');
+}
+/* Un vídeo a la vista: manda el vídeo, se para lo demás. */
+function abrirVideoId(vid, titulo, canal, mini){
+  viendoVideo = true;
+  if(actual && !audio.paused) pausarYo();
+  ytVerId = vid;
+  ytTituloActual = {vid:vid, titulo:titulo || '', canal:canal || ''};
+  anotarHisto({k:'y', key:'y'+vid, titulo:titulo || ('Vídeo ' + vid), sub:canal || 'YouTube', img:mini || '', dat:vid});
+  pintarYouTube();
+  $('v-buscar').scrollTop = 0;
+}
+async function escucharCompleta(p){
+  cerrarHoja(); ir('buscar'); ponerPestana('youtube');
+  var txt = p.artista + ' ' + p.titulo;
+  $('q').value = txt;
+  ytTexto = txt; ytBuscando = true; ytResultados = []; pintarYouTube();
+  try{ ytResultados = await buscarYouTube(txt + ' audio oficial'); }
+  catch(_){ ytResultados = []; toast('No se pudo buscar en YouTube ahora mismo. Prueba en un minuto.', 'malo', 5000); }
+  ytBuscando = false;
+  if(ytResultados.length){ var v = ytResultados[0]; abrirVideoId(v.vid, v.titulo, v.canal, v.miniatura); }
+  else pintarYouTube();
+}
+function reproducirHisto(h){
+  if(h.k === 'c'){ tocarCancion(h.dat).then(pintarVista); }
+  else if(h.k === 'r'){ viendoVideo = false; tocarRadio(h.dat); pintarVista(); }
+  else if(h.k === 'u'){ tocarAudius(h.dat, [h.dat]); pintarVista(); }
+  else if(h.k === 'a'){ hojaApple(h.dat, [h.dat]); }
+  else if(h.k === 'y'){ ir('buscar'); ponerPestana('youtube'); abrirVideoId(h.dat, h.titulo, h.sub, h.img); }
+}
+function abrirItem(it, lista){
+  if(it.tipo === 'apple') hojaApple(it, lista);
+  else if(it.tipo === 'audius'){ tocarAudius(it, lista); pintarVista(); }
+  else if(it.tipo === 'radio'){ viendoVideo = false; tocarRadio(it); pintarVista(); }
+  else if(it.tipo === 'hist') reproducirHisto(it);
+}
+
+/* ── la pestaña Buscar → Música ── */
+async function lanzarBusquedaMusica(texto){
+  texto = String(texto || '').trim();
+  if(!texto){ mu.res = []; mu.texto = ''; mu.fallo = ''; pintarBuscar(); return; }
+  mu.buscando = true; mu.texto = texto; mu.fallo = ''; mu.au = []; pintarBuscar();
+  var pAp = buscarApple(texto, paisIni()), pAu = buscarAudius(texto).catch(function(){ return []; });
+  try{
+    mu.res = await pAp;
+    mu.au = await pAu;
+    auResultados = mu.au;
+    if(!mu.res.length && !mu.au.length) mu.fallo = 'No aparece nada con ese nombre. Prueba con otra forma de escribirlo.';
+  }catch(err){
+    mu.res = []; mu.fallo = 'No se pudo preguntar ahora mismo. ¿Tienes internet?';
+    anotar('apple', err.message);
+  }
+  mu.buscando = false; pintarBuscar();
+}
+function pintarMusica(){
+  var C = $('tab-cuerpo'), h = '';
+  if(mu.buscando){
+    h = '<div class="vacio"><span class="em">⏳</span>Buscando «'+esc(mu.texto)+'»…</div>';
+  }else if(mu.res.length || mu.au.length){
+    GR.mu = mu.res;
+    if(mu.res.length){
+      h = '<div class="shelf-t">🎤 '+esc(mu.texto)+'</div>' + mu.res.map(function(p, i){ return filaApple(p, 'mu', i); }).join('');
+      h += '<div class="note">Toca una canción: <b>entera en YouTube</b>, <b>30 s aquí</b> o <b>cómprala en MP3</b>.</div>';
+    }
+    if(mu.au.length)
+      h += '<div class="shelf-t">🎧 Completas y gratis · Audius</div>' + mu.au.map(function(p, i){ return filaAudius(p, i); }).join('');
+  }else{
+    if(mu.fallo) h += '<div class="vacio"><span class="em">🔎</span>'+esc(mu.fallo)+'</div>';
+    h += '<div class="hscroll" style="margin-top:2px">' + ARTISTAS_SUG.map(function(n){
+      return '<button class="tab" data-artista="'+esc(n)+'">'+esc(n)+'</button>'; }).join('') + '</div>';
+    if(INI.apple.length){
+      GR.mu = INI.apple;
+      h += '<div class="shelf-t">🔥 Éxitos de hoy</div>' + INI.apple.map(function(p, i){ return filaApple(p, 'mu', i); }).join('');
+    }else{
+      h += '<div class="vacio"><span class="em">🎶</span>Escribe un cantante o un grupo<br>y pulsa buscar.</div>';
+      if(!INI.cargando && !INI.fallo) cargarInicio();
+    }
+    if(INI.au.length){
+      auResultados = INI.au;
+      h += '<div class="shelf-t">🎧 Completas y gratis · lo que suena en Audius</div>' +
+           INI.au.map(function(p, i){ return filaAudius(p, i); }).join('');
+    }
+  }
   C.innerHTML = h;
 }
+
 function pintarBuscar(){
   var q = ($('q').value||'').toLowerCase().trim();
   var C = $('tab-cuerpo');
-  $('q').placeholder = pestana==='radio' ? 'Buscar emisora, ciudad o género…'
+  if(pestana === 'musica'){ $('q').placeholder = 'Cantante, grupo o canción'; pintarMusica(); return; }
+  $('q').placeholder = pestana==='radio' ? 'Nombre, ciudad o país'
                      : pestana==='youtube' ? 'Escribe y pulsa buscar…'
                      : pestana==='descubrir' ? 'Bolero, mambo, jazz… y pulsa buscar'
                      : 'Buscar en tu música…';
@@ -1981,10 +2485,12 @@ function pintarBuscar(){
       : '<div class="vacio"><span class="em">🔎</span>'+(CANCIONES.length?'Nada con ese nombre en tu música.':'Todavía no has añadido música.')+'</div>';
   }
   else if(pestana === 'radio'){
-    var h = '', L2 = listaEmisoras();
+    var h = '', L2 = listaEmisoras(), cn = conteoRadio();
+    function veces(e){ return (cn[e.url] && cn[e.url].n) || 0; }
     CIUDADES.forEach(function(c){
       var l = L2.filter(function(e){ return e.ciudad === c[0] &&
-        (!q || (e.nombre+' '+e.genero+' '+nombreCiudad(e.ciudad)).toLowerCase().indexOf(q) >= 0); });
+        (!q || (e.nombre+' '+e.genero+' '+nombreCiudad(e.ciudad)).toLowerCase().indexOf(q) >= 0); })
+        .sort(function(a, b){ return veces(b) - veces(a); });      // las que más oyes, arriba
       if(!l.length) return;
       h += '<div class="city">'+c[1]+' '+esc(c[2])+'</div>' + l.map(filaEmisora).join('');
     });
@@ -1993,20 +2499,40 @@ function pintarBuscar(){
       CIUDADES.forEach(function(c){ if(c[0]===e.ciudad) conocida = true; });
       return !conocida && (!q || (e.nombre+' '+e.genero).toLowerCase().indexOf(q) >= 0); });
     if(otras.length) h += '<div class="city">➕ Tuyas</div>' + otras.map(filaEmisora).join('');
-    C.innerHTML = (h || '<div class="vacio"><span class="em">📻</span>Ninguna de las tuyas se llama así.</div>') +
-      '<button class="btn" id="b-emisora">➕&nbsp; Añadir emisora a mano</button>' +
-      bloqueMundo();
+    var arriba = '';
+    if(!q && !rbResultados.length && !rbBuscando && !rbFallo){
+      arriba += estante('🚗 Radios de éxitos · un toque', 'rh', radiosDeExitos());
+      arriba += '<div class="shelf-t">🎚 Por estilo · un toque</div><div class="hscroll">' +
+        ESTILOS_RADIO.map(function(s){ return '<button class="tab" data-estilo="'+esc(s[1])+'" data-nombre="'+esc(s[0])+'">'+esc(s[0])+'</button>'; }).join('') + '</div>';
+      var mo = masOidas();
+      if(mo.length) arriba += estante('⭐ Las que más oyes', 'mo', mo);
+    }
+    C.innerHTML = arriba + bloqueMundo() +
+      (h ? '<div class="city">⭐ Tus emisoras guardadas</div>' + h : '') +
+      '<button class="btn" id="b-emisora">🔗&nbsp; ¿No la encuentras? Añádela con su enlace</button>';
   }
   else if(pestana === 'youtube') pintarYouTube();
   else {
     pintarDescubrir();
-    if(descFuente === 'hoy' && !auResultados.length && !auBuscando && !auFallo) lanzarBusquedaAudius('');
+    if(!iaResultados.length && !iaBuscando && !iaTexto) lanzarBusquedaArchive('bolero');
   }
 }
 
 /* ─── YouTube: escribes y busca, sin clave de Google ─────────────── */
 var ytResultados = [], ytBuscando = false, ytTexto = '', ytVerId = null;
 
+function esFavVideo(vid){
+  for(var i=0;i<VIDEOS.length;i++) if(VIDEOS[i].vid === vid) return true;
+  return false;
+}
+function filaVideoFav(v){
+  return '<div class="row" data-ver-yt="'+esc(v.vid)+'">'+
+    '<span class="art" style="background-image:url(\'https://i.ytimg.com/vi/'+esc(v.vid)+'/mqdefault.jpg\'),'+tono(v.vid)+
+      ';background-size:cover;background-position:center"></span>'+
+    '<span class="r-x"><span class="r-t">'+esc(v.titulo||v.vid)+'</span><span class="r-s">'+esc(v.canal||'YouTube')+'</span></span>'+
+    '<span class="r-a on" data-fav-video="'+esc(v.vid)+'">❤️</span></div>';
+}
+var ytTituloActual = {vid:'', titulo:'', canal:''};
 function pintarYouTube(){
   var C = $('tab-cuerpo'), h = '';
   if(ytVerId){
@@ -2014,7 +2540,8 @@ function pintarYouTube(){
          '<iframe src="https://www.youtube-nocookie.com/embed/'+esc(ytVerId)+'?playsinline=1&rel=0" '+
          'style="position:absolute;inset:0;width:100%;height:100%;border:0" loading="lazy" '+
          'allow="accelerometer;encrypted-media;gyroscope;picture-in-picture;fullscreen" allowfullscreen></iframe></div>'+
-         '<button class="btn solido" data-guardar-video="'+esc(ytVerId)+'">💾&nbsp; Guardar este vídeo</button>'+
+         '<button class="btn '+(esFavVideo(ytVerId)?'suave':'solido')+'" data-fav-video="'+esc(ytVerId)+'">'+
+           (esFavVideo(ytVerId)?'❤️&nbsp; En tus favoritos · toca para quitar':'♡&nbsp; Añadir a favoritos')+'</button>'+
          '<button class="btn" data-cerrar-yt="1">✕&nbsp; Cerrar el vídeo</button>';
   }
   if(ytBuscando) h += '<div class="note">Buscando en YouTube…</div>';
@@ -2028,7 +2555,7 @@ function pintarYouTube(){
           (v.miniatura ? '' : '▶') + '</span>' +
         '<span class="r-x"><span class="r-t">'+esc(v.titulo)+'</span>'+
         '<span class="r-s">'+esc(v.canal)+(v.seg?' · '+m+':'+(s<10?'0':'')+s:'')+'</span></span>'+
-        '<span class="r-a" data-guardar-video="'+esc(v.vid)+'">💾</span></div>';
+        '<span class="r-a '+(esFavVideo(v.vid)?'on':'')+'" data-fav-video="'+esc(v.vid)+'">'+(esFavVideo(v.vid)?'❤️':'♡')+'</span></div>';
     }).join('');
   }else if(ytTexto){
     h += '<div class="vacio"><span class="em">📺</span>Sin resultados para «'+esc(ytTexto)+'».</div>';
@@ -2038,11 +2565,7 @@ function pintarYouTube(){
   }
   h += '<div class="note">El vídeo <b>se para al bloquear el móvil o salir de la app</b>. Lo bloquean Apple y YouTube, no hay forma de evitarlo desde una web.<br>Para el coche: tu música descargada o la radio.</div>';
   if(VIDEOS.length){
-    h += '<div class="shelf-t">📺 Guardados</div>' + VIDEOS.map(function(v){
-      return '<div class="row" data-ver-yt="'+esc(v.vid)+'">'+
-        '<span class="art" style="background:'+tono(v.vid)+'">▶</span>'+
-        '<span class="r-x"><span class="r-t">'+esc(v.titulo||v.vid)+'</span><span class="r-s">YouTube</span></span>'+
-        '<span class="r-a" data-borrar-video="'+esc(v.id)+'">🗑</span></div>'; }).join('');
+    h += '<div class="shelf-t">❤️ Tus vídeos favoritos</div>' + VIDEOS.map(filaVideoFav).join('');
   }
   C.innerHTML = h;
 }
@@ -2092,7 +2615,7 @@ function pistaAudius(x){
           genero: x.genre || '',
           dur: +x.duration || 0,
           caratula: base, fotos: fotos,
-          escuchas: +x.play_count || 0,
+          escuchas: +x.play_count || 0, tipo:'audius',
           url: AUDIUS + '/tracks/' + x.id + '/stream?1=1' + APP};
 }
 /* Se llama desde el onerror de la imagen: pasa al siguiente espejo, y si se
@@ -2140,7 +2663,7 @@ function tocarAudius(p, lista){
   fallosRadio = 0; espera = 1000; intentosVigilante = 0;
   paradoPorMi = false; recuperarAlVolver = false; viendoVideo = false;
   actual = {tipo:'cancion', remota:true, id:'au_'+p.id, titulo:p.titulo,
-            artista:p.artista, album:'Audius', sub:p.artista + ' \u00b7 Audius',
+            artista:p.artista, album:p.fuente || 'Audius', sub:p.artista + ' \u00b7 ' + (p.fuente || 'Audius'),
             dur:p.dur, url:p.url, logo:p.caratula, cal:''};
   cola = []; colaPos = -1;
   if(lista && lista.length){
@@ -2151,6 +2674,7 @@ function tocarAudius(p, lista){
   audio.src = p.url;
   var pr = audio.play();
   if(pr && pr.catch) pr.catch(function(){ pintarEstado('No se pudo abrir esta canci\u00f3n.'); });
+  histoDePista(p);
   pintarAhora(null);
 }
 /* Las de Audius que marca con el corazón. En localStorage y por persona:
@@ -2173,7 +2697,8 @@ function marcarAudius(p){
     else fuera.push(l[i]);
   }
   if(!habia) fuera.unshift({id:p.id, titulo:p.titulo, artista:p.artista, dur:p.dur,
-                            caratula:p.caratula, fotos:p.fotos, genero:p.genero, url:p.url});
+                            caratula:p.caratula, fotos:p.fotos, genero:p.genero, url:p.url,
+                            fuente:p.fuente || '', web:p.web || '', precio:p.precio || '', tipo:p.tipo || ''});
   guardarFavAudius(fuera);
   return !habia;
 }
@@ -2204,15 +2729,6 @@ function bloqueAudius(){
 }
 function pintarDescubrir(){
   var C = $('tab-cuerpo'), h = '';
-  h += '<div class="tabs fijas" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px">'+
-    '<button class="tab'+(descFuente==='hoy'?' on':'')+'" data-desc="hoy">🔥 De hoy</button>'+
-    '<button class="tab'+(descFuente==='clasicos'?' on':'')+'" data-desc="clasicos">📼 Clásicos</button></div>';
-
-  if(descFuente === 'hoy'){
-    h += bloqueAudius();
-    C.innerHTML = h;
-    return;
-  }
 
   if(iaBuscando) h += '<div class="note">Buscando…</div>';
   else if(iaAbierto){
@@ -2313,17 +2829,23 @@ function pintarBiblio(){
   if(!CANCIONES.length && filtro !== 'favoritos'){
     C.innerHTML = '<div class="vacio"><span class="em">➕</span>Tu biblioteca está vacía.<br>'+
       'Toca <b>Añadir música</b> y elige tus MP3<br>desde <b>Archivos</b> o <b>iCloud Drive</b>.<br><br>'+
-      '<span style="font-size:calc(12.5px * var(--esc))">¿No sabes dónde guardarlos?<br>Mira <b>⚙️ Ajustes → Dónde guardar tus MP3</b>.</span></div>';
+      '<span style="font-size:calc(12.5px * var(--esc))">¿No sabes dónde guardarlos?<br>Mira <b>⚙️ Ajustes → Dónde guardar tus MP3</b>.</span></div>'+
+      '<button class="btn solido" data-ir-tab="musica">🎧&nbsp; Buscar un cantante</button>'+
+      '<button class="btn" data-ir-tab="radio">📻&nbsp; Ir a la radio</button>';
     return;
   }
   if(filtro === 'favoritos'){
     var favC = CANCIONES.filter(function(c){ return c.fav; });
     var favE = listaEmisoras().filter(function(e){ return FAV_RADIO[e.nombre]; });
     var favA = favAudius();
-    if(!favC.length && !favE.length && !favA.length){
+    var hh = histo().slice(0, 14).map(function(x){ var o = {}; for(var k in x) o[k] = x[k]; o.tipo = 'hist'; return o; });
+    if(!favC.length && !favE.length && !favA.length && !VIDEOS.length){
       C.innerHTML = '<div class="vacio"><span class="em">♥</span>Todavía no has marcado nada.<br>'+
-        'Toca el ♡ de una canción o de una emisora<br>y aparecerá aquí.<br><br>'+
-        '<span style="font-size:12.5px">Son tuyas: Elibel tiene las suyas.</span></div>';
+        'Toca el ♡ de una canción, una emisora<br>o un vídeo y aparecerá aquí.<br><br>'+
+        '<span style="font-size:calc(12.5px * var(--esc))">Son tuyas: Elibel tiene las suyas.</span></div>' +
+        (hh.length ? estante('🕐 Escuchado hace poco', 'bh', hh) : '') +
+        '<button class="btn solido" data-ir-tab="musica">🎧&nbsp; Buscar un cantante</button>' +
+        '<button class="btn" data-ir-tab="radio">📻&nbsp; Ir a la radio</button>';
       return;
     }
     var h = '';
@@ -2332,6 +2854,7 @@ function pintarBiblio(){
     if(favC.length) h += '<div class="city">🎵 Tus canciones · '+favC.length+'</div>' +
       favC.map(function(c){ return filaCancion(c); }).join('') +
       '<button class="btn solido" id="b-tocar-favs" style="margin-top:12px">▶&nbsp; Reproducir tus favoritas</button>';
+    if(VIDEOS.length) h += '<div class="city">📺 Tus vídeos · '+VIDEOS.length+'</div>' + VIDEOS.map(filaVideoFav).join('');
     if(favA.length) h += '<div class="city">🔥 De Descubrir · '+favA.length+'</div>' +
       favA.map(function(p, i){
         var son = actual && actual.id === 'au_'+p.id;
@@ -2342,10 +2865,11 @@ function pintarBiblio(){
           : '<span class="art vacia" style="background:'+tono(p.titulo+p.artista)+'">🎵</span>';
         return '<div class="row'+(son?' sonando':'')+'" data-aufav-tocar="'+i+'">'+cuadro+
           '<span class="r-x"><span class="r-t">'+esc(p.titulo)+'</span>'+
-          '<span class="r-s"><span class="enc">'+esc(p.artista)+' · Audius</span>'+
+          '<span class="r-s"><span class="enc">'+esc(p.artista)+' · '+esc(p.fuente || 'Audius')+'</span>'+
           '<span class="cal">'+tiempo(p.dur)+'</span></span></span>'+
           '<span class="r-a on" data-aufav-quitar="'+i+'">❤️</span></div>';
       }).join('');
+    if(hh.length) h += estante('🕐 Escuchado hace poco', 'bh', hh);
     C.innerHTML = h;
     return;
   }
@@ -2446,7 +2970,7 @@ async function pintarAjustes(){
     '<button class="btn suave" id="a-anadir2">➕&nbsp; Añadir música ahora</button></div>'+
 
   '<div class="card" style="border-color:var(--cyan)"><h3>Copia de seguridad</h3>'+
-    '<div class="kv"><span>Guarda tus emisoras, tus favoritos y tus listas en un archivo. '+
+    '<div class="kv"><span>Guarda tus emisoras, favoritos (canciones, radios y vídeos), listas, historial, foto y ajustes en un archivo. '+
       '<b>Hazla antes de borrar el icono</b> de la app: el iPhone se lleva los datos al desinstalarla.'+
       '<br><span class="pista">No guarda los MP3: esos los tienes en el ordenador.</span></span></div>'+
     '<button class="btn suave" id="a-exportar">💾&nbsp; Guardar copia</button>'+
@@ -2747,6 +3271,33 @@ document.addEventListener('click', async function(ev){
     return;
   }
 
+  if((el = t.closest('[data-estilo]'))){ radioPorEstilo(el.dataset.estilo, el.dataset.nombre || el.dataset.estilo); return; }
+  if((el = t.closest('[data-pais]'))){
+    try{ localStorage.setItem('mm_pais_' + yo, el.dataset.pais); }catch(_){}
+    INI.t = 0; INI.art = {}; cargarInicio(true); return; }
+  if((el = t.closest('[data-ini-refresh]'))){ INI.art = {}; cargarInicio(true); return; }
+  if((el = t.closest('[data-artista]'))){
+    var nA = el.dataset.artista;
+    if(!(vistaActual === 'buscar' && pestana === 'musica')){ ir('buscar'); ponerPestana('musica'); }
+    $('q').value = nA; lanzarBusquedaMusica(nA); $('v-buscar').scrollTop = 0; return; }
+  if((el = t.closest('[data-gr]'))){
+    var gp = el.dataset.gr.split('|'), itG = (GR[gp[0]] || [])[+gp[1]];
+    if(itG) abrirItem(itG, GR[gp[0]]);
+    return; }
+  if((el = t.closest('[data-ap-yt]'))){ if(apAbierta) escucharCompleta(apAbierta.p); return; }
+  if((el = t.closest('[data-ap-previa]'))){
+    if(apAbierta){
+      var lP = apAbierta.lista.filter(function(x){ return x.url; });
+      cerrarHoja(); viendoVideo = false; tocarAudius(apAbierta.p, lP); pintarVista();
+    }
+    return; }
+  if((el = t.closest('[data-ap-fav]'))){
+    if(apAbierta){
+      var puestaA = marcarAudius(apAbierta.p);
+      cerrarHoja();
+      toast(puestaA ? 'Guardada en tus favoritas.' : 'Quitada de favoritas.', 'bueno', 2200);
+    }
+    return; }
   if((el = t.closest('[data-cancion]'))){ await tocarCancion(el.dataset.cancion); pintarVista(); return; }
   if((el = t.closest('[data-emisora]'))){
     var L = listaEmisoras();
@@ -2767,26 +3318,30 @@ document.addEventListener('click', async function(ev){
     }
     return;
   }
-  if((el = t.closest('[data-guardar-video]'))){
+  if((el = t.closest('[data-fav-video]'))){
     ev.stopPropagation();
-    var vid = el.dataset.guardarVideo, tit = 'Vídeo ' + vid;
-    for(var vi=0; vi<ytResultados.length; vi++)
-      if(ytResultados[vi].vid === vid) tit = ytResultados[vi].titulo;
-    await guardar('videos', {id:yo+'_'+vid, duenyo:yo, vid:vid, titulo:tit});
-    await cargarDatos(); pintarBuscar(); toast('Vídeo guardado.', 'bueno'); return;
-  }
-  if((el = t.closest('[data-borrar-video]'))){
-    ev.stopPropagation();
-    await borrar('videos', el.dataset.borrarVideo); await cargarDatos(); pintarBuscar(); return;
+    var vid = el.dataset.favVideo;
+    if(esFavVideo(vid)){
+      await borrar('videos', yo+'_'+vid);
+      toast('Quitado de tus favoritos.', 'bueno', 2200);
+    }else{
+      var tit = (ytTituloActual.vid === vid ? ytTituloActual.titulo : '') || ('Vídeo ' + vid), can = ytTituloActual.vid === vid ? ytTituloActual.canal : '';
+      for(var vi=0; vi<ytResultados.length; vi++)
+        if(ytResultados[vi].vid === vid){ tit = ytResultados[vi].titulo; can = ytResultados[vi].canal; }
+      await guardar('videos', {id:yo+'_'+vid, duenyo:yo, vid:vid, titulo:tit, canal:can});
+      toast('Añadido a tus favoritos. Ojo: se guarda el enlace, no se baja el vídeo.', 'bueno', 4200);
+    }
+    await cargarDatos(); pintarVista(); return;
   }
   if((el = t.closest('[data-ver-yt]'))){
     // Aquí manda el vídeo: se para la música nuestra y se suelta la radio.
     // Si no, iOS interrumpía el <audio>, la app creía que había sido una
     // llamada y lo reenganchaba ENCIMA del vídeo. (fallo del 29/09/2026)
-    viendoVideo = true;
-    if(actual && !audio.paused) pausarYo();
-    ytVerId = el.dataset.verYt; pintarYouTube();
-    $('v-buscar').scrollTop = 0; return; }
+    if(!(vistaActual === 'buscar' && pestana === 'youtube')){ ir('buscar'); ponerPestana('youtube'); }
+    var vY = el.dataset.verYt, tY = '', cY = '', mY = '';
+    ytResultados.forEach(function(v){ if(v.vid === vY){ tY = v.titulo; cY = v.canal; mY = v.miniatura; } });
+    VIDEOS.forEach(function(v){ if(v.vid === vY && !tY){ tY = v.titulo; cY = v.canal || ''; } });
+    abrirVideoId(vY, tY, cY, mY); return; }
   if((el = t.closest('[data-cerrar-yt]'))){
     viendoVideo = false; ytVerId = null; pintarYouTube(); return; }
   if((el = t.closest('[data-rb-sug]'))){
@@ -2820,7 +3375,7 @@ document.addEventListener('click', async function(ev){
     var pF = auResultados[+el.dataset.auFav];
     if(pF){
       var puesta = marcarAudius(pF);
-      pintarDescubrir();
+      pintarVista();
       toast(puesta ? 'Guardada en tus favoritas.' : 'Quitada de favoritas.', 'bueno', 2200);
     }
     return;
@@ -2923,18 +3478,22 @@ document.addEventListener('click', async function(ev){
 
 // Mi música y Radio filtran mientras escribes (es local, es instantáneo).
 // YouTube y Descubrir salen a internet: esperan a que pulses buscar.
+var rbReloj = null;
 $('q').addEventListener('input', function(){
   if(pestana === 'mimusica' || pestana === 'radio') pintarBuscar();
+  if(pestana === 'radio'){
+    clearTimeout(rbReloj);
+    var v = $('q').value.trim();
+    rbReloj = setTimeout(function(){ if(pestana === 'radio') lanzarBusquedaMundo(v.length >= 2 ? v : ''); }, 550);
+  }
 });
 $('form-q').addEventListener('submit', function(e){
   e.preventDefault();
   $('q').blur();                       // baja el teclado del iPhone
   var t = $('q').value;
-  if(pestana === 'youtube') lanzarBusquedaYouTube(t);
-  else if(pestana === 'descubrir'){
-    if(descFuente === 'hoy') lanzarBusquedaAudius(t);
-    else lanzarBusquedaArchive(t);
-  }
+  if(pestana === 'musica') lanzarBusquedaMusica(t);
+  else if(pestana === 'youtube') lanzarBusquedaYouTube(t);
+  else if(pestana === 'descubrir') lanzarBusquedaArchive(t);
   else if(pestana === 'radio') lanzarBusquedaMundo(t);
 });
 $('ffoto').addEventListener('change', async function(e){
@@ -2967,6 +3526,7 @@ function ponerPestana(t){
   ytVerId = null; ytResultados = []; ytTexto = ''; ytBuscando = false;
   iaAbierto = null; iaResultados = []; iaTexto = ''; iaBuscando = false;
   rbResultados = []; rbTexto = ''; rbBuscando = false; rbFallo = '';
+  mu.res = []; mu.texto = ''; mu.buscando = false; mu.fallo = '';
   pintarBuscar();
   $('v-buscar').scrollTop = 0;
 }

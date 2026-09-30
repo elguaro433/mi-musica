@@ -561,7 +561,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.19.2';
+var APP_VERSION = '1.19.3';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2500,7 +2500,18 @@ function hojaApple(p, lista){
     '<button class="opc" data-cerrar-hoja="1"><span class="em">✕</span><span class="tx"><b>Cerrar</b></span></button>');
 }
 /* Un vídeo a la vista: manda el vídeo, se para lo demás. */
+var ytConfirmado = false, pendVideo = null;
 function abrirVideoId(vid, titulo, canal, mini){
+  if(AJ.ahorro && !ytConfirmado){
+    pendVideo = [vid, titulo, canal, mini];
+    abrirHoja(
+      '<h4>Un vídeo gasta datos</h4>' +
+      '<div class="sub">Tienes el <b>ahorro de datos</b> activado. Un vídeo a calidad normal gasta unos 0,5 GB por hora. ' +
+      'Si no estás con wifi, baja la calidad en el ⚙ del vídeo (144p gasta unas 5 veces menos).</div>' +
+      '<button class="btn solido" id="yt-seguir" style="margin-top:6px">▶&nbsp; Ver igual</button>' +
+      '<button class="btn" data-cerrar-hoja="1">Ahora no</button>');
+    return;
+  }
   viendoVideo = true;
   if(actual && !audio.paused) pausarYo();
   ytVerId = vid;
@@ -2667,6 +2678,8 @@ function pintarYouTube(){
          '<iframe src="https://www.youtube-nocookie.com/embed/'+esc(ytVerId)+'?playsinline=1&rel=0" '+
          'style="position:absolute;inset:0;width:100%;height:100%;border:0" loading="lazy" '+
          'allow="accelerometer;encrypted-media;gyroscope;picture-in-picture;fullscreen" allowfullscreen></iframe></div>'+
+         '<div class="note" style="margin:8px 0 0">💡 Para gastar menos datos: toca el <b>⚙</b> del vídeo → <b>Calidad</b> → <b>144p</b> o <b>240p</b>. '+
+           '(Normal gasta ~0,5 GB por hora; 144p, ~0,1 GB.)</div>'+
          '<button class="btn '+(esFavVideo(ytVerId)?'suave':'solido')+'" data-fav-video="'+esc(ytVerId)+'">'+
            (esFavVideo(ytVerId)?'❤️&nbsp; En tus favoritos · toca para quitar':'♡&nbsp; Añadir a favoritos')+'</button>'+
          '<button class="btn" data-cerrar-yt="1">✕&nbsp; Cerrar el vídeo</button>';
@@ -3581,6 +3594,10 @@ document.addEventListener('click', async function(ev){
     return;
   }
 
+  if(t.closest('#yt-seguir')){
+    ytConfirmado = true; cerrarHoja();
+    if(pendVideo){ var pv = pendVideo; pendVideo = null; abrirVideoId(pv[0], pv[1], pv[2], pv[3]); }
+    return; }
   if((el = t.closest('[data-yt-sug]'))){
     $('q').value = el.dataset.ytSug; lanzarBusquedaYouTube(el.dataset.ytSug + ' éxitos'); return; }
   if((el = t.closest('[data-yt-cancion]'))){

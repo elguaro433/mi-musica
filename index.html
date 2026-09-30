@@ -90,10 +90,10 @@ button{font-family:inherit;color:inherit}
 #v-quien{padding:0}
 #v-quien.on{display:flex;flex-direction:column;justify-content:center;align-items:center;
   padding:calc(var(--sat) + 24px) calc(28px + var(--sar)) calc(var(--sab) + 24px) calc(28px + var(--sal))}
-.q-logo{font-size:calc(46px * var(--esc))}
+.q-logo{width:132px;height:132px;border-radius:26%;display:block}
 .q-title{font-family:var(--font-d);font-weight:700;font-size:calc(30px * var(--esc));letter-spacing:-.02em;margin-top:6px}
 .q-sub{color:var(--muted);font-size:calc(14px * var(--esc));text-align:center;margin:6px 0 26px;max-width:24ch}
-.q-btn{width:100%;max-width:340px;display:flex;align-items:center;gap:14px;background:var(--card);
+.q-btn{font-size:calc(21px * var(--esc));font-weight:600;width:100%;max-width:340px;display:flex;align-items:center;gap:14px;background:var(--card);
   border:1px solid var(--line);border-radius:17px;padding:15px 17px;margin-bottom:12px;cursor:pointer;
   font-size:calc(16px * var(--esc));text-align:left}
 .q-btn:active{background:var(--card2);border-color:var(--purple)}
@@ -416,7 +416,7 @@ body.coche #coche-salir{display:block}
 /* ---------- carga ---------- */
 #carga{position:fixed;inset:0;background:var(--bg);z-index:110;display:flex;
   flex-direction:column;justify-content:center;align-items:center;gap:14px}
-#carga .em{font-size:calc(44px * var(--esc));animation:late 1.4s ease-in-out infinite}
+#carga .carga-logo{width:min(62vw,300px);height:min(62vw,300px);border-radius:22%;animation:late 1.8s ease-in-out infinite}
 @keyframes late{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
 #carga div{color:var(--dim);font-size:calc(13px * var(--esc))}
 .oculto{display:none !important}
@@ -428,18 +428,17 @@ body.coche #coche-salir{display:block}
 
   <!-- ¿Quién eres? -->
   <div class="view" id="v-quien">
-    <div class="q-logo">🎵</div>
+    <img class="q-logo" src="icon-192.png" alt="">
     <div class="q-title">Mi Música</div>
-    <div class="q-sub" id="q-sub">Antes de empezar, dime quién eres</div>
+    <div class="q-sub" id="q-sub">¿Quién eres?</div>
     <button class="q-btn" data-p="emmanuel">
       <span class="av av-e">E</span>
-      <span>Emmanuel Díaz<small>Su música y sus listas</small></span>
+      <span>Emmanuel</span>
     </button>
     <button class="q-btn" data-p="elibel">
       <span class="av av-l">E</span>
-      <span>Elibel González<small>Su música y sus listas</small></span>
+      <span>Elibel</span>
     </button>
-    <div class="q-foot">Sin contraseñas.<br>Tu música se guarda solo en este teléfono.</div>
   </div>
 
   <!-- Inicio -->
@@ -543,7 +542,7 @@ body.coche #coche-salir{display:block}
 <!-- El <audio> vive aquí y no se destruye al navegar -->
 <div id="audio-caja"><audio id="audio" playsinline preload="metadata"></audio></div>
 
-<div id="carga"><span class="em">🎵</span><div>Abriendo tu música…</div></div>
+<div id="carga"><img class="carga-logo" src="icon-512.png" alt=""><div>Abriendo tu música…</div></div>
 
 <div id="seguro">
   <span class="em">🛟</span>
@@ -552,6 +551,7 @@ body.coche #coche-salir{display:block}
   <button class="btn solido" id="s-reintentar">Reintentar</button>
   <button class="btn suave" id="s-copia">Guardar copia de mis datos</button>
   <button class="btn" id="s-reparar">Reparar (conserva la música)</button>
+  <button class="btn" id="s-borrar" style="color:#ff9bb0;border-color:#6b2a3a">🗑 Liberar espacio: borrar la música de la app</button>
   <pre id="s-log"></pre>
 </div>
 
@@ -561,7 +561,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.18.0';
+var APP_VERSION = '1.19.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1493,7 +1493,7 @@ function tocarRadio(e){
   paradoPorMi = false; recuperarAlVolver = false;
   actual = {tipo:'radio', titulo:e.nombre, sub:nombreCiudad(e.ciudad) + ' · ' + e.genero,
             url:e.url, ciudad:e.ciudad, genero:e.genero, logo:e.logo || '',
-            fav:!!FAV_RADIO[e.nombre],
+            fav:!!FAV_RADIO[e.nombre], kbps:e.kbps || 0,
             cal: e.kbps ? ((e.codec||'') + ' ' + e.kbps + ' kbps').trim() : ''};
   cola = []; colaPos = -1;
   audio.src = e.url;
@@ -1581,7 +1581,24 @@ function guardarUltimo(){
     }));
   }catch(_){}
 }
-setInterval(function(){ if(actual && !audio.paused) guardarUltimo(); }, 5000);
+var tickRadio = 0;
+function datosRadio(){ try{ return JSON.parse(localStorage.getItem('mm_datos') || '{}') || {}; }catch(_){ return {}; } }
+function sumarRadio(seg, kbps){
+  var d = datosRadio(), hoy = new Date().toISOString().slice(0, 10);
+  d[hoy] = (d[hoy] || 0) + seg * (kbps || 96) * 1000 / 8;
+  var dias = Object.keys(d).sort();
+  while(dias.length > 14) delete d[dias.shift()];
+  try{ localStorage.setItem('mm_datos', JSON.stringify(d)); }catch(_){}
+}
+setInterval(function(){
+  if(actual && !audio.paused) guardarUltimo();
+  var ahora = Date.now();
+  if(actual && actual.tipo === 'radio' && !audio.paused){
+    // con la pantalla apagada iOS congela estos avisos pero la radio sigue: se cuenta por reloj
+    if(tickRadio) sumarRadio(Math.min((ahora - tickRadio) / 1000, 43200), actual.kbps);
+    tickRadio = ahora;
+  }else tickRadio = 0;
+}, 5000);
 
 async function retomar(){
   try{
@@ -2156,14 +2173,15 @@ function anotarHisto(o){
 function histoDePista(p){
   var k = p.fuente === 'Apple' ? 'a' : 'u';
   anotarHisto({k:k, key:k + p.id, titulo:p.titulo, sub:p.artista, artista:p.artista,
-               img:p.caratula || '', dat:p});
+               img:(p.fotos && p.fotos[0]) || p.caratula || '', dat:p});
 }
 
 /* ── pistas de Apple ── */
 function pistaApple(id, titulo, artista, img, previa, web, precio, genero){
+  var chica = img ? String(img).replace(/\/\d+x\d+bb\.jpg$/i, '/240x240bb.jpg') : '';
   var p = {tipo:'apple', fuente:'Apple', id:'ap' + id, titulo:String(titulo || '').trim(),
            artista:String(artista || '').trim(), dur:30, caratula:img || '',
-           fotos:img ? [img] : [], url:previa || '', web:web || '',
+           fotos:chica ? [chica] : [], url:previa || '', web:web || '',
            precio:precio || '', genero:genero || ''};
   if(!p.titulo) return null;
   return p;
@@ -2268,7 +2286,7 @@ async function radiosTop(cc){
       var d = await traerConLimite(orden[i] + '/json/stations/search?countrycode=' + cc +
         '&order=clickcount&reverse=true&limit=40&is_https=true&hidebroken=true', 9000);
       try{ localStorage.setItem('mm_rb_ok', orden[i]); }catch(_){}
-      return (d || []).map(emisoraDelMundo).filter(Boolean).slice(0, 14)
+      return (d || []).map(emisoraDelMundo).filter(Boolean).slice(0, 10)
         .map(function(e){ e.tipo = 'radio'; return e; });
     }catch(err){ ultimo = err; anotar('radiobrowser', orden[i] + ' · ' + err.message); }
   }
@@ -2299,7 +2317,7 @@ function nombresParaTi(){
 function delCantante(lista, n){
   var m = n.toLowerCase();
   var suyas = lista.filter(function(p){ return p.artista.toLowerCase().indexOf(m) >= 0; });
-  return (suyas.length >= 3 ? suyas : lista).slice(0, 14);
+  return (suyas.length >= 3 ? suyas : lista).slice(0, 10);
 }
 
 /* Los cantantes de "Porque escuchas a…": cada uno se pregunta una sola vez. */
@@ -2327,14 +2345,18 @@ async function cargarInicio(forzar){
     // Lo de la última vez sale al instante, aunque haya que refrescarlo luego.
     if(INI.apple.length) repintarInicio();
   }
-  if(!forzar && INI.t && (Date.now() - INI.t) < 30 * 60 * 1000){ cargarArtistas(cc); return; }
+  // Sin ahorro: se refresca cada 4 horas. Con ahorro: nunca solo (lo pides tú con ↻).
+  if(!forzar && INI.t && (AJ.ahorro || (Date.now() - INI.t) < 4 * 3600 * 1000)){
+    if(!AJ.ahorro) cargarArtistas(cc);
+    return;
+  }
   INI.cargando = true; INI.fallo = false;
   repintarInicio();
   var bien = 0;
   function ok(f){ return function(x){ f(x); bien++; repintarInicio(); }; }
   var tareas = [
     exitosApple(cc).then(ok(function(x){ INI.apple = x; })),
-    buscarAudius('').then(ok(function(x){ INI.au = x.slice(0, 14).map(function(p){ p.tipo = 'audius'; return p; }); })),
+    buscarAudius('').then(ok(function(x){ INI.au = x.slice(0, 10).map(function(p){ p.tipo = 'audius'; return p; }); })),
     radiosTop(RB_PAIS[cc]).then(ok(function(x){ INI.rb = x; }))
   ];
   tareas.push(cargarArtistas(cc).then(function(){ bien++; }));
@@ -2417,7 +2439,7 @@ function pintarInicio(){
   h += '<div class="tabs" style="margin-top:14px">' + PAISES_INI.map(function(p){
     return '<button class="tab'+(p[0] === paisIni() ? ' on' : '')+'" data-pais="'+p[0]+'">'+p[1]+' '+p[2]+'</button>'; }).join('') + '</div>';
 
-  if(INI.apple.length) h += estante('🔥 Éxitos ahora', 'ex', INI.apple);
+  if(INI.apple.length) h += estante('🔥 Éxitos ahora', 'ex', INI.apple.slice(0, 15));
   else if(INI.cargando) h += esqueleto('🔥 Éxitos ahora');
 
   var hi = histo().slice(0, 14).map(function(x){ var o = {}; for(var k in x) o[k] = x[k]; o.tipo = 'hist'; return o; });
@@ -2712,11 +2734,12 @@ function pistaAudius(x){
   if(!x || !x.id || !x.title) return null;
   var art = x.artwork || {};
   var base = art['480x480'] || art['150x150'] || '';
+  var chica = art['150x150'] || base;       // en las listas basta la pequeña (8 KB contra 40 KB)
   // Los espejos: si el servidor que toca contesta 403, se prueba el de al lado.
   var fotos = [];
-  if(base){
-    fotos.push(base);
-    var trozo = base.split('/content/')[1] || '';
+  if(chica){
+    fotos.push(chica);
+    var trozo = chica.split('/content/')[1] || '';
     (art.mirrors || []).forEach(function(m){
       if(!trozo) return;
       var u = String(m).replace(/\/$/, '') + '/content/' + trozo;
@@ -3166,8 +3189,18 @@ function pintarBiblio(){
       '<span class="r-s">'+l.length+(l.length===1?' canción':' canciones')+'</span></span></div>'; }).join('');
 }
 
+function mbTxt(b){ return b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(b < 10485760 ? 1 : 0) + ' MB'; }
 async function pintarAjustes(){
   var p = PERSONAS[yo];
+  var ocupa = '', cuota = '';
+  try{
+    if(navigator.storage && navigator.storage.estimate){
+      var es = await navigator.storage.estimate();
+      ocupa = mbTxt(es.usage || 0); cuota = mbTxt(es.quota || 0);
+    }
+  }catch(_){}
+  var dd = datosRadio(), hoyK = new Date().toISOString().slice(0, 10), sem = 0;
+  Object.keys(dd).sort().slice(-7).forEach(function(k){ sem += dd[k]; });
   var errores = [];
   try{ errores = JSON.parse(localStorage.getItem(CAJA)||'[]'); }catch(_){}
 
@@ -3203,7 +3236,15 @@ async function pintarAjustes(){
     '<div class="kv"><span>Pantalla siempre encendida</span>'+
       '<span class="sw'+(AJ.pantalla?' on':'')+'" data-aj="pantalla"></span></div></div>'+
 
+  '<div class="card"><h3>Internet</h3>'+
+    '<div class="kv"><span>Ahorro de datos<br><span class="pista">Inicio no se actualiza solo: lo pides tú con ↻</span></span>'+
+      '<span class="sw'+(AJ.ahorro?' on':'')+'" data-aj="ahorro"></span></div>'+
+    '<div class="kv"><span>Radio hoy</span><span class="v">≈ '+mbTxt(dd[hoyK] || 0)+'</span></div>'+
+    '<div class="kv"><span>Radio, últimos 7 días</span><span class="v">≈ '+mbTxt(sem)+'</span></div>'+
+    '<div class="kv"><span class="pista">La radio es lo que más gasta: una hora son unos 30 a 60 MB. Tu música guardada no gasta nada. Lo demás de la app gasta muy poco.</span></div></div>'+
+
   '<div class="card"><h3>Tus datos</h3>'+
+    (ocupa ? '<div class="kv"><span>Ocupa en el teléfono</span><span class="v">'+ocupa+'</span></div>' : '')+
     '<button class="btn suave" id="a-anadir2" style="margin-top:0">➕&nbsp; Añadir mis MP3</button>'+
     '<a class="btn" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Cómo traer mi música del PC</a>'+
     '<button class="btn" id="a-exportar">💾&nbsp; Guardar copia de seguridad</button>'+
@@ -3380,6 +3421,9 @@ function marcarBarra(){
 }
 function ir(v){
   vistaActual = v;
+  if(v !== 'buscar' && ytVerId){            // quitar el reproductor: si no, sigue bajando vídeo escondido
+    ytVerId = null; viendoVideo = false; $('tab-cuerpo').innerHTML = '';
+  }
   var vs = document.querySelectorAll('.view');
   for(var i=0;i<vs.length;i++) vs[i].classList.remove('on');
   var el = $('v-'+v);
@@ -3750,6 +3794,13 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#s-reintentar')){ arranqueOK(); location.reload(); return; }
   if(t.closest('#s-copia')){ await copiaDeEmergencia(); return; }
   if(t.closest('#s-reparar')){ reparar(); return; }
+  if(t.closest('#s-borrar')){
+    if(confirm('¿Borrar TODA la música y los datos de la app en este teléfono?\n\nLibera el espacio. Tus archivos originales del ordenador no se tocan. No se puede deshacer.')){
+      var q = indexedDB.deleteDatabase(DB_NOMBRE);
+      q.onsuccess = q.onerror = q.onblocked = function(){ arranqueOK(); location.reload(); };
+    }
+    return;
+  }
 });
 
 // Mi música y Radio filtran mientras escribes (es local, es instantáneo).
@@ -4010,6 +4061,18 @@ async function copiaDeEmergencia(){
     await exportarCopia();
   }catch(err){ alert('No se pudo crear la copia: ' + err.message); }
 }
+/* Pantalla de emergencia: además del error, dice cuánto ocupa la app y si parece falta de espacio. */
+async function detalleSeguro(mensaje){
+  var t = String(mensaje || ''), ocupa = '';
+  try{
+    var es = await navigator.storage.estimate();
+    ocupa = '\nLa app ocupa ' + mbTxt(es.usage || 0) + ' de ' + mbTxt(es.quota || 0) + ' permitidos.';
+  }catch(_){}
+  var espacio = /quota|storage|space|disk|full|lleno|espacio|open database/i.test(t);
+  $('s-log').textContent = (espacio
+    ? '⚠️ El iPhone no dejó abrir el almacenamiento de la app. Suele ser por poco espacio libre o porque el teléfono estaba bloqueado.\n1) Desbloquea el iPhone y toca «Reintentar».\n2) Si sigue: Ajustes → General → Almacenamiento del iPhone y libera sitio (lo que más ocupa suelen ser las descargas de WhatsApp, Telegram u OneDrive).\n\n'
+    : '') + t + ocupa;
+}
 function reparar(){
   try{
     if(navigator.serviceWorker && navigator.serviceWorker.controller){
@@ -4031,7 +4094,7 @@ if('serviceWorker' in navigator){
 async function entrar(p){
   yo = p;
   try{ localStorage.setItem('mm_perfil', p); }catch(_){}
-  $('q-sub').textContent = 'Antes de empezar, dime quién eres';
+  $('q-sub').textContent = '¿Quién eres?';
   await cargarDatos();
   await revisarBiblioteca();
   recuperarCola();
@@ -4090,14 +4153,23 @@ async function arrancar(){
     $('seguro').classList.add('on');
     var e = [];
     try{ e = JSON.parse(localStorage.getItem(CAJA)||'[]'); }catch(_){}
-    $('s-log').textContent = e.slice(0,6).map(function(x){ return x.o+': '+x.m; }).join('\n') || '(sin detalles)';
+    detalleSeguro(e.slice(0,6).map(function(x){ return x.o+': '+x.m; }).join('\n') || '(sin detalles)');
     return;
   }
   marcarArranque();
 
   try{
     cargarAjustes();
-    await abrirDB();
+    var abierta = false, ultimoErr = null;
+    for(var intento = 0; intento < 6 && !abierta; intento++){
+      try{ await abrirDB(); abierta = true; }
+      catch(err){
+        ultimoErr = err;
+        anotar('abrirDB', 'intento ' + (intento + 1) + ': ' + ((err && (err.message || err.name)) || err));
+        await new Promise(function(q){ setTimeout(q, 1500); });
+      }
+    }
+    if(!abierta) throw (ultimoErr || new Error('no se pudo abrir el almacenamiento'));
     await pedirPersistencia();
 
     if('serviceWorker' in navigator){
@@ -4134,7 +4206,7 @@ async function arrancar(){
     anotar('arranque', err.message, err.stack);
     $('carga').classList.add('oculto');
     $('seguro').classList.add('on');
-    $('s-log').textContent = err.message + '\n' + (err.stack||'').slice(0,400);
+    detalleSeguro(err.name + ': ' + err.message + '\n' + (err.stack||'').slice(0,300));
   }
 }
 

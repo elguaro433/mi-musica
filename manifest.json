@@ -2,7 +2,7 @@
   "name": "Mi Música — Emmanuel Díaz",
   "short_name": "Emmanuel",
   "description": "Tu música, tuya de verdad. Sin internet, en el coche y con tu nombre.",
-  "start_url": "./index.html",
+  "start_url": "./index.html?p=emmanuel",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

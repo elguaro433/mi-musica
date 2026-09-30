@@ -561,7 +561,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.19.1';
+var APP_VERSION = '1.19.2';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -4182,6 +4182,9 @@ async function arrancar(){
     if(!guardado){
       try{ guardado = localStorage.getItem('mm_perfil'); }catch(_){}
     }
+    // Este enlace es el de Emmanuel (el de Elibel es elibel.html): no se pregunta quién eres.
+    // Para cambiar de persona está Ajustes → Cambiar de persona.
+    if(!guardado) guardado = 'emmanuel';
 
     $('carga').classList.add('oculto');
 

@@ -526,7 +526,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.14.0';
+var APP_VERSION = '1.14.1';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2509,7 +2509,9 @@ function pintarBuscar(){
     }
     C.innerHTML = arriba + bloqueMundo() +
       (h ? '<div class="city">⭐ Tus emisoras guardadas</div>' + h : '') +
-      '<button class="btn" id="b-emisora">🔗&nbsp; ¿No la encuentras? Añádela con su enlace</button>';
+      '<button class="btn solido" id="b-buscar-radio">🔎&nbsp; Buscar cualquier emisora del mundo</button>' +
+      '<button id="b-emisora" style="display:block;margin:12px auto 4px;background:none;border:0;color:var(--dim);'+
+        'font-size:calc(12.5px * var(--esc));text-decoration:underline;padding:10px">o añádela pegando su enlace</button>';
   }
   else if(pestana === 'youtube') pintarYouTube();
   else {
@@ -3412,6 +3414,8 @@ document.addEventListener('click', async function(ev){
   // botones sueltos
   if(t.closest('#b-anadir')){ $('ficheros').click(); return; }
   if(t.closest('#seguir')){ desbloquear(); await retomar(); return; }
+  if(t.closest('#b-buscar-radio')){
+    $('v-buscar').scrollTop = 0; $('q').focus(); return; }
   if(t.closest('#b-emisora')){ await nuevaEmisora(); return; }
   if(t.closest('#b-tocar-favs')){
     var ids = CANCIONES.filter(function(c){ return c.fav && !c.falta; }).map(function(c){ return c.id; });

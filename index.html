@@ -474,7 +474,7 @@ body.coche #coche-salir{display:block}
     </div>
     <div id="bib-cuerpo"></div>
     <button class="btn" id="b-anadir">➕&nbsp; Añadir música</button>
-    <input type="file" id="ficheros" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg" multiple class="oculto">
+    <input type="file" id="ficheros" accept=".mp3,.m4a,.aac,.wav,.flac,.ogg" multiple class="oculto">
     <input type="file" id="ffoto" accept="image/*" class="oculto">
   </div>
 
@@ -549,7 +549,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.16.1';
+var APP_VERSION = '1.16.2';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2932,6 +2932,26 @@ function marcarBib(){
   }
   $('bib-tools').style.display = (grupoBib(filtro) === 'canciones' && CANCIONES.length) ? '' : 'none';
 }
+/* El menú que sale (Fototeca · Grabar vídeo · Seleccionar archivos) es de iOS y no se puede
+   quitar; lo que sí se puede es avisar antes de dónde hay que tocar. */
+function guiaAnadir(){
+  var vista = false;
+  try{ vista = localStorage.getItem('mm_guia_anadir') === '1'; }catch(_){}
+  if(vista){ $('ficheros').click(); return; }
+  abrirHoja(
+    '<h4>Añadir tu música</h4>' +
+    '<div class="sub">El iPhone te va a enseñar un menú. Sigue estos pasos:</div>' +
+    '<div class="opc" style="cursor:default"><span class="em">1️⃣</span><span class="tx"><b>Toca «Seleccionar archivos»</b>' +
+      '<small>la última opción del menú (no Fototeca)</small></span></div>' +
+    '<div class="opc" style="cursor:default"><span class="em">2️⃣</span><span class="tx"><b>Abajo, toca «Examinar»</b>' +
+      '<small>y elige OneDrive → Music → Para la app</small></span></div>' +
+    '<div class="opc" style="cursor:default"><span class="em">3️⃣</span><span class="tx"><b>Marca todas y toca «Abrir»</b>' +
+      '<small>antes toca «Seleccionar», arriba a la derecha</small></span></div>' +
+    '<button class="btn solido" id="guia-abrir" style="margin-top:12px">Entendido, abrir archivos</button>' +
+    '<a class="btn" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Ver la guía con más detalle</a>' +
+    '<button id="guia-nunca" style="display:block;margin:10px auto 2px;background:none;border:0;color:var(--dim);' +
+      'font-size:calc(12.5px * var(--esc));text-decoration:underline;padding:10px">No volver a mostrar este aviso</button>');
+}
 function pintarBiblio(){
   var C = $('bib-cuerpo');
   marcarBib();
@@ -2942,10 +2962,10 @@ function pintarBiblio(){
   // ahi lo que quieres es "Anadir canciones", que es otra cosa.
   $('b-anadir').style.display =
     ((filtro === 'listas' && listaAbierta) || filtro === 'favoritos') ? 'none' : '';
-  if(!CANCIONES.length && filtro !== 'favoritos'){
+  if(!CANCIONES.length && grupoBib(filtro) === 'canciones'){
     C.innerHTML = '<div class="vacio"><span class="em">➕</span>Tu biblioteca está vacía.<br>'+
       'Toca <b>Añadir música</b> y elige tus MP3<br>desde <b>Archivos</b> o <b>iCloud Drive</b>.<br><br>'+
-      '<span style="font-size:calc(12.5px * var(--esc))">¿No sabes dónde guardarlos?<br>Mira <b>⚙️ Ajustes → Dónde guardar tus MP3</b>.</span></div>'+
+      '</div>'+
       '<a class="btn solido" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Cómo traer mi música del PC</a>'+
       '<button class="btn" data-ir-tab="musica">🎧&nbsp; Buscar un cantante</button>'+
       '<button class="btn" data-ir-tab="radio">📻&nbsp; Ir a la radio</button>';
@@ -3514,7 +3534,11 @@ document.addEventListener('click', async function(ev){
   }
 
   // botones sueltos
-  if(t.closest('#b-anadir')){ $('ficheros').click(); return; }
+  if(t.closest('#b-anadir')){ guiaAnadir(); return; }
+  if(t.closest('#guia-abrir')){ cerrarHoja(); $('ficheros').click(); return; }
+  if(t.closest('#guia-nunca')){
+    try{ localStorage.setItem('mm_guia_anadir', '1'); }catch(_){}
+    cerrarHoja(); $('ficheros').click(); return; }
   if(t.closest('#seguir')){ desbloquear(); await retomar(); return; }
   if(t.closest('#b-buscar-radio')){
     $('v-buscar').scrollTop = 0; $('q').focus(); return; }
@@ -3532,7 +3556,7 @@ document.addEventListener('click', async function(ev){
     try{ localStorage.removeItem('mm_foto_' + yo); }catch(_){}
     pintarAjustes(); toast('Foto quitada.', null, 1800); return;
   }
-  if(t.closest('#a-anadir2')){ $('ficheros').click(); return; }
+  if(t.closest('#a-anadir2')){ guiaAnadir(); return; }
   if(t.closest('#a-exportar')){ await exportarCopia(); return; }
   if(t.closest('#a-importar')){ $('fcopia').click(); return; }
   if(t.closest('#a-diag')){ await diagnostico(); return; }

@@ -188,6 +188,16 @@ a.opc{text-decoration:none;color:inherit}
 .tabs.fijas.cinco .tab.fav svg{vertical-align:-4px;margin-right:4px}
 .r-a[data-fav],.r-a.on[data-au-fav],.r-a.on[data-fav-video],.r-a.on[data-aufav-quitar]{font-size:calc(23px * var(--esc))}
 
+.tabs.fijas.tres{grid-template-columns:repeat(3,1fr)}
+.tabs.fijas.tres .tab{font-size:calc(13px * min(var(--esc), 1.14));padding:10px 4px}
+.seg{display:flex;gap:6px;margin:0 0 10px}
+.sg{flex:1;min-height:40px;padding:8px 4px;border-radius:12px;background:transparent;border:1px solid var(--line);
+  color:var(--muted);font-size:calc(13px * min(var(--esc), 1.14));font-weight:500;cursor:pointer}
+.sg.on{background:var(--card2);color:var(--ink);border-color:var(--purple)}
+.vermas{margin-left:auto;font-family:var(--font-b);font-size:calc(13px * var(--esc));font-weight:500;color:var(--purple);
+  cursor:pointer;padding:8px 2px}
+#bib-tools .busca{margin-bottom:10px}
+
 /* ---------- pestañas y campos ---------- */
 .tabs{display:flex;gap:8px;margin:2px 0 14px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
@@ -436,12 +446,10 @@ body.coche #coche-salir{display:block}
     <div class="vhead"><div><h2>Buscar</h2></div><div class="gear" data-ir="ajustes">⚙️</div></div>
     <form id="form-q" autocomplete="off"><div class="busca"><span class="lupa">⌕</span><input class="campo" id="q" type="search" enterkeyhint="search"
       placeholder="Cantante, grupo o canción" autocomplete="off" autocorrect="off" autocapitalize="off"></div></form>
-    <div class="tabs" id="tabs-b">
+    <div class="tabs fijas tres" id="tabs-b">
       <button class="tab on" data-t="musica">🎧 Música</button>
-      <button class="tab" data-t="mimusica">🎵 Mi música</button>
       <button class="tab" data-t="radio"><svg class="ti" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 8 17 3" stroke="#ff8a4c" stroke-width="1.8" stroke-linecap="round"/><rect x="2" y="8" width="20" height="13" rx="3.2" fill="#ff8a4c"/><circle cx="8" cy="14.5" r="3.2" fill="#fff" opacity=".93"/><rect x="13" y="12" width="6.2" height="1.8" rx=".9" fill="#fff"/><rect x="13" y="15.6" width="6.2" height="1.8" rx=".9" fill="#fff" opacity=".7"/></svg>Radio</button>
       <button class="tab" data-t="youtube"><svg class="ti" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="1.2" y="4.6" width="21.6" height="14.8" rx="4.4" fill="#ff1f1f"/><path d="M10 8.9v6.2l5.3-3.1z" fill="#fff"/></svg>YouTube</button>
-      <button class="tab" data-t="descubrir">📼 Clásicos</button>
     </div>
     <div id="tab-cuerpo"></div>
   </div>
@@ -449,12 +457,19 @@ body.coche #coche-salir{display:block}
   <!-- Biblioteca -->
   <div class="view" id="v-biblio">
     <div class="vhead"><div><h2>Biblioteca</h2></div><div class="gear" data-ir="ajustes">⚙️</div></div>
-    <div class="tabs fijas cinco">
-      <button class="tab fav on" data-b="favoritos"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.6 4.5c2 0 3.6 1.1 5.4 3.2 1.8-2.1 3.4-3.2 5.4-3.2 3.6 0 5.7 3.8 4.2 7.2C19.5 16.4 12 21 12 21z" fill="#ff4d8d"/></svg>Favoritas</button>
-      <button class="tab" data-b="canciones">Canciones</button>
-      <button class="tab" data-b="artistas">Artistas</button>
-      <button class="tab" data-b="albumes">Álbumes</button>
-      <button class="tab" data-b="listas">Listas</button>
+    <div class="tabs fijas tres">
+      <button class="tab bt on" data-b="canciones">🎵 Mi música</button>
+      <button class="tab bt" data-b="favoritos"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.6 4.5c2 0 3.6 1.1 5.4 3.2 1.8-2.1 3.4-3.2 5.4-3.2 3.6 0 5.7 3.8 4.2 7.2C19.5 16.4 12 21 12 21z" fill="#ff4d8d"/></svg>Favoritas</button>
+      <button class="tab bt" data-b="listas">☰ Listas</button>
+    </div>
+    <div id="bib-tools">
+      <div class="busca"><span class="lupa">⌕</span><input class="campo" id="bq" type="search" enterkeyhint="search"
+        placeholder="Buscar en mi música" autocomplete="off" autocorrect="off" autocapitalize="off"></div>
+      <div class="seg">
+        <button class="sg on" data-b="canciones">Todas</button>
+        <button class="sg" data-b="artistas">Artistas</button>
+        <button class="sg" data-b="albumes">Álbumes</button>
+      </div>
     </div>
     <div id="bib-cuerpo"></div>
     <button class="btn" id="b-anadir">➕&nbsp; Añadir música</button>
@@ -533,7 +548,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.15.0';
+var APP_VERSION = '1.16.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1212,7 +1227,7 @@ var LISTAS = [];
 var EMIS_CASA = [];            // emisoras añadidas a mano
 var FAV_RADIO = {};            // nombre → true (del dueño actual)
 var VIDEOS = [];
-var vistaActual = 'quien', pestana = 'musica', filtro = 'favoritos';
+var vistaActual = 'quien', pestana = 'musica', filtro = 'canciones', bibQ = '';
 var listaAbierta = null;       // id de la lista cuya ficha estás mirando
 var AJ = {};                   // ajustes del teléfono
 
@@ -2377,6 +2392,14 @@ function pintarInicio(){
   if(AJ.cocheEnInicio)
     h += '<button class="btn" id="b-coche" style="margin-top:8px">🚗&nbsp; Modo coche</button>';
 
+  if(CANCIONES.length){
+    var rec = CANCIONES.slice().sort(function(a, b){ return (b.ultima||b.anadida||0) - (a.ultima||a.anadida||0); }).slice(0, 12);
+    h += '<div class="shelf-t">🎵 Tu música <span class="vermas" data-ir="biblio">Ver todas ›</span></div><div class="hscroll">' +
+      rec.map(function(c){
+        return '<div class="tile" data-cancion="'+esc(c.id)+'">'+cuadroCancion(c, true)+
+          '<div class="t">'+esc(c.titulo)+'</div><div class="s">'+esc(c.artista)+'</div></div>'; }).join('') + '</div>';
+  }
+
   // De qué país quieres los éxitos
   h += '<div class="tabs" style="margin-top:14px">' + PAISES_INI.map(function(p){
     return '<button class="tab'+(p[0] === paisIni() ? ' on' : '')+'" data-pais="'+p[0]+'">'+p[1]+' '+p[2]+'</button>'; }).join('') + '</div>';
@@ -2495,6 +2518,13 @@ async function lanzarBusquedaMusica(texto){
 }
 function pintarMusica(){
   var C = $('tab-cuerpo'), h = '';
+  var ql = ($('q').value || '').toLowerCase().trim();
+  if(ql.length >= 2){
+    var loc = CANCIONES.filter(function(c){
+      return (c.titulo+' '+c.artista+' '+c.album+' '+c.genero).toLowerCase().indexOf(ql) >= 0; });
+    if(loc.length) h += '<div class="shelf-t">🎵 En tu música · '+loc.length+'</div>' +
+      loc.slice(0, 8).map(function(c){ return filaCancion(c); }).join('');
+  }
   if(mu.buscando){
     h = '<div class="vacio"><span class="em">⏳</span>Buscando «'+esc(mu.texto)+'»…</div>';
   }else if(mu.res.length || mu.au.length){
@@ -2520,6 +2550,7 @@ function pintarMusica(){
       h += '<div class="shelf-t">🎧 Completas y gratis · lo que suena en Audius</div>' +
            INI.au.map(function(p, i){ return filaAudius(p, i); }).join('');
     }
+    h += '<button class="btn" data-ir-tab="descubrir">📼&nbsp; Clásicos: música antigua y libre</button>';
   }
   C.innerHTML = h;
 }
@@ -2891,8 +2922,21 @@ function idYouTube(t){
   if(/^[A-Za-z0-9_-]{11}$/.test(String(t).trim())) return String(t).trim();
   return null;
 }
+function grupoBib(f){ return (f === 'artistas' || f === 'albumes' || f === 'canciones') ? 'canciones' : f; }
+function marcarBib(){
+  var bs = document.querySelectorAll('#v-biblio [data-b]');
+  for(var i=0;i<bs.length;i++){
+    var seg = bs[i].classList.contains('sg');
+    bs[i].classList.toggle('on', seg ? bs[i].dataset.b === filtro : grupoBib(bs[i].dataset.b) === grupoBib(filtro));
+  }
+  $('bib-tools').style.display = (grupoBib(filtro) === 'canciones' && CANCIONES.length) ? '' : 'none';
+}
 function pintarBiblio(){
   var C = $('bib-cuerpo');
+  marcarBib();
+  var ql = (bibQ || '').toLowerCase().trim();
+  var LC = ql ? CANCIONES.filter(function(c){
+    return (c.titulo+' '+c.artista+' '+c.album+' '+c.genero).toLowerCase().indexOf(ql) >= 0; }) : CANCIONES;
   // Dentro de la ficha de una lista, el "Anadir musica" global estorba:
   // ahi lo que quieres es "Anadir canciones", que es otra cosa.
   $('b-anadir').style.display =
@@ -2945,7 +2989,9 @@ function pintarBiblio(){
     return;
   }
   if(filtro === 'canciones'){
-    C.innerHTML = CANCIONES.map(function(c){ return filaCancion(c); }).join(''); return; }
+    C.innerHTML = LC.length ? LC.map(function(c){ return filaCancion(c); }).join('')
+      : '<div class="vacio"><span class="em">🔎</span>Nada con ese nombre en tu música.</div>';
+    return; }
   if(filtro === 'listas'){
     // ¿Estás dentro de una lista? Entonces se ve su ficha.
     var abierta = null;
@@ -2982,7 +3028,7 @@ function pintarBiblio(){
   }
   var clave = filtro === 'artistas' ? 'artista' : 'album';
   var m = {};
-  CANCIONES.forEach(function(c){ (m[c[clave]] = m[c[clave]] || []).push(c); });
+  LC.forEach(function(c){ (m[c[clave]] = m[c[clave]] || []).push(c); });
   var claves = Object.keys(m).sort(function(a,b){ return a.localeCompare(b,'es'); });
   C.innerHTML = claves.map(function(n){
     var l = m[n];
@@ -3221,8 +3267,6 @@ document.addEventListener('click', async function(ev){
   if((el = t.closest('[data-b]'))){
     filtro = el.dataset.b;
     listaAbierta = null;
-    var bs = document.querySelectorAll('[data-b]');
-    for(var i=0;i<bs.length;i++) bs[i].classList.toggle('on', bs[i].dataset.b === filtro);
     pintarBiblio(); return;
   }
 
@@ -3539,13 +3583,14 @@ document.addEventListener('click', async function(ev){
 // YouTube y Descubrir salen a internet: esperan a que pulses buscar.
 var rbReloj = null;
 $('q').addEventListener('input', function(){
-  if(pestana === 'mimusica' || pestana === 'radio') pintarBuscar();
+  if(pestana === 'mimusica' || pestana === 'radio' || (pestana === 'musica' && !mu.buscando)) pintarBuscar();
   if(pestana === 'radio'){
     clearTimeout(rbReloj);
     var v = $('q').value.trim();
     rbReloj = setTimeout(function(){ if(pestana === 'radio') lanzarBusquedaMundo(v.length >= 2 ? v : ''); }, 550);
   }
 });
+$('bq').addEventListener('input', function(){ bibQ = $('bq').value; pintarBiblio(); });
 $('form-q').addEventListener('submit', function(e){
   e.preventDefault();
   $('q').blur();                       // baja el teclado del iPhone

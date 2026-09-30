@@ -18,6 +18,8 @@ Lo de abajo es de la v1.7.0; esto es lo que cambió después y manda sobre ello.
 - **YouTube:** ya no dice «Guardar vídeo» (era mentira: solo guardaba el enlace). Es un ❤️; salen en Biblioteca → Favoritas.
 - **Copia de seguridad** ahora guarda también corazones de Audius/Apple, vídeos, historial, emisoras más oídas, país, foto y ajustes.
 - **LO QUE EL USUARIO PIDIÓ Y NO SE HIZO (decidido, no volver a ofrecer):** bajar audio de YouTube a MP3 / webs «YouTube to MP3», aunque sea «uso personal» y firme un documento. No se construye. Tampoco sugerir Apple Music/Spotify como «solución»: lo vivió como que no respondía a lo que pedía. Lo legal que sí hay: comprar MP3 (Amazon/Qobuz/Apple), radio, Audius.
+- **v1.16.0 — menos pestañas (se quejó de fatiga):** Buscar tiene 3 (Música · Radio · YouTube; «Clásicos» es un botón al final de Música y «Mi música» ya no está: lo tuyo sale en Música como «En tu música»). Biblioteca tiene 3 (Mi música · Favoritas · Listas) y **arranca en Mi música**; Todas/Artistas/Álbumes son un selector dentro, con buscador. Inicio enseña «Tu música» arriba. Antes arrancaba en Favoritas y no encontraba sus canciones.
+- **Su música del PC** (OneDrive `Music`, 75 MP3 sueltos: 52 canciones + 23 mezclas de >1 h) se preparó en `OneDrive\Music\Para la app` (52 copias con nombre real, etiquetas y portada; originales intactos). Las mezclas y `musica vieja` se dejaron fuera a propósito (1,2 GB).
 - **Siguiente (propuesto, sin hacer):** seguir cantantes + «novedades» en Inicio (iTunes `lookup ... sort=recent`), página de cantante con discos, «Reproducir éxitos» en cadena con YouTube (solo pantalla encendida), lista «Por comprar».
 
 ## 👉 EMPIEZA AQUÍ (tras la sesión del 29/09/2026 noche, v1.7.0)

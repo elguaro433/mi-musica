@@ -549,7 +549,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.16.3';
+var APP_VERSION = '1.16.4';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2934,10 +2934,36 @@ function marcarBib(){
 }
 /* El menú que sale (Fototeca · Grabar vídeo · Seleccionar archivos) es de iOS y no se puede
    quitar; lo que sí se puede es avisar antes de dónde hay que tocar. */
+function abrirSelector(){
+  try{ localStorage.setItem('mm_picker', String(Date.now())); }catch(_){}
+  $('ficheros').click();
+}
+/* Si iOS cierra la app mientras baja los archivos de OneDrive, al volver a arrancar no hay nada
+   que importar. Se nota por la marca que dejó abrirSelector() y se explica el método seguro. */
+function avisoSelector(){
+  var t = 0;
+  try{ t = +localStorage.getItem('mm_picker') || 0; localStorage.removeItem('mm_picker'); }catch(_){}
+  if(!t || Date.now() - t > 15 * 60 * 1000) return;
+  anotar('selector', 'la app se reinició mientras se elegían archivos (iOS la cerró)');
+  setTimeout(function(){
+    abrirHoja(
+      '<h4>El iPhone cerró la app</h4>' +
+      '<div class="sub">Pasa a veces al traer muchos archivos de OneDrive de golpe. No se ha perdido nada. ' +
+      'Hay un método que no falla: copiar antes la carpeta al iPhone.</div>' +
+      '<div class="opc" style="cursor:default"><span class="em">1️⃣</span><span class="tx"><b>Abre la app «Archivos»</b>' +
+        '<small>el icono azul de carpeta del iPhone</small></span></div>' +
+      '<div class="opc" style="cursor:default"><span class="em">2️⃣</span><span class="tx"><b>Copia la carpeta «Para la app»</b>' +
+        '<small>OneDrive → Archivos → Music, mantenla pulsada → Copiar</small></span></div>' +
+      '<div class="opc" style="cursor:default"><span class="em">3️⃣</span><span class="tx"><b>Pégala en «En mi iPhone»</b>' +
+        '<small>Explorar → En mi iPhone, pulsa un hueco → Pegar</small></span></div>' +
+      '<a class="btn solido" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Ver la guía paso a paso</a>' +
+      '<button class="opc" data-cerrar-hoja="1" style="margin-top:8px"><span class="em">✕</span><span class="tx"><b>Cerrar</b></span></button>');
+  }, 1500);
+}
 function guiaAnadir(){
   var vista = false;
   try{ vista = localStorage.getItem('mm_guia_anadir') === '1'; }catch(_){}
-  if(vista){ $('ficheros').click(); return; }
+  if(vista){ abrirSelector(); return; }
   abrirHoja(
     '<h4>Añadir tu música</h4>' +
     '<div class="sub">El iPhone te va a enseñar un menú. Sigue estos pasos:</div>' +
@@ -3535,10 +3561,10 @@ document.addEventListener('click', async function(ev){
 
   // botones sueltos
   if(t.closest('#b-anadir')){ guiaAnadir(); return; }
-  if(t.closest('#guia-abrir')){ cerrarHoja(); $('ficheros').click(); return; }
+  if(t.closest('#guia-abrir')){ cerrarHoja(); abrirSelector(); return; }
   if(t.closest('#guia-nunca')){
     try{ localStorage.setItem('mm_guia_anadir', '1'); }catch(_){}
-    cerrarHoja(); $('ficheros').click(); return; }
+    cerrarHoja(); abrirSelector(); return; }
   if(t.closest('#seguir')){ desbloquear(); await retomar(); return; }
   if(t.closest('#b-buscar-radio')){
     $('v-buscar').scrollTop = 0; $('q').focus(); return; }
@@ -3635,6 +3661,8 @@ $('ffoto').addEventListener('change', async function(e){
   catch(err){ anotar('foto', err.message); toast('No se pudo usar esa imagen.', 'malo'); }
 });
 $('ficheros').addEventListener('change', function(e){
+  try{ localStorage.removeItem('mm_picker'); }catch(_){}
+  anotar('selector', 'recibidos ' + (e.target.files ? e.target.files.length : 0) + ' archivos');
   anadirFicheros(Array.prototype.slice.call(e.target.files));
   e.target.value = '';
 });
@@ -3970,6 +3998,7 @@ async function arrancar(){
 
     // Arrancó bien
     arranqueOK();
+    avisoSelector();
 
     // Aviso si no está instalada (los 7 días de Safari)
     var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;

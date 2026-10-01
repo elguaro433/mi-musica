@@ -563,7 +563,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.20.0';
+var APP_VERSION = '1.21.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1191,11 +1191,7 @@ function bloqueMundo(){
   if(rbFallo)    return h + '<div class="vacio"><span class="em">📻</span>' + esc(rbFallo) + '</div>';
   if(rbResultados.length)
     return h + rbResultados.map(function(e, i){ return filaEmisoraMundo(e, i); }).join('');
-  return h +
-    '<div class="hscroll" style="margin-top:2px">' +
-    ['Venezuela','Colombia','España','Andorra','Barquisimeto','Caracas','Medellín','Santo Domingo','Líder']
-      .map(function(t){ return '<button class="tab" data-rb-sug="' + esc(t) + '">' + esc(t) + '</button>'; })
-      .join('') + '</div>';
+  return '';
 }
 
 /* Internet Archive — solo colecciones legalmente limpias:
@@ -1672,6 +1668,7 @@ async function pintarAhora(cancion){
   $('mini').classList.add('on');
   pintarBotones(!audio.paused);
   pintarCola();
+  refrescarTuMusica();
 
   // ─── lo que sale en el coche y en la pantalla de bloqueo ───
   if('mediaSession' in navigator){
@@ -1992,7 +1989,7 @@ function soltarCaratulas(){
    tambi\u00e9n lo NO encontrado) para no volver a preguntar por lo mismo.
    Sale a internet solo el artista y el t\u00edtulo de la canci\u00f3n.            */
 var PORTADAS = {};
-try{ PORTADAS = JSON.parse(localStorage.getItem('mm_portadas') || '{}') || {}; }catch(_){ PORTADAS = {}; }
+try{ PORTADAS = JSON.parse(localStorage.getItem('mm_portadas2') || '{}') || {}; }catch(_){ PORTADAS = {}; }
 var colaPortadas = [], buscandoPortada = false;
 
 function clavePortada(c){
@@ -2022,11 +2019,12 @@ async function masticarPortadas(){
     var c = colaPortadas.shift();
     var k = clavePortada(c);
     if(PORTADAS[k] !== undefined) continue;
-    var url = '';
+    var url = '', fallo = false;
     try{ url = await traerPortada(c); }
-    catch(err){ anotar('portada', err.message, c.titulo); }
+    catch(err){ fallo = true; anotar('portada', err.message, c.titulo); }
+    if(fallo){ await new Promise(function(r){ setTimeout(r, 600); }); continue; }   // un fallo de red NO es «no hay portada»
     PORTADAS[k] = url;
-    try{ localStorage.setItem('mm_portadas', JSON.stringify(PORTADAS)); }catch(_){}
+    try{ localStorage.setItem('mm_portadas2', JSON.stringify(PORTADAS)); }catch(_){}
     if(url) pintarVista();
     await new Promise(function(r){ setTimeout(r, 220); });
   }
@@ -2066,10 +2064,14 @@ function iconoEstilo(c){
 }
 /* El cuadro de una canci\u00f3n: su car\u00e1tula si la trae; si no, su color con el
    dibujo del estilo. Nunca un cuadro liso y mudo. */
+function imgRota(img){
+  var s = img.parentNode; if(!s) return;
+  s.classList.add('vacia'); s.textContent = img.getAttribute('data-ico') || '🎵';
+}
 function cuadroCancion(c, grande){
   var f = 'background:' + tono(c.titulo + c.artista);
   var u = urlCaratula(c) || portadaDe(c);
-  if(u) return '<span class="art" style="'+f+'"><img src="'+esc(u)+'" alt="" loading="lazy" onerror="this.remove()"></span>';
+  if(u) return '<span class="art" style="'+f+'"><img src="'+esc(u)+'" alt="" data-ico="'+iconoEstilo(c)+'" onerror="imgRota(this)"></span>';
   var dentro = c.falta ? '\u26A0\uFE0F' : iconoEstilo(c);
   return '<span class="art vacia'+(grande?' g':'')+'" style="'+f+'">'+dentro+'</span>';
 }
@@ -2385,7 +2387,12 @@ async function cargarInicio(forzar){
   }else INI.fallo = true;
   repintarInicio();
 }
+var relojIni = 0;
 function repintarInicio(){
+  clearTimeout(relojIni);
+  relojIni = setTimeout(repintarInicioYa, 350);      // varios avisos seguidos = un solo repintado
+}
+function repintarInicioYa(){
   if(vistaActual === 'inicio') pintarInicio();
   else if(vistaActual === 'buscar' && pestana === 'musica' && !mu.res.length && !mu.buscando) pintarMusica();
 }
@@ -2432,7 +2439,29 @@ function filaApple(p, g, i){
     '<span class="r-a">⋯</span></div>';
 }
 
+function hidratarIni(){
+  var cc = paisIni();
+  if(INI.yo !== yo){ INI.yo = yo; INI.art = {}; INI.t = 0; }
+  if(INI.cc === cc) return;
+  INI.cc = cc; INI.t = 0; INI.apple = []; INI.au = []; INI.rb = [];
+  try{
+    var c = JSON.parse(localStorage.getItem('mm_ini_' + cc) || 'null');
+    if(c && c.apple){ INI.apple = c.apple; INI.au = c.au || []; INI.rb = c.rb || []; INI.t = c.t || 0; }
+  }catch(_){}
+}
+function filasTuMusica(){
+  var rec = CANCIONES.slice().sort(function(a, b){ return (b.ultima||b.anadida||0) - (a.ultima||a.anadida||0); }).slice(0, 12);
+  return rec.map(function(c){
+    return '<div class="tile" data-cancion="'+esc(c.id)+'">'+cuadroCancion(c, true)+
+      '<div class="t">'+esc(c.titulo)+'</div><div class="s">'+esc(c.artista)+'</div></div>'; }).join('');
+}
+/* Al cambiar de canción, solo se rehace «Tu música» (no toda la pantalla). */
+function refrescarTuMusica(){
+  if(vistaActual !== 'inicio') return;
+  var el = $('ini-tu'); if(el) el.innerHTML = filasTuMusica();
+}
 function pintarInicio(){
+  hidratarIni();
   $('saludo').textContent = saludoHora() + ', ' + PERSONAS[yo].corto;
   var C = $('inicio-cuerpo'), h = '';
   GR = {};
@@ -2445,11 +2474,8 @@ function pintarInicio(){
     h += '<button class="btn" id="b-coche" style="margin-top:8px">🚗&nbsp; Modo coche</button>';
 
   if(CANCIONES.length){
-    var rec = CANCIONES.slice().sort(function(a, b){ return (b.ultima||b.anadida||0) - (a.ultima||a.anadida||0); }).slice(0, 12);
-    h += '<div class="shelf-t">🎵 Tu música <span class="vermas" data-ir="biblio">Ver todas ›</span></div><div class="hscroll">' +
-      rec.map(function(c){
-        return '<div class="tile" data-cancion="'+esc(c.id)+'">'+cuadroCancion(c, true)+
-          '<div class="t">'+esc(c.titulo)+'</div><div class="s">'+esc(c.artista)+'</div></div>'; }).join('') + '</div>';
+    h += '<div class="shelf-t">🎵 Tu música <span class="vermas" data-ir="biblio">Ver todas ›</span></div><div class="hscroll" id="ini-tu">' +
+      filasTuMusica() + '</div>';
   }
 
   // De qué país quieres los éxitos
@@ -2647,24 +2673,12 @@ function pintarBuscar(){
       CIUDADES.forEach(function(c){ if(c[0]===e.ciudad) conocida = true; });
       return !conocida && (!q || (e.nombre+' '+e.genero).toLowerCase().indexOf(q) >= 0); });
     if(otras.length) h += '<div class="city">➕ Tuyas</div>' + otras.map(filaEmisora).join('');
-    var arriba = '';
-    if(!q && !rbResultados.length && !rbBuscando && !rbFallo){
-      arriba += estante('🚗 Radios de éxitos · un toque', 'rh', radiosDeExitos());
-      arriba += '<div class="shelf-t">🎚 Por estilo · un toque</div><div class="hscroll">' +
-        ESTILOS_RADIO.map(function(s){ return '<button class="tab" data-estilo="'+esc(s[1])+'" data-nombre="'+esc(s[0])+'">'+esc(s[0])+'</button>'; }).join('') + '</div>';
-      var mo = masOidas();
-      if(mo.length) arriba += estante('⭐ Las que más oyes', 'mo', mo);
-    }
     var botones =
-      '<button class="btn solido" id="b-buscar-radio">🔎&nbsp; Buscar cualquier emisora del mundo</button>' +
-      '<button id="b-emisora" style="display:block;margin:12px auto 4px;background:none;border:0;color:var(--dim);'+
-        'font-size:calc(12.5px * var(--esc));text-decoration:underline;padding:10px">o añádela pegando su enlace</button>';
+      '<button class="btn solido" id="b-buscar-radio">🔎&nbsp; Buscar cualquier emisora del mundo</button>';
     var propias = h ? '<div class="city">⭐ Tus emisoras guardadas</div>' + h : '';
     // Buscando: los resultados arriba. En reposo: tus emisoras, el botón de buscar,
     // y debajo de todo lo demás (radios de éxitos, estilos, países).
-    C.innerHTML = arriba
-      ? propias + botones + arriba + bloqueMundo()
-      : bloqueMundo() + propias + botones;
+    C.innerHTML = botones + bloqueMundo() + propias;
   }
   else if(pestana === 'youtube') pintarYouTube();
   else {
@@ -4218,8 +4232,10 @@ async function arrancar(){
     // La direccion manda sobre lo guardado: el icono de Elibel abre SU
     // musica aunque el ultimo que la usara en ese telefono fuera otro.
     var guardado = perfilPedido();
-    if(!guardado){
-      try{ guardado = localStorage.getItem('mm_perfil'); }catch(_){}
+    if(guardado !== 'elibel'){
+      var ya = '';
+      try{ ya = localStorage.getItem('mm_perfil'); }catch(_){}
+      if(ya && PERSONAS[ya]) guardado = ya;
     }
     // Este enlace es el de Emmanuel (el de Elibel es elibel.html): no se pregunta quién eres.
     // Para cambiar de persona está Ajustes → Cambiar de persona.

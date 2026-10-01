@@ -140,8 +140,8 @@ button{font-family:inherit;color:inherit}
 .row.falta{opacity:.45}
 .row.desl{position:relative;touch-action:pan-y;transition:transform .22s ease}
 .row.desl.mov{transition:none}
-.swa{visibility:hidden;position:absolute;left:100%;top:3px;bottom:3px;width:128px;display:flex;gap:6px;padding-left:8px;box-sizing:border-box}
-.row.desl.abre .swa{visibility:visible}
+.swa{display:none;position:absolute;left:100%;top:3px;bottom:3px;width:128px;gap:6px;padding-left:8px;box-sizing:border-box}
+.row.desl.abre .swa{display:flex}
 .swb{flex:1;display:grid;place-items:center;font-size:25px;border-radius:13px}
 .swb.fav{background:rgba(255,95,166,.22)}
 .swb.del{background:#ff5f7a}
@@ -590,7 +590,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.31.0';
+var APP_VERSION = '1.31.1';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';

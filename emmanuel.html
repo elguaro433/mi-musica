@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Mi Música — Emmanuel</title>
+<meta name="description" content="La música de Emmanuel. Sin internet, en el coche y con su nombre.">
+
+<!-- Esta página existe por una limitación del iPhone: una app instalada solo
+     puede tener UN icono y UN nombre. Instalando desde aquí, Elibel tiene su
+     propia entrada, su nombre debajo del icono y entra directa a su perfil
+     sin tener que elegir quién es cada vez. -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0913">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Emmanuel">
+<link rel="apple-touch-icon" href="icon-180.png">
+
+<link rel="apple-touch-startup-image" href="splash-393x852.png"
+  media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)">
+<link rel="apple-touch-startup-image" href="splash-440x956.png"
+  media="(device-width:440px) and (device-height:956px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)">
+<link rel="apple-touch-startup-image" href="splash-402x874.png"
+  media="(device-width:402px) and (device-height:874px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)">
+<link rel="apple-touch-startup-image" href="splash-430x932.png"
+  media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)">
+<link rel="apple-touch-startup-image" href="splash-375x812.png"
+  media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)">
+<link rel="apple-touch-startup-image" href="splash-390x844.png"
+  media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)">
+<link rel="icon" href="icon-32.png">
+
+<style>
+  html,body{margin:0;height:100%;background:#0b0913;color:#f6f2ff;
+    font-family:system-ui,-apple-system,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+  img{width:132px;height:132px;border-radius:29px}
+  p{margin:0;color:#aea4c9;font-size:14px}
+  a{color:#ff5fa6;font-size:15px}
+</style>
+</head>
+<body>
+  <img src="icon-192.png" alt="Mi Música">
+  <p>Abriendo la música de Emmanuel…</p>
+  <a href="index.html?p=emmanuel">Entrar</a>
+
+<script>
+/* En cuanto carga, a la app con su perfil ya elegido. El enlace de arriba
+   es solo por si el navegador bloquea el salto automático. */
+location.replace('index.html?p=emmanuel');
+</script>
+</body>
+</html>

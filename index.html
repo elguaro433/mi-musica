@@ -145,6 +145,7 @@ button{font-family:inherit;color:inherit}
 .swb{flex:1;display:grid;place-items:center;font-size:25px;border-radius:13px}
 .swb.fav{background:rgba(255,95,166,.22)}
 .swb.del{background:#ff5f7a}
+#yt-host{position:absolute;inset:0;width:100%;height:100%;border:0}
 .r-i{flex:0 0 auto;font-size:15px;opacity:.9}
 .view{overflow-x:hidden}
 .art{width:54px;height:54px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
@@ -589,7 +590,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.29.0';
+var APP_VERSION = '1.30.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2847,7 +2848,7 @@ async function escucharCompleta(p){
   cerrarHoja(); ir('buscar'); ponerPestana('youtube');
   var txt = p.artista + ' ' + p.titulo;
   $('q').value = txt;
-  ytTexto = txt; ytBuscando = true; ytResultados = []; pintarYouTube();
+  ytProbados = {}; ytTexto = txt; ytBuscando = true; ytResultados = []; pintarYouTube();
   try{ ytResultados = await buscarYouTube(txt + ' audio oficial'); }
   catch(_){ ytResultados = []; toast('No se pudo buscar en YouTube ahora mismo. Prueba en un minuto.', 'malo', 5000); }
   ytBuscando = false;
@@ -2986,14 +2987,9 @@ function pintarYouTube(){
   var C = $('tab-cuerpo'), h = '';
   if(ytVerId){
     h += '<div style="position:relative;padding-top:56.25%;border-radius:13px;overflow:hidden;background:#000;margin-bottom:10px">'+
-         '<iframe src="https://www.youtube-nocookie.com/embed/'+esc(ytVerId)+'?playsinline=1&rel=0" '+
-         'style="position:absolute;inset:0;width:100%;height:100%;border:0" loading="lazy" '+
-         'allow="accelerometer;encrypted-media;gyroscope;picture-in-picture;fullscreen" allowfullscreen></iframe></div>'+
-         '<div class="note" style="margin:8px 0 0">💡 Para gastar menos datos: toca el <b>⚙</b> del vídeo → <b>Calidad</b> → <b>144p</b> o <b>240p</b>. '+
-           '(Normal gasta ~0,5 GB por hora; 144p, ~0,1 GB.)</div>'+
+         '<div id="yt-host"></div></div>'+
          '<button class="btn '+(esFavVideo(ytVerId)?'suave':'solido')+'" data-fav-video="'+esc(ytVerId)+'">'+
-           (esFavVideo(ytVerId)?'❤️&nbsp; En tus favoritos · toca para quitar':'♡&nbsp; Añadir a favoritos')+'</button>'+
-         '<button class="btn" data-cerrar-yt="1">✕&nbsp; Cerrar el vídeo</button>';
+           (esFavVideo(ytVerId)?'❤️&nbsp; Guardado en Favoritas':'♡&nbsp; Guardar vídeo')+'</button>';
   }
   if(ytBuscando) h += '<div class="note">Buscando en YouTube…</div>';
   else if(ytResultados.length){
@@ -3021,13 +3017,58 @@ function pintarYouTube(){
             '<span class="r-x"><span class="r-t">'+esc(p.titulo)+'</span><span class="r-s"><span class="enc">'+esc(p.artista)+'</span></span></span>' +
             '<span class="r-a">▶︎</span></div>'; }).join('');
     }else if(!INI.cargando && !INI.fallo) cargarInicio();
-    h += '<div class="note">También puedes escribir arriba o pegar un enlace de YouTube.</div>';
   }
-  h += '<div class="note">El vídeo <b>se para al bloquear el móvil o salir de la app</b>. Es una limitación de iOS y de YouTube, no de la app.<br>Para el coche: tu música descargada o la radio.</div>';
   if(VIDEOS.length){
     h += '<div class="shelf-t">❤️ Tus vídeos favoritos</div>' + VIDEOS.map(filaVideoFav).join('');
   }
   C.innerHTML = h;
+  if(ytVerId) montarReproductorYT();
+}
+/* Reproductor con la API de YouTube: si el dueño no deja verlo aquí (errores
+   100, 101, 150…), se pasa solo al siguiente resultado en vez de enseñar
+   «El vídeo no está disponible». */
+var ytApiListo = null, ytPlayer = null, ytProbados = {};
+function cargarYTApi(){
+  if(window.YT && window.YT.Player) return Promise.resolve();
+  if(ytApiListo) return ytApiListo;
+  ytApiListo = new Promise(function(ok, mal){
+    var prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function(){ try{ if(prev) prev(); }catch(_){} ok(); };
+    var sc = document.createElement('script');
+    sc.src = 'https://www.youtube.com/iframe_api';
+    sc.onerror = function(){ ytApiListo = null; mal(new Error('sin API de YouTube')); };
+    document.head.appendChild(sc);
+    setTimeout(function(){ mal(new Error('la API de YouTube tarda')); }, 8000);
+  });
+  return ytApiListo;
+}
+async function montarReproductorYT(){
+  var id = ytVerId, host = $('yt-host');
+  if(!host || !id) return;
+  ytProbados[id] = true;
+  try{
+    await cargarYTApi();
+    if(id !== ytVerId || !$('yt-host')) return;
+    ytPlayer = new YT.Player('yt-host', {
+      videoId: id, host: 'https://www.youtube-nocookie.com',
+      playerVars: {playsinline: 1, rel: 0},
+      events: {onError: function(e){ ytFallo(id, e && e.data); }}
+    });
+  }catch(err){
+    anotar('youtube', err.message);
+    host = $('yt-host');
+    if(host) host.outerHTML = '<iframe id="yt-host" src="https://www.youtube-nocookie.com/embed/'+esc(id)+'?playsinline=1&rel=0" '+
+      'allow="accelerometer;encrypted-media;gyroscope;picture-in-picture;fullscreen" allowfullscreen></iframe>';
+  }
+}
+function ytFallo(id, codigo){
+  anotar('youtube', 'vídeo no disponible (' + codigo + ')', id);
+  var sig = null;
+  for(var i=0;i<ytResultados.length && !sig;i++) if(!ytProbados[ytResultados[i].vid]) sig = ytResultados[i];
+  if(sig){
+    toast('Ese vídeo no se puede ver aquí. Pruebo con otro…', null, 2200);
+    abrirVideoId(sig.vid, sig.titulo, sig.canal, sig.miniatura);
+  }else toast('Ese vídeo no se puede ver aquí. Prueba con otro resultado.', 'malo', 3500);
 }
 
 async function lanzarBusquedaYouTube(texto){
@@ -4171,11 +4212,11 @@ document.addEventListener('click', async function(ev){
       for(var vi=0; vi<ytResultados.length; vi++)
         if(ytResultados[vi].vid === vid){ tit = ytResultados[vi].titulo; can = ytResultados[vi].canal; }
       await guardar('videos', {id:yo+'_'+vid, duenyo:yo, vid:vid, titulo:tit, canal:can});
-      toast('Añadido a tus favoritos. Ojo: se guarda el enlace, no se baja el vídeo.', 'bueno', 4200);
+      toast('Guardado en Biblioteca → Favoritas. Se guarda el enlace; el vídeo no se baja.', 'bueno', 4500);
     }
     await cargarDatos(); pintarVista(); return;
   }
-  if((el = t.closest('[data-ver-yt]'))){
+  if((el = t.closest('[data-ver-yt]'))){ ytProbados = {};
     // Aquí manda el vídeo: se para la música nuestra y se suelta la radio.
     // Si no, iOS interrumpía el <audio>, la app creía que había sido una
     // llamada y lo reenganchaba ENCIMA del vídeo. (fallo del 29/09/2026)

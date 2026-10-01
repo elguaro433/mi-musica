@@ -6,12 +6,12 @@
    ⚠️ IMPORTANTE: este service worker NUNCA toca IndexedDB. La música vive ahí.
    Borrar estas cachés no borra ni una canción.                                 */
 
-const VERSION = '1.35.0';
+const VERSION = '1.35.1';
 const CACHE = 'mimusica-' + VERSION;
 
 const ARMAZON = [
   './', './index.html', './manifest.json',
-  './elibel.html', './emmanuel.html', './manifest-elibel.json',
+  './elibel.html', './emmanuel.html', './limpiar.html', './manifest-elibel.json',
   './icon-180.png', './icon-192.png', './icon-512.png',
   './logo.png',
   './splash-375x812.png',

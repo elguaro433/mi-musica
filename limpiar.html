@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi Música — poner al día</title>
+<meta name="theme-color" content="#0b0913">
+<style>
+  html,body{margin:0;height:100%;background:#0b0913;color:#f6f2ff;font-family:system-ui,-apple-system,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 24px}
+  img{width:110px;height:110px;border-radius:25px}
+  p{margin:0;color:#aea4c9;font-size:15px;line-height:1.5}
+</style>
+</head>
+<body>
+<img src="icon-192.png" alt="Mi Música">
+<p id="t">Poniendo la app al día…</p>
+<script>
+/* Rescata un teléfono que se quedó con una versión vieja: borra los archivos guardados
+   de la app y su service worker, y entra de nuevo. NO toca la música (IndexedDB). */
+(async function(){
+  var m = String(location.search).match(/[?&]p=(emmanuel|elibel)(?![a-z])/i);
+  var quien = m ? m[1].toLowerCase() : '';
+  try{ if(!quien) quien = localStorage.getItem('mm_bloqueado') || 'emmanuel'; }catch(_){ quien = quien || 'emmanuel'; }
+  try{
+    if('serviceWorker' in navigator){
+      var regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(function(r){ return r.unregister(); }));
+    }
+    if(window.caches){
+      var ks = await caches.keys();
+      await Promise.all(ks.map(function(k){ return caches.delete(k); }));
+    }
+  }catch(e){}
+  document.getElementById('t').textContent = 'Listo. Entrando…';
+  setTimeout(function(){ location.replace('index.html?p=' + quien + '&n=' + Date.now()); }, 700);
+})();
+</script>
+</body>
+</html>

@@ -612,7 +612,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.35.0';
+var APP_VERSION = '1.35.1';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2876,7 +2876,7 @@ function refrescarTuMusica(){
 }
 function pintarInicio(){
   hidratarIni();
-  $('saludo').textContent = saludoHora() + ', ' + PERSONAS[yo].corto;
+  $('saludo').innerHTML = esc(saludoHora() + ', ' + PERSONAS[yo].corto) + ' <span style="opacity:.45;font-size:11px;font-weight:400">· v' + APP_VERSION + '</span>';
   var C = $('inicio-cuerpo'), h = '';
   GR = {};
   INI.nombres = nombresParaTi();
@@ -5095,6 +5095,13 @@ async function arrancar(){
     if('serviceWorker' in navigator){
       navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'}).catch(function(err){ anotar('sw', err.message); });
       setTimeout(buscarActualizacion, 4000);
+      var teniaControl = !!navigator.serviceWorker.controller, recargado = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function(){
+        if(!teniaControl || recargado) return;
+        recargado = true;
+        if(!actual || audio.paused) setTimeout(function(){ location.reload(); }, 400);
+        else actualizacionPendiente = true;
+      });
     }
 
     // Cada app es de una sola persona (ver cabecera): no hay «quién eres» ni «cambiar de persona».

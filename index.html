@@ -360,8 +360,12 @@ a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box
 #n-s{color:var(--muted);font-size:calc(14px * var(--esc));text-align:center;min-height:21px}
 #n-cal{color:var(--cyan);font-size:calc(10.5px * var(--esc));text-align:center;letter-spacing:.11em;
   text-transform:uppercase;font-weight:700;margin:6px 0 16px;min-height:13px}
-.seek{height:5px;background:#3a2f57;border-radius:3px;overflow:hidden;margin-bottom:7px;cursor:pointer}
-.seek i{display:block;height:100%;background:linear-gradient(90deg,#a970ff,#ff5fa6);width:0}
+.seek{position:relative;height:34px;margin-bottom:0;cursor:pointer;touch-action:none;-webkit-user-select:none;user-select:none}
+.seek::before{content:"";position:absolute;left:0;right:0;top:14px;height:6px;border-radius:3px;background:#3a2f57}
+.seek i{position:absolute;left:0;top:14px;height:6px;border-radius:3px;background:linear-gradient(90deg,#a970ff,#ff5fa6);width:0}
+.seek i::after{content:"";position:absolute;right:-10px;top:-7px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.5)}
+.seek.vivo i::after{display:none}
+#now-cerrar{display:grid;place-items:center;width:52px;height:52px;margin:-8px 0 -8px -10px;color:var(--text,#f6f2ff)}
 .times{display:flex;justify-content:space-between;font-size:calc(11px * var(--esc));color:var(--dim);margin-bottom:20px}
 .ctrls{display:flex;align-items:center;justify-content:center;gap:26px;margin-bottom:20px}
 .ctrls button{background:none;border:0;font-size:calc(22px * var(--esc));cursor:pointer;padding:4px;flex:0 0 auto}
@@ -403,7 +407,7 @@ body.coche #now h3{font-size:calc(30px * var(--esc));line-height:1.15}
 body.coche #n-s{font-size:calc(18px * var(--esc))}
 body.coche #n-cal{display:none}
 body.coche .times{font-size:calc(15px * var(--esc));margin-bottom:22px}
-body.coche .seek{height:9px}
+body.coche .seek{height:44px}
 /* Conduciendo solo hacen falta tres cosas: atras, play, adelante.
    Aleatorio y repetir se ajustan antes de arrancar, no al volante. */
 body.coche .ctrls{gap:26px;margin-bottom:24px}
@@ -497,7 +501,7 @@ body.coche #coche-salir{display:block}
 
   <!-- Sonando ahora -->
   <div id="now">
-    <div class="now-top"><span id="now-cerrar">⌄</span><span style="letter-spacing:.14em;font-size:calc(11px * var(--esc));cursor:default">SONANDO AHORA</span><span style="display:flex;gap:16px;align-items:center"><span id="now-mas">⋯</span><span id="now-fav">♡</span></span></div>
+    <div class="now-top"><span id="now-cerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></span><span style="letter-spacing:.14em;font-size:calc(11px * var(--esc));cursor:default">SONANDO AHORA</span><span style="display:flex;gap:16px;align-items:center"><span id="now-mas">⋯</span><span id="now-fav">♡</span></span></div>
     <div class="art" id="n-art"></div>
     <h3 id="n-t">—</h3>
     <div id="n-s">—</div>
@@ -564,7 +568,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.24.0';
+var APP_VERSION = '1.25.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1861,7 +1865,7 @@ function pintarBotones(sonando){
 function pintarProgreso(){
   if(!actual) return;
   if(actual.tipo === 'radio'){
-    $('m-prog').style.width = '100%'; $('n-seek').style.width = '100%';
+    $('m-prog').style.width = '100%'; $('n-seek').style.width = '100%'; $('n-seek-caja').classList.add('vivo');
     $('n-a').textContent = '●';
     // En directo no hay principio ni final. Si no se BORRA lo que quedo de la
     // cancion anterior, CarPlay y la pantalla de bloqueo siguen pintando una
@@ -1875,8 +1879,11 @@ function pintarProgreso(){
   var d = audio.duration || actual.dur || 0;
   var pct = d ? (audio.currentTime / d * 100) : 0;
   $('m-prog').style.width = pct + '%';
-  $('n-seek').style.width = pct + '%';
-  $('n-a').textContent = tiempo(audio.currentTime);
+  $('n-seek-caja').classList.remove('vivo');
+  if(!$('n-seek-caja').dataset.arr){
+    $('n-seek').style.width = pct + '%';
+    $('n-a').textContent = tiempo(audio.currentTime);
+  }
   if('mediaSession' in navigator && navigator.mediaSession.setPositionState && d){
     try{ navigator.mediaSession.setPositionState({duration:d, position:Math.min(audio.currentTime,d), playbackRate:1}); }catch(_){}
   }
@@ -4080,12 +4087,37 @@ $('ficheros').addEventListener('change', function(e){
 document.addEventListener('change', function(e){
   if(e.target.id === 'fcopia' && e.target.files[0]){ importarCopia(e.target.files[0]); e.target.value=''; }
 });
-$('n-seek-caja').addEventListener('click', function(e){
-  if(!actual || actual.tipo !== 'cancion') return;
-  var r = this.getBoundingClientRect();
-  var d = audio.duration || actual.dur;
-  if(d) { try{ audio.currentTime = (e.clientX - r.left) / r.width * d; }catch(_){} }
-});
+/* Barra de «Sonando ahora»: se toca o se arrastra con el dedo. */
+(function(){
+  var caja = $('n-seek-caja'), arrastrando = false;
+  function pos(e){
+    var r = caja.getBoundingClientRect(), d = audio.duration || (actual && actual.dur) || 0;
+    var f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    return {f:f, d:d};
+  }
+  function mover(e){
+    if(!actual || actual.tipo !== 'cancion') return;
+    var q = pos(e); if(!q.d) return;
+    $('n-seek').style.width = (q.f * 100) + '%';
+    $('n-a').textContent = tiempo(q.f * q.d);
+  }
+  caja.addEventListener('pointerdown', function(e){
+    if(!actual || actual.tipo !== 'cancion') return;
+    arrastrando = true; caja.dataset.arr = '1';
+    try{ caja.setPointerCapture(e.pointerId); }catch(_){}
+    mover(e); e.preventDefault();
+  });
+  caja.addEventListener('pointermove', function(e){ if(arrastrando) mover(e); });
+  function soltar(e){
+    if(!arrastrando) return;
+    arrastrando = false; delete caja.dataset.arr;
+    var q = pos(e);
+    if(q.d){ try{ audio.currentTime = q.f * q.d; }catch(_){} }
+    pintarProgreso();
+  }
+  caja.addEventListener('pointerup', soltar);
+  caja.addEventListener('pointercancel', function(){ arrastrando = false; delete caja.dataset.arr; pintarProgreso(); });
+})();
 
 function ponerPestana(t){
   pestana = t;

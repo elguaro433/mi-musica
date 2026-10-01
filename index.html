@@ -1455,6 +1455,15 @@ async function precargarSiguiente(){
     if(a && a.blob && cola[(colaPos + 1) % cola.length] === id) sigPre = {id:id, a:a};
   }catch(_){}
 }
+var pendienteGuardar = {};
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden) return;
+  var ids = Object.keys(pendienteGuardar);
+  ids.forEach(function(k){
+    var c = pendienteGuardar[k]; delete pendienteGuardar[k];
+    guardar('canciones', limpia(c)).catch(function(e){ anotar('guardar', e.message); });
+  });
+});
 async function tocarCancion(id, listaIds){
   var c = null;
   for(var i=0;i<CANCIONES.length;i++) if(CANCIONES[i].id === id) c = CANCIONES[i];
@@ -1488,7 +1497,9 @@ async function tocarCancion(id, listaIds){
       pintarBotones(false);
     });
     c.veces = (c.veces||0) + 1; c.ultima = Date.now();
-    guardar('canciones', limpia(c));
+    // Con la pantalla apagada iOS no deja escribir blobs ("Error preparing Blob/File data"): se guarda al volver.
+    if(document.hidden) pendienteGuardar[c.id] = c;
+    else guardar('canciones', limpia(c)).catch(function(e){ anotar('guardar', e.message); });
     guardarUltimo(); guardarCola();
     anotarHisto({k:'c', key:'c'+c.id, titulo:c.titulo, sub:c.artista, artista:c.artista, dat:c.id});
     await pintarAhora(c);
@@ -2005,10 +2016,17 @@ async function traerPortada(c){
   var busca = limpiaBusqueda(c.artista) + ' ' + limpiaBusqueda(c.titulo);
   var u = 'https://itunes.apple.com/search?term=' + encodeURIComponent(busca) +
           '&media=music&entity=song&limit=1';
-  var d = await traerConLimite(u, 9000);
-  var x = (d && d.results || [])[0];
-  if(!x || !x.artworkUrl100) return '';
-  return String(x.artworkUrl100).replace('100x100bb', '600x600bb');
+  try{
+    var d = await traerConLimite(u, 9000);
+    var x = (d && d.results || [])[0];
+    if(!x || !x.artworkUrl100) return '';
+    return String(x.artworkUrl100).replace('100x100bb', '600x600bb');
+  }catch(err){
+    // Apple no contesta (le pasa a su móvil): se pregunta a Deezer.
+    var dz = await jsonp('https://api.deezer.com/search?q=' + encodeURIComponent(busca) + '&limit=1', 9000);
+    var y = ((dz && dz.data) || [])[0];
+    return (y && y.album && (y.album.cover_big || y.album.cover_medium)) || '';
+  }
 }
 /* De una en una y con respiro: son decenas de canciones y no hace falta
    atropellar a nadie. Cuando encuentra una, repinta lo que se est\u00e9 viendo. */

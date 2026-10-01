@@ -612,7 +612,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.36.1';
+var APP_VERSION = '1.36.2';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1555,7 +1555,21 @@ function iniciarMezcla(){
     MZ.ctx.createMediaElementSource(MZ.b).connect(MZ.gainB);
     MZ.listo = true;
     // NO se reanuda sola: si otra app tomó el sonido (WhatsApp, una llamada), se le deja.
-    MZ.ctx.onstatechange = function(){ anotar('sonido', 'mezcla: el audio pasó a ' + MZ.ctx.state); };
+    // Detector de silencio: tras una llamada o un audio de WhatsApp el iPhone deja el audio de la
+    // mezcla «en marcha» pero MUDO (visto en el iPhone de Elibel, 1/10/2026). Se vigila la señal real.
+    MZ.an = MZ.ctx.createAnalyser(); MZ.an.fftSize = 512; MZ.gain.connect(MZ.an);
+    MZ.ctx.onstatechange = function(){
+      var st = MZ.ctx.state;
+      anotar('sonido', 'mezcla: el audio pasó a ' + st);
+      linea('mezcla:' + st);
+      if(st === 'interrupted' || st === 'suspended') MZ.rota = true;
+      if(st === 'running' && MZ.rota){
+        MZ.rota = false;
+        // 1º el truco habitual (parar y arrancar el motor); 2º se mide si suena de verdad
+        try{ MZ.ctx.suspend().then(function(){ return MZ.ctx.resume(); }).catch(function(){}); }catch(_){}
+        setTimeout(comprobarSonidoMezcla, 2500);
+      }
+    };
     // iOS solo deja arrancar un reproductor nuevo si antes lo tocaste con el dedo.
     // Con el primer toque se "desbloquea" el segundo, en silencio.
     document.addEventListener('click', function des(){
@@ -1594,6 +1608,30 @@ function abortarPuente(){
 }
 /* Cuando faltan ~9 s: se deja lista la siguiente en el segundo reproductor.
    Cuando faltan ~4 s: entra la nueva (sube) mientras la vieja se va (baja). */
+function hayMuestra(){
+  try{
+    var d = new Uint8Array(MZ.an.fftSize); MZ.an.getByteTimeDomainData(d);
+    for(var i=0;i<d.length;i++) if(Math.abs(d[i] - 128) > 1) return true;
+  }catch(_){ return true; }
+  return false;
+}
+function comprobarSonidoMezcla(){
+  if(!MZ.listo || !actual || audio.paused) return;
+  var ok = false, n = 0;
+  (function medir(){
+    if(hayMuestra()) ok = true;
+    if(ok || ++n >= 8){
+      if(ok){ linea('mezcla: el sonido llega bien'); return; }
+      linea('mezcla: SILENCIO tras la interrupción → se apaga la mezcla');
+      anotar('mezcla', 'silencio tras interrupción: mezcla apagada');
+      AJ.mezcla = false; guardarAjustes(); guardarUltimo();
+      toast('El sonido se quedó mudo tras la interrupción. Apago la mezcla y reinicio.', 'malo', 3000);
+      setTimeout(function(){ location.reload(); }, 2200);
+      return;
+    }
+    setTimeout(medir, 250);
+  })();
+}
 async function mezclaVigila(){
   if(!MZ.listo || !actual || actual.tipo !== 'cancion' || actual.remota || repetir === 2) return;
   var d = audio.duration, resto = d - audio.currentTime;
@@ -3913,7 +3951,7 @@ async function pintarAjustes(){
       '<span class="sw'+(AJ.cocheEnInicio?' on':'')+'" data-aj="cocheEnInicio"></span></div>'+
     '<div class="kv"><span>Pantalla siempre encendida</span>'+
       '<span class="sw'+(AJ.pantalla?' on':'')+'" data-aj="pantalla"></span></div>'+
-    '<div class="kv"><span>Mezclar canciones (prueba)<br><span class="pista">Una baja mientras la siguiente sube. Reinicia la app. Si el sonido falla, se apaga sola.</span></span>'+
+    '<div class="kv"><span>Mezclar canciones (prueba)<br><span class="pista">Una baja mientras la siguiente sube. Reinicia la app. Puede dejar el sonido mudo tras una llamada o un audio de WhatsApp: si pasa, se apaga sola.</span></span>'+
       '<span class="sw'+(AJ.mezcla?' on':'')+'" data-aj="mezcla"></span></div></div>'+
 
   '<div class="card"><h3>Internet</h3>'+
@@ -4148,6 +4186,7 @@ function trasInterrupcion(){
   if(Date.now() - tSalida < 3500){ setTimeout(seguirTrasSalir, 300); return; }
   pausaAjena = Date.now();
   interrumpida = Date.now();
+  MZ.huboInterrupcion = true;
   anotar('sonido', 'pausa por otra app (llegó ' + Math.round((Date.now() - tSalida) / 1000) + ' s después de salir): espero', actual.titulo);
   pintarEstado('En pausa · otra app está sonando');
 }
@@ -4170,7 +4209,7 @@ try{
     });
   }
 }catch(_){}
-audio.addEventListener('playing', function(){ interrumpida = 0; });
+audio.addEventListener('playing', function(){ interrumpida = 0; if(MZ.listo && MZ.huboInterrupcion){ MZ.huboInterrupcion = false; setTimeout(comprobarSonidoMezcla, 2500); } });
 /* Volver a la app (tras una llamada, la cámara, WhatsApp…): si la música se paró por
    una interrupción y ya nada más suena, sigue. Si iOS no avisa por Audio Session. */
 document.addEventListener('visibilitychange', function(){

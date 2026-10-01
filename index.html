@@ -563,7 +563,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.22.0';
+var APP_VERSION = '1.23.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1714,20 +1714,7 @@ async function pintarAhora(cancion){
   // ─── lo que sale en el coche y en la pantalla de bloqueo ───
   if('mediaSession' in navigator){
     try{
-      // En CarPlay: la caratula si la hay, si no el logo de la emisora, y de
-      // ultimo recurso el icono de la app. El orden importa: iOS coge la
-      // primera que consiga cargar.
-      var arte = [];
-      if(tieneImg) arte.push({src:caratulaURL, sizes:'512x512', type:'image/jpeg'});
-      else if(actual.logo) arte.push({src:actual.logo, sizes:'512x512'});
-      arte.push({src:'icon-512.png', sizes:'512x512', type:'image/png'},
-                {src:'icon-192.png', sizes:'192x192', type:'image/png'});
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: actual.titulo,
-        artist: actual.tipo==='radio' ? nombreCiudad(actual.ciudad) : (actual.artista||''),
-        album: actual.tipo==='radio' ? 'Mi Música · Radio' : (actual.album||'Mi Música'),
-        artwork: arte
-      });
+      ponerMetadata(tieneImg ? caratulaURL : '', imagen);
       // Ojo: estos mandos son los del volante y la pantalla de bloqueo.
       // Antes llamaban a audio.pause() a pelo, así que la app no se enteraba
       // de que habías parado TÚ y la volvía a encender sola. Ahora pasan por
@@ -1741,10 +1728,11 @@ async function pintarAhora(cancion){
         navigator.mediaSession.setActionHandler('seekto', function(d){
           if(d.seekTime != null){ try{ audio.currentTime = d.seekTime; }catch(_){} }
         });
-        navigator.mediaSession.setActionHandler('seekbackward', function(){
-          audio.currentTime = Math.max(0, audio.currentTime - 10); });
-        navigator.mediaSession.setActionHandler('seekforward', function(){
-          audio.currentTime = Math.min(audio.duration||0, audio.currentTime + 10); });
+        // Sin 'seekbackward/seekforward' a propósito: si existen, CarPlay pinta «-10 / +10 s»
+        // en vez de canción anterior / siguiente.
+        ['seekbackward','seekforward'].forEach(function(a){
+          try{ navigator.mediaSession.setActionHandler(a, null); }catch(_){}
+        });
       }else{
         ['seekto','seekbackward','seekforward'].forEach(function(a){
           try{ navigator.mediaSession.setActionHandler(a, null); }catch(_){}
@@ -1754,6 +1742,43 @@ async function pintarAhora(cancion){
         }
       }
     }catch(err){ anotar('mediaSession', err.message); }
+  }
+}
+/* Lo que ve el coche. iOS no carga bien carátulas «blob:», así que la de dentro
+   del MP3 se encoge a 512 px y se pasa como imagen incrustada (data:); la de
+   Apple/Deezer o el logo de la emisora van por https; el icono, de último. */
+var metaVer = 0;
+function ponerMetadata(blobURL, remota){
+  if(!actual || !('mediaSession' in navigator)) return;
+  var ver = ++metaVer, esRadio = actual.tipo === 'radio';
+  function aplicar(img){
+    if(ver !== metaVer || !actual) return;
+    var arte = [];
+    if(img) arte.push({src:img, sizes:'512x512'});
+    else if(remota && remota.indexOf('blob:') !== 0) arte.push({src:remota, sizes:'512x512'});
+    else if(actual.logo) arte.push({src:actual.logo, sizes:'512x512'});
+    arte.push({src:'icon-512.png', sizes:'512x512', type:'image/png'});
+    try{
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: actual.titulo,
+        artist: esRadio ? nombreCiudad(actual.ciudad) : (actual.artista||''),
+        album: esRadio ? 'Mi Música · Radio' : (actual.album && actual.album !== 'Sin álbum' ? actual.album : 'Mi Música'),
+        artwork: arte
+      });
+    }catch(err){ anotar('mediaSession', err.message); }
+  }
+  aplicar('');                                   // enseguida: título y, si hay, la imagen remota
+  if(blobURL){
+    var im = new Image();
+    im.onload = function(){
+      try{
+        var c = document.createElement('canvas'), m = Math.min(1, 512 / Math.max(im.width, im.height));
+        c.width = Math.round(im.width * m); c.height = Math.round(im.height * m);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        aplicar(c.toDataURL('image/jpeg', 0.85));
+      }catch(_){}
+    };
+    im.src = blobURL;
   }
 }
 function pintarBotones(sonando){
@@ -2073,7 +2098,10 @@ async function masticarPortadas(){
     if(fallo){ await new Promise(function(r){ setTimeout(r, 600); }); continue; }   // un fallo de red NO es «no hay portada»
     PORTADAS[k] = url;
     try{ localStorage.setItem('mm_portadas2', JSON.stringify(PORTADAS)); }catch(_){}
-    if(url) pintarVista();
+    if(url){
+      pintarVista();
+      if(actual && actual.tipo === 'cancion' && clavePortada(actual) === k){ try{ pintarAhora(buscarCancion(actual.id)); }catch(_){} }
+    }
     await new Promise(function(r){ setTimeout(r, 220); });
   }
   buscandoPortada = false;

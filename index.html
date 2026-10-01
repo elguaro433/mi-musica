@@ -563,7 +563,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.21.0';
+var APP_VERSION = '1.22.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -573,8 +573,10 @@ function anotar(origen, msg, extra){
     // Apuntamos si pasó con la pantalla apagada: es la pista que faltaba
     // para saber de verdad si iOS nos corta el sonido de fondo.
     var fondo = document.hidden ? ' · [PANTALLA APAGADA]' : '';
-    l.unshift({f:new Date().toISOString(), v:APP_VERSION, o:origen,
-               m:String(msg).slice(0,300) + fondo, e:String(extra||'').slice(0,300)});
+    var txt = String(msg).slice(0,300) + fondo;
+    if(l[0] && l[0].o === origen && l[0].m === txt){ l[0].n = (l[0].n||1) + 1; l[0].f = new Date().toISOString(); }   // el mismo fallo seguido = una línea con contador
+    else l.unshift({f:new Date().toISOString(), v:APP_VERSION, o:origen,
+               m:txt, e:String(extra||'').slice(0,300)});
     localStorage.setItem(CAJA, JSON.stringify(l.slice(0,50)));
   }catch(_){}
   if(window.console) console.warn('[MiMúsica]', origen, msg, extra||'');
@@ -1424,6 +1426,7 @@ function cablearAudio(){
     var c = audio.error ? audio.error.code : 0;
     anotar('audio', 'error código ' + c, actual ? actual.titulo : '');
     if(actual && actual.tipo === 'radio'){ if(!paradoPorMi) programarReconexion(); }
+    else if(actual && actual.tipo === 'cancion' && !actual.remota){ repararCancion(); }
     else if(actual){ pintarEstado('No se pudo reproducir este archivo.'); }
   });
   // 'stalled' salta por cualquier bache de la red. Antes reconectábamos al
@@ -1454,6 +1457,32 @@ async function precargarSiguiente(){
     var a = await leer('audios', c.hash);
     if(a && a.blob && cola[(colaPos + 1) % cola.length] === id) sigPre = {id:id, a:a};
   }catch(_){}
+}
+/* Autoreparación de una canción que no suena: 1º se vuelve a leer su archivo
+   de la base de datos (la dirección temporal pudo caducar); 2º si sigue mal
+   se salta a la siguiente, para que en el coche no se quede en silencio.   */
+var reintentoCancion = {id:null, n:0}, saltosSeguidos = 0;
+async function repararCancion(){
+  if(!actual || paradoPorMi) return;
+  var id = actual.id, c = buscarCancion(id);
+  if(reintentoCancion.id !== id) reintentoCancion = {id:id, n:0};
+  if(c && !c.falta && reintentoCancion.n < 1){
+    reintentoCancion.n++;
+    try{
+      var a = await leer('audios', c.hash);
+      if(a && a.blob && actual && actual.id === id){
+        soltarURLs(); urlActual = URL.createObjectURL(a.blob); actual.url = urlActual;
+        audio.src = urlActual; var q = audio.play(); if(q && q.catch) q.catch(function(){});
+        anotar('reparado', 'canción vuelta a cargar', c.titulo); return;
+      }
+    }catch(_){}
+  }
+  if(saltosSeguidos < Math.max(1, Math.min(cola.length, 8)) && cola.length > 1){
+    saltosSeguidos++;
+    anotar('reparado', 'canción saltada', actual.titulo);
+    toast('No se pudo abrir «' + esc(actual.titulo) + '». Paso a la siguiente.', 'malo', 3000);
+    siguiente();
+  }else pintarEstado('No se pudo reproducir este archivo.');
 }
 var pendienteGuardar = {};
 document.addEventListener('visibilitychange', function(){
@@ -1490,6 +1519,7 @@ async function tocarCancion(id, listaIds){
               fav:!!c.fav, cal:textoCalidad(c.cal, c.bytes || (a.bytes||0), c.dur)};
     audio.src = urlActual;
     intentosVigilante = 0; paradoPorMi = false; recuperarAlVolver = false;
+    audio.addEventListener('playing', function ok(){ audio.removeEventListener('playing', ok); saltosSeguidos = 0; });
     var p = audio.play();
     if(p && p.catch) p.catch(function(err){
       anotar('play', err.message, c.titulo);
@@ -1667,7 +1697,7 @@ async function pintarAhora(cancion){
       var encaje = (!tieneImg && actual.tipo === 'radio') ? 'center/contain' : 'center/cover';
       el.style.background = 'url("'+imagen+'") ' + encaje + ' no-repeat, ' + fondo; el.textContent='';
     }
-    else { el.style.background = fondo; el.textContent = actual.tipo==='radio' ? '📻' : (id==='n-art'?'🎵':''); }
+    else { el.style.background = fondo; el.textContent = actual.tipo==='radio' ? '📻' : '🎵'; }
   });
   $('n-t').textContent = actual.titulo;
   $('m-t').textContent = actual.titulo;
@@ -3395,6 +3425,35 @@ function recuperarCola(){
   }catch(_){}
 }
 
+/* Autoreparación de la cola: quita canciones borradas o sin archivo. */
+function sanearCola(){
+  var idAct = cola[colaPos], antes = cola.length;
+  cola = cola.filter(function(id){ var c = buscarCancion(id); return c && !c.falta; });
+  var i = cola.indexOf(idAct);
+  colaPos = i >= 0 ? i : Math.min(Math.max(colaPos, 0), Math.max(cola.length - 1, 0));
+  if(cola.length !== antes){ anotar('reparado', 'cola limpiada', (antes - cola.length) + ' canciones'); guardarCola(); }
+}
+/* Autoreparación al arrancar: datos guardados rotos, listas con canciones borradas. */
+async function autoReparar(){
+  try{
+    var rotos = 0;
+    for(var i = localStorage.length - 1; i >= 0; i--){
+      var k = localStorage.key(i);
+      if(!k || k.indexOf('mm_') !== 0) continue;
+      var v = localStorage.getItem(k);
+      if(v && (v.charAt(0) === '{' || v.charAt(0) === '[')){
+        try{ JSON.parse(v); }catch(_){ localStorage.removeItem(k); rotos++; anotar('reparado', 'dato guardado roto, borrado', k); }
+      }
+    }
+    sanearCola();
+    for(var j = 0; j < LISTAS.length; j++){
+      var l = LISTAS[j], ya = l.canciones || [];
+      var nuevas = ya.filter(function(id){ return !!buscarCancion(id); });
+      if(nuevas.length !== ya.length){ l.canciones = nuevas; await guardar('listas', l); anotar('reparado', 'lista limpiada', l.nombre); }
+    }
+  }catch(err){ anotar('autoReparar', err.message); }
+}
+
 /* ─── Repetir: apagado → todo → una ──────────────────────────────
    En el coche lo normal es que NO se pare nunca: por eso "todo". */
 function ciclarRepetir(){
@@ -4169,6 +4228,7 @@ async function entrar(p){
   await cargarDatos();
   await revisarBiblioteca();
   recuperarCola();
+  autoReparar();
   $('barra').classList.add('on');
   ir('inicio');
 }

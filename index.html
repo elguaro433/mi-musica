@@ -141,6 +141,7 @@ button{font-family:inherit;color:inherit}
 .art{width:54px;height:54px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
   font-size:calc(18px * var(--esc));overflow:hidden;background-size:cover;background-position:center}
 .art img{width:100%;height:100%;object-fit:cover;display:block}
+.art.ch{width:34px;height:34px;border-radius:7px;font-size:14px}
 .art.vacia{font-size:calc(22px * var(--esc));text-shadow:0 2px 6px rgba(0,0,0,.35)}
 .art.vacia.g{font-size:calc(46px * var(--esc))}
 .art img.logo{object-fit:contain;padding:3px}
@@ -563,7 +564,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.23.0';
+var APP_VERSION = '1.24.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1168,8 +1169,8 @@ function cuadroEmisora(e){
   var f = 'background:' + tono(e.nombre);
   if(e.logo)
     return '<span class="art" style="'+f+'"><img class="logo" src="'+esc(e.logo)+'" alt="" '+
-           'loading="lazy" onerror="this.parentNode.textContent=&quot;📻&quot;"></span>';
-  return '<span class="art" style="'+f+'">📻</span>';
+           'loading="lazy" onerror="this.parentNode.textContent=this.getAttribute(&quot;data-ini&quot;)" data-ini="'+esc(inicialesDe(e.nombre))+'"></span>';
+  return '<span class="art" style="'+f+';font-weight:800;font-size:calc(17px * var(--esc))">'+esc(inicialesDe(e.nombre))+'</span>';
 }
 function filaEmisoraMundo(e, i){
   var yaEsta = false, L = listaEmisoras();
@@ -1419,7 +1420,7 @@ function cablearAudio(){
   audio.addEventListener('ended', function(){
     if(actual && actual.tipo==='cancion'){
       if(repetir === 2){ audio.currentTime = 0; audio.play(); }   // repetir una
-      else siguiente();                                            // la cola da la vuelta sola
+      else { MZ.entra = true; siguiente(); }                       // la cola da la vuelta sola
     }
   });
   audio.addEventListener('error', function(){
@@ -1461,6 +1462,57 @@ async function precargarSiguiente(){
 /* Autoreparación de una canción que no suena: 1º se vuelve a leer su archivo
    de la base de datos (la dirección temporal pudo caducar); 2º si sigue mal
    se salta a la siguiente, para que en el coche no se quede en silencio.   */
+/* ═════════ Mezcla entre canciones (EXPERIMENTAL, apagada por defecto) ═════
+   iOS no deja bajar el volumen de un <audio>, así que se pasa por Web Audio.
+   Riesgo conocido: si el iPhone suspende ese audio con la pantalla apagada, se
+   oiría silencio. Por eso: solo si se activa en Ajustes, se aplica al reiniciar,
+   y si 2 s después de «sonar» el audio no está corriendo, se apaga sola y la
+   app se reinicia SIN mezcla (autoreparación).                                  */
+var MZ = {ctx:null, gain:null, listo:false, entra:false, saliendo:null};
+function iniciarMezcla(){
+  if(!AJ.mezcla || MZ.listo) return;
+  try{
+    var AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+    MZ.ctx = new AC();
+    var src = MZ.ctx.createMediaElementSource(audio);
+    MZ.gain = MZ.ctx.createGain(); src.connect(MZ.gain); MZ.gain.connect(MZ.ctx.destination);
+    MZ.listo = true;
+    MZ.ctx.onstatechange = function(){ if(MZ.ctx.state === 'interrupted' || MZ.ctx.state === 'suspended') try{ MZ.ctx.resume(); }catch(_){} };
+    audio.addEventListener('playing', function(){
+      try{ MZ.ctx.resume(); }catch(_){}
+      setTimeout(function(){
+        if(!MZ.listo || audio.paused || !actual) return;
+        if(MZ.ctx.state !== 'running'){
+          AJ.mezcla = false; guardarAjustes(); anotar('mezcla', 'audio no corría, mezcla apagada');
+          toast('La mezcla no funcionó en este teléfono. La apago y reinicio.', 'malo', 2500);
+          setTimeout(function(){ location.reload(); }, 1800);
+        }
+      }, 2000);
+    });
+    audio.addEventListener('timeupdate', mezclaVigila);
+  }catch(err){ anotar('mezcla', err.message); AJ.mezcla = false; guardarAjustes(); }
+}
+function mezclaVigila(){
+  if(!MZ.listo || !actual || actual.tipo !== 'cancion' || actual.remota || repetir === 2) return;
+  var d = audio.duration, resto = d - audio.currentTime;
+  if(!isFinite(d) || d < 20 || resto > 4 || resto < 0.3 || MZ.saliendo === actual.id) return;
+  if(cola.length < 2 && repetir === 0) return;
+  MZ.saliendo = actual.id;
+  try{
+    var g = MZ.gain.gain, t = MZ.ctx.currentTime;
+    g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(0.0001, t + resto - 0.1);
+  }catch(_){}
+}
+function mezclaEntrada(){
+  if(!MZ.listo) return;
+  try{
+    var g = MZ.gain.gain, t = MZ.ctx.currentTime;
+    g.cancelScheduledValues(t);
+    if(MZ.entra){ g.setValueAtTime(0.0001, t); g.linearRampToValueAtTime(1, t + 3); }
+    else g.setValueAtTime(1, t);
+  }catch(_){}
+  MZ.entra = false; MZ.saliendo = null;
+}
 var reintentoCancion = {id:null, n:0}, saltosSeguidos = 0;
 async function repararCancion(){
   if(!actual || paradoPorMi) return;
@@ -1519,6 +1571,7 @@ async function tocarCancion(id, listaIds){
               fav:!!c.fav, cal:textoCalidad(c.cal, c.bytes || (a.bytes||0), c.dur)};
     audio.src = urlActual;
     intentosVigilante = 0; paradoPorMi = false; recuperarAlVolver = false;
+    mezclaEntrada();
     audio.addEventListener('playing', function ok(){ audio.removeEventListener('playing', ok); saltosSeguidos = 0; });
     var p = audio.play();
     if(p && p.catch) p.catch(function(err){
@@ -1669,35 +1722,52 @@ async function retomar(){
 }
 
 /* ═════════════════ MEDIA SESSION (pantalla de bloqueo y coche) ══ */
+var pintaVer = 0;
+function inicialesDe(t){
+  var w = String(t||'').replace(/[^\p{L}\p{N} ]/gu,' ').split(/\s+/).filter(function(x){ return x && !/^(fm|radio|la|el|de|del|los|las|y)$/i.test(x); });
+  if(!w.length) w = String(t||'').split(/\s+/).filter(Boolean);
+  return w.slice(0,3).map(function(x){ return x.charAt(0); }).join('').toUpperCase() || '♪';
+}
+/* Qué se ve en «Ahora suena» y en la barrita: la carátula del MP3, la portada
+   buscada, el logo de la emisora… y si ninguna carga, una insignia con las
+   iniciales (nunca un cuadro liso). Cada candidata se prueba de verdad. */
+function probarImagen(url){
+  return new Promise(function(ok){
+    if(!url) return ok(false);
+    var im = new Image(); var t = setTimeout(function(){ ok(false); }, 6000);
+    im.onload = function(){ clearTimeout(t); ok(true); };
+    im.onerror = function(){ clearTimeout(t); ok(false); };
+    im.src = url;
+  });
+}
 async function pintarAhora(cancion){
   if(!actual) return;
+  var ver = ++pintaVer, yoActual = actual;
   var fondo = tono(actual.titulo + (actual.artista||''));
-  soltarCaratula();
-  var tieneImg = false;
-
-  if(cancion && cancion.hash){
-    try{
-      var full = await leer('canciones', cancion.id);
-      if(full && full.caratula){
-        caratulaURL = URL.createObjectURL(full.caratula);
-        tieneImg = true;
-      }
-    }catch(_){}
+  var esRadio = actual.tipo === 'radio';
+  var cand = [];
+  if(cancion){
+    var cc = buscarCancion(cancion.id) || cancion;
+    var u0 = urlCaratula(cc); if(u0) cand.push({u:u0, blob:true});
   }
-
-  // La radio no tiene caratula dentro del archivo, pero muchas emisoras
-  // tienen logo. Si lo hay, es lo que se ve (y lo que va al coche).
-  var imagen = tieneImg ? caratulaURL
-             : (actual.logo || (actual.tipo === 'cancion' ? portadaDe(actual) : ''));
+  if(actual.logo) cand.push({u:actual.logo, blob:false});
+  if(actual.tipo === 'cancion'){ var pd = portadaDe(actual); if(pd) cand.push({u:pd, blob:false}); }
+  var elegida = null;
+  for(var i=0;i<cand.length && !elegida;i++){
+    if(await probarImagen(cand[i].u)) elegida = cand[i];
+    if(ver !== pintaVer || actual !== yoActual) return;      // mientras tanto cambió la canción
+  }
+  var imagen = elegida ? elegida.u : '', tieneImg = !!(elegida && elegida.blob);
   ['n-art','m-art'].forEach(function(id){
     var el = $(id);
     if(imagen){
-      // La caratula de una cancion es cuadrada y llena; el logo de una
-      // emisora es de cualquier forma, asi que se ve entero sobre el color.
-      var encaje = (!tieneImg && actual.tipo === 'radio') ? 'center/contain' : 'center/cover';
+      var encaje = (esRadio && !tieneImg) ? 'center/contain' : 'center/cover';
       el.style.background = 'url("'+imagen+'") ' + encaje + ' no-repeat, ' + fondo; el.textContent='';
+    }else{
+      el.style.background = fondo;
+      el.textContent = esRadio ? inicialesDe(actual.titulo) : '🎵';
+      el.style.fontWeight = esRadio ? '800' : '';
     }
-    else { el.style.background = fondo; el.textContent = actual.tipo==='radio' ? '📻' : '🎵'; }
   });
   $('n-t').textContent = actual.titulo;
   $('m-t').textContent = actual.titulo;
@@ -1714,7 +1784,7 @@ async function pintarAhora(cancion){
   // ─── lo que sale en el coche y en la pantalla de bloqueo ───
   if('mediaSession' in navigator){
     try{
-      ponerMetadata(tieneImg ? caratulaURL : '', imagen);
+      ponerMetadata(tieneImg ? imagen : '', imagen);
       // Ojo: estos mandos son los del volante y la pantalla de bloqueo.
       // Antes llamaban a audio.pause() a pelo, así que la app no se enteraba
       // de que habías parado TÚ y la volvía a encender sola. Ahora pasan por
@@ -1828,7 +1898,7 @@ function pintarCola(){
     for(var k=0;k<CANCIONES.length;k++) if(CANCIONES[k].id === id) sig.push(CANCIONES[k]);
   }
   c.innerHTML = '<h4>A continuación</h4>' + sig.map(function(s){
-    return '<div class="row" style="padding:5px 0"><span class="art" style="width:34px;height:34px;border-radius:7px;background:'+tono(s.titulo+s.artista)+'"></span>'+
+    return '<div class="row" style="padding:5px 0">'+cuadroCancion(s).replace('<span class="art','<span class="art ch')+
       '<span class="r-x"><span class="r-t" style="font-size:calc(13px * var(--esc))">'+esc(s.titulo)+'</span>'+
       '<span class="r-s" style="font-size:calc(11px * var(--esc))">'+esc(s.artista)+'</span></span></div>';
   }).join('');
@@ -3355,7 +3425,9 @@ async function pintarAjustes(){
     '<div class="kv"><span>Modo coche también en Inicio</span>'+
       '<span class="sw'+(AJ.cocheEnInicio?' on':'')+'" data-aj="cocheEnInicio"></span></div>'+
     '<div class="kv"><span>Pantalla siempre encendida</span>'+
-      '<span class="sw'+(AJ.pantalla?' on':'')+'" data-aj="pantalla"></span></div></div>'+
+      '<span class="sw'+(AJ.pantalla?' on':'')+'" data-aj="pantalla"></span></div>'+
+    '<div class="kv"><span>Mezclar canciones (prueba)<br><span class="pista">Una baja mientras la siguiente sube. Reinicia la app. Si el sonido falla, se apaga sola.</span></span>'+
+      '<span class="sw'+(AJ.mezcla?' on':'')+'" data-aj="mezcla"></span></div></div>'+
 
   '<div class="card"><h3>Internet</h3>'+
     '<div class="kv"><span>Ahorro de datos<br><span class="pista">Inicio no se actualiza solo: lo pides tú con ↻</span></span>'+
@@ -3886,7 +3958,8 @@ document.addEventListener('click', async function(ev){
   if((el = t.closest('[data-aj]'))){
     var k = el.dataset.aj;
     if(k === 'coche'){ modoCoche(!enCoche); }
-    else { AJ[k] = !AJ[k]; guardarAjustes(); if(k === 'pantalla') ponerCandado(AJ.pantalla); }
+    else { AJ[k] = !AJ[k]; guardarAjustes(); if(k === 'pantalla') ponerCandado(AJ.pantalla);
+      if(k === 'mezcla'){ pausarYo(); toast(AJ.mezcla ? 'Mezcla activada. Reinicio la app…' : 'Mezcla apagada. Reinicio la app…', 'bueno', 1500); setTimeout(function(){ location.reload(); }, 1400); return; } }
     pintarAjustes(); return;
   }
 
@@ -4319,6 +4392,7 @@ async function arrancar(){
 
   try{
     cargarAjustes();
+    iniciarMezcla();
     var abierta = false, ultimoErr = null;
     for(var intento = 0; intento < 6 && !abierta; intento++){
       try{ await abrirDB(); abierta = true; }

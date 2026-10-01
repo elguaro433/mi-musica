@@ -138,6 +138,15 @@ button{font-family:inherit;color:inherit}
 .row:active{background:rgba(169,112,255,.1)}
 .row.sonando .r-t{color:var(--purple)}
 .row.falta{opacity:.45}
+.row.desl{position:relative;touch-action:pan-y;transition:transform .22s ease}
+.row.desl.mov{transition:none}
+.swa{visibility:hidden;position:absolute;left:100%;top:3px;bottom:3px;width:128px;display:flex;gap:6px;padding-left:8px;box-sizing:border-box}
+.row.desl.abre .swa{visibility:visible}
+.swb{flex:1;display:grid;place-items:center;font-size:25px;border-radius:13px}
+.swb.fav{background:rgba(255,95,166,.22)}
+.swb.del{background:#ff5f7a}
+.r-i{flex:0 0 auto;font-size:15px;opacity:.9}
+.view{overflow-x:hidden}
 .art{width:54px;height:54px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
   font-size:calc(18px * var(--esc));overflow:hidden;background-size:cover;background-position:center}
 .art img{width:100%;height:100%;object-fit:cover;display:block}
@@ -579,7 +588,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.26.0';
+var APP_VERSION = '1.27.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2335,13 +2344,15 @@ function filaCancion(c, dentroDe){
   var son = actual && actual.tipo==='cancion' && actual.id === c.id;
   var der = dentroDe
     ? '<span class="r-a" data-quitar="'+esc(dentroDe)+'" data-quitar-id="'+esc(c.id)+'">✕</span>'
-    : '<span class="r-a '+(c.fav?'on':'')+'" data-fav="'+esc(c.id)+'">'+(c.fav?'❤️':'♡')+'</span>';
-  return '<div class="row'+(son?' sonando':'')+(c.falta?' falta':'')+'" data-cancion="'+esc(c.id)+'">'+
+    : (c.fav ? '<span class="r-i">❤️</span>' : '');
+  var acc = dentroDe ? '' :
+    '<span class="swa"><span class="swb fav" data-fav="'+esc(c.id)+'">'+(c.fav?'❤️':'🤍')+'</span>'+
+    '<span class="swb del" data-borrar-pedir="'+esc(c.id)+'">🗑</span></span>';
+  return '<div class="row'+(dentroDe?'':' desl')+(son?' sonando':'')+(c.falta?' falta':'')+'" data-cancion="'+esc(c.id)+'">'+
     cuadroCancion(c)+
     '<span class="r-x"><span class="r-t">'+esc(c.titulo)+'</span>'+
       '<span class="r-s">'+esc(c.artista)+'</span></span>'+
-    der +
-    '<span class="r-a" data-mas="'+esc(c.id)+'">⋯</span></div>';
+    der + acc + '</div>';
 }
 /* ═════════ Música de hoy: éxitos y cantantes (Apple) + historial ═════
    Apple publica sin clave y con CORS (probado el 30/09/2026):
@@ -3240,14 +3251,15 @@ function filaEmisora(e){
   var f = !!FAV_RADIO[e.nombre];
   var cal = (e.codec ? e.codec : '') + (e.kbps ? ' ' + e.kbps : '');
   var est = estrellas(e);
-  return '<div class="row'+(son?' sonando':'')+'" data-emisora="'+esc(e.nombre)+'">'+
+  return '<div class="row desl'+(son?' sonando':'')+'" data-emisora="'+esc(e.nombre)+'">'+
     cuadroEmisora(e)+
     '<span class="r-x"><span class="r-t">'+esc(e.nombre)+'</span>'+
       '<span class="r-s"><span class="badge">🔴</span><span class="enc">'+esc(e.genero)+'</span>'+
       (cal?'<span class="cal">'+esc(cal)+'</span>':'')+
       (est?'<span class="est">'+est+'</span>':'')+'</span></span>'+
-    '<span class="r-a '+(f?'on':'')+'" data-favradio="'+esc(e.nombre)+'">'+(f?'❤️':'♡')+'</span>'+
-    '<span class="r-a" data-quitar-emi="'+esc(e.nombre)+'" aria-label="Quitar emisora" style="opacity:.75">🗑</span></div>';
+    (f ? '<span class="r-i">❤️</span>' : '')+
+    '<span class="swa"><span class="swb fav" data-favradio="'+esc(e.nombre)+'">'+(f?'❤️':'🤍')+'</span>'+
+    '<span class="swb del" data-quitar-emi="'+esc(e.nombre)+'">🗑</span></span></div>';
 }
 var pendEmi = null;
 function hojaQuitarEmisora(nombre){
@@ -4249,6 +4261,46 @@ document.addEventListener('change', function(e){
   }
   caja.addEventListener('pointerup', soltar);
   caja.addEventListener('pointercancel', function(){ arrastrando = false; delete caja.dataset.arr; pintarProgreso(); });
+})();
+
+/* Deslizar una fila hacia la izquierda enseña ❤️ y 🗑 (canciones y emisoras). */
+(function(){
+  var fila = null, x0 = 0, y0 = 0, dx = 0, mov = false, abierta = null, ANCHO = 128;
+  function cerrar(r){ if(r){ r.classList.remove('mov'); r.style.transform = ''; if(abierta === r) abierta = null; setTimeout(function(){ if(abierta !== r) r.classList.remove('abre'); }, 260); } }
+  document.addEventListener('pointerdown', function(e){
+    var r = e.target.closest ? e.target.closest('.row.desl') : null;
+    if(abierta && abierta !== r && !(e.target.closest && e.target.closest('.swb'))) cerrar(abierta);
+    if(!r || (e.target.closest && e.target.closest('.swb'))) { fila = null; return; }
+    fila = r; x0 = e.clientX; y0 = e.clientY; dx = 0; mov = false;
+  });
+  document.addEventListener('pointermove', function(e){
+    if(!fila) return;
+    var ax = e.clientX - x0, ay = e.clientY - y0;
+    if(!mov){
+      if(Math.abs(ay) > 12 && Math.abs(ay) > Math.abs(ax)){ fila = null; return; }   // era para desplazar la lista
+      if(Math.abs(ax) < 10) return;
+      mov = true; fila.classList.add('mov'); fila.classList.add('abre');
+    }
+    var base = (abierta === fila) ? -ANCHO : 0;
+    dx = Math.max(-ANCHO - 24, Math.min(0, base + ax));
+    fila.style.transform = 'translateX(' + dx + 'px)';
+  });
+  function fin(){
+    if(!fila) return;
+    var r = fila; fila = null;
+    if(!mov) return;
+    r.classList.remove('mov');
+    if(dx < -ANCHO / 2){ if(abierta && abierta !== r) cerrar(abierta); r.style.transform = 'translateX(' + (-ANCHO) + 'px)'; abierta = r; }
+    else cerrar(r);
+    window.__swipe = Date.now();          // el toque que acaba un deslizamiento no abre la fila
+  }
+  document.addEventListener('pointerup', fin);
+  document.addEventListener('pointercancel', fin);
+  document.addEventListener('click', function(e){
+    if(window.__swipe && Date.now() - window.__swipe < 350){ e.stopPropagation(); e.preventDefault(); window.__swipe = 0; }
+    else if(abierta && e.target.closest && e.target.closest('.row.desl') === abierta && !e.target.closest('.swb')){ e.stopPropagation(); e.preventDefault(); cerrar(abierta); }
+  }, true);
+  document.addEventListener('scroll', function(){ if(abierta) cerrar(abierta); }, true);
 })();
 
 function ponerPestana(t){

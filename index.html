@@ -612,7 +612,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.35.5';
+var APP_VERSION = '1.36.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2819,7 +2819,7 @@ function cantantesSeguidos(){
   return out.slice(0, 12);
 }
 async function cargarNovedades(forzar){
-  if(NOV.cargando || !navigator.onLine) return;
+  if(NOV.cargando || !navigator.onLine || AJ.sinNovedades) return;
   if(NOV.yo !== yo){
     NOV = {items:[], t:0, cargando:false, yo:yo};
     try{ var c = JSON.parse(localStorage.getItem('mm_nov_' + yo) || 'null'); if(c){ NOV.items = c.items || []; NOV.t = c.t || 0; } }catch(_){}
@@ -2907,14 +2907,12 @@ function pintarInicio(){
       filasTuMusica() + '</div>';
   }
 
-  if(NOV.items.length){
+  if(NOV.items.length && !AJ.sinNovedades){
     GR.nv = NOV.items;
     h += '<div class="shelf-t">🆕 Novedades <span class="vermas" data-seguir-cantante="1">Seguir a otro ›</span></div><div class="hscroll">' +
       NOV.items.map(function(p, i){
         var f = new Date(p.fecha);
         return '<div class="tile" data-gr="nv|'+i+'">'+cuadroPista(p)+'<div class="t">'+esc(p.titulo)+'</div><div class="s">'+esc(p.artista)+'</div></div>'; }).join('') + '</div>';
-  }else if(CANCIONES.length){
-    h += '<button class="btn" data-seguir-cantante="1" style="margin-top:10px">🆕&nbsp; Seguir un cantante y ver sus novedades</button>';
   }
 
   // De qué país quieres los éxitos
@@ -3919,6 +3917,8 @@ async function pintarAjustes(){
       '<span class="sw'+(AJ.mezcla?' on':'')+'" data-aj="mezcla"></span></div></div>'+
 
   '<div class="card"><h3>Internet</h3>'+
+    '<div class="kv"><span>Ocultar novedades de cantantes<br><span class="pista">Quita esa fila de Inicio</span></span>'+
+      '<span class="sw'+(AJ.sinNovedades?' on':'')+'" data-aj="sinNovedades"></span></div>'+
     '<div class="kv"><span>Ahorro de datos<br><span class="pista">Inicio no se actualiza solo: lo pides tú con ↻</span></span>'+
       '<span class="sw'+(AJ.ahorro?' on':'')+'" data-aj="ahorro"></span></div>'+
     '<div class="kv"><span>Radio hoy</span><span class="v">≈ '+mbTxt(dd[hoyK] || 0)+'</span></div>'+

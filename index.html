@@ -597,7 +597,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.33.0';
+var APP_VERSION = '1.34.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -3907,6 +3907,7 @@ async function pintarAjustes(){
     '<input type="file" id="fcopia" accept="application/json,.json" class="oculto"></div>'+
 
   '<div class="card"><h3>Sobre la app</h3>'+
+    '<button class="btn" id="a-actualizar" style="margin-bottom:14px">🔄&nbsp; Buscar actualización</button>'+
     '<div class="credito">Propiedad de la <b>Familia Díaz González</b><br>Creador: <b>Emmanuel Díaz</b><br>Versión '+APP_VERSION+'</div>'+
     '<div class="sign">Emmanuel Díaz</div>'+
     '<button class="btn" id="a-informe">📋&nbsp; Copiar informe para soporte</button>'+
@@ -4049,16 +4050,47 @@ function pausarYo(){
   }
   setTimeout(function(){ pausaMia = false; }, 600);
 }
+/* Otra app (un audio de WhatsApp o Telegram, una llamada…) tomó el sonido.
+   ANTES la música se reenganchaba sola a los 1,2 s y le cortaba el audio a la
+   otra app (fallo que vio Elibel, 1/10/2026). Ahora NO se pelea: se espera a
+   que iOS avise de que el sonido vuelve a estar libre (Audio Session API) o a
+   que toques ▶ / el botón del volante. */
+var interrumpida = 0;
 function trasInterrupcion(){
   if(!actual || pausaMia || paradoPorMi || viendoVideo || audio.ended) return;
   pausaAjena = Date.now();
-  // Reintento suave: iOS a veces deja seguir sin pedir permiso nuevo.
-  setTimeout(function(){
-    if(!actual || !audio.paused || pausaMia) return;
-    var p = audio.play();
-    if(p && p.catch) p.catch(function(){ /* hará falta tocar ▶ */ });
-  }, 1200);
+  interrumpida = Date.now();
+  pintarEstado('En pausa · otra app está sonando');
 }
+function reanudarTrasInterrupcion(){
+  var hace = Date.now() - interrumpida;
+  if(!interrumpida || hace > 20 * 60 * 1000){ interrumpida = 0; return; }
+  if(!actual || !audio.paused || pausaMia || paradoPorMi || viendoVideo){ interrumpida = 0; return; }
+  interrumpida = 0; pintarEstado(null);
+  anotar('sonido', 'el sonido vuelve a estar libre: sigo con ' + actual.titulo);
+  if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }       // en directo: se reengancha al directo
+  var p = audio.play(); if(p && p.catch) p.catch(function(){ pintarEstado('Toca ▶ para seguir'); });
+}
+try{
+  if(navigator.audioSession && navigator.audioSession.addEventListener){
+    navigator.audioSession.addEventListener('statechange', function(){
+      var st = navigator.audioSession.state;
+      anotar('sonido', 'iOS dice: ' + st, actual ? actual.titulo : '');      // para ver en el informe qué pasa de verdad
+      if(st === 'active' && interrumpida) setTimeout(reanudarTrasInterrupcion, 1200);
+    });
+  }
+}catch(_){}
+audio.addEventListener('playing', function(){ interrumpida = 0; });
+/* Volver a la app (tras una llamada, la cámara, WhatsApp…): si la música se paró por
+   una interrupción y ya nada más suena, sigue. Si iOS no avisa por Audio Session. */
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden || !interrumpida) return;
+  setTimeout(function(){
+    var ses = navigator.audioSession && navigator.audioSession.state;
+    if(ses === 'interrupted') return;                 // iOS dice que sigue ocupado: se espera
+    reanudarTrasInterrupcion();
+  }, 900);
+});
 
 /* ─── Mantener la pantalla encendida (móvil en el soporte) ───────── */
 var candado = null;
@@ -4462,6 +4494,12 @@ document.addEventListener('click', async function(ev){
     var ids = CANCIONES.filter(function(c){ return c.fav && !c.falta; }).map(function(c){ return c.id; });
     if(ids.length){ await tocarCancion(ids[0], ids); pintarVista(); }
     else toast('No hay ninguna canción favorita que se pueda tocar.');
+    return;
+  }
+  if(t.closest('#a-actualizar')){
+    toast('Buscando…', null, 1500);
+    var hay = await buscarActualizacion(true);
+    if(!hay) toast('Ya tienes la última versión (' + APP_VERSION + ').', 'bueno', 3000);
     return;
   }
   if(t.closest('#b-lista')){ await nuevaLista(); return; }
@@ -4905,6 +4943,38 @@ async function detalleSeguro(mensaje){
     ? '⚠️ El iPhone no dejó abrir el almacenamiento de la app. Suele ser por poco espacio libre o porque el teléfono estaba bloqueado.\n1) Desbloquea el iPhone y toca «Reintentar».\n2) Si sigue: Ajustes → General → Almacenamiento del iPhone y libera sitio (lo que más ocupa suelen ser las descargas de WhatsApp, Telegram u OneDrive).\n\n'
     : '') + t + ocupa;
 }
+/* Una app instalada en el iPhone puede pasar días «dormida» con la versión vieja.
+   Aquí se mira la versión publicada: si hay una nueva, se pone sola cuando no
+   suena nada (o en cuanto se pare la música). Así Elibel y Emmanuel van iguales. */
+var actualizacionPendiente = false, ultimaBusqueda = 0;
+async function buscarActualizacion(forzar){
+  if(!navigator.onLine) return false;
+  if(!forzar && Date.now() - ultimaBusqueda < 10 * 60 * 1000) return false;
+  ultimaBusqueda = Date.now();
+  try{
+    var r = await fetch('index.html?v=' + Date.now(), {cache: 'no-store'});
+    var t = await r.text();
+    var m = t.match(/APP_VERSION = '([\d.]+)'/);
+    if(!m || m[1] === APP_VERSION) return false;
+    anotar('actualizar', 'hay versión nueva ' + m[1] + ' (esta es ' + APP_VERSION + ')');
+    actualizacionPendiente = true;
+    aplicarActualizacion(m[1]);
+    return true;
+  }catch(_){ return false; }
+}
+function aplicarActualizacion(v){
+  if(!actualizacionPendiente) return;
+  if(actual && !audio.paused){
+    toast('Hay una versión nueva (' + v + '). Se pondrá en cuanto pares la música.', 'bueno', 4500);
+    return;
+  }
+  actualizacionPendiente = false;
+  toast('Poniendo la versión nueva…', 'bueno', 1500);
+  setTimeout(reparar, 900);
+}
+audio.addEventListener('pause', function(){ if(actualizacionPendiente && !audio.ended) setTimeout(function(){ if(audio.paused) aplicarActualizacion(''); }, 1500); });
+document.addEventListener('visibilitychange', function(){ if(!document.hidden) buscarActualizacion(false); });
+
 function reparar(){
   try{
     if(navigator.serviceWorker && navigator.serviceWorker.controller){
@@ -5008,7 +5078,8 @@ async function arrancar(){
     await pedirPersistencia();
 
     if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('sw.js').catch(function(err){ anotar('sw', err.message); });
+      navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'}).catch(function(err){ anotar('sw', err.message); });
+      setTimeout(buscarActualizacion, 4000);
     }
 
     // La direccion manda sobre lo guardado: el icono de Elibel abre SU

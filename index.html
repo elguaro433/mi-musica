@@ -612,7 +612,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.35.2';
+var APP_VERSION = '1.35.4';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -3940,7 +3940,7 @@ async function pintarAjustes(){
     '<button class="btn" id="a-actualizar" style="margin-bottom:14px">🔄&nbsp; Buscar actualización</button>'+
     '<div class="credito">Propiedad de la <b>Familia Díaz González</b><br>Creador: <b>Emmanuel Díaz</b><br>Versión '+APP_VERSION+'</div>'+
     '<div class="sign">Emmanuel Díaz</div>'+
-    '<button class="btn" id="a-informe">📋&nbsp; Copiar informe para soporte</button>'+
+    '<button class="btn" id="a-informe">📋&nbsp; Enviar informe (WhatsApp)</button>'+
     '<button class="btn" id="a-reparar">🛟&nbsp; Reparar la app (conserva la música)</button></div>';
 }
 
@@ -4085,11 +4085,31 @@ function pausarYo(){
    otra app (fallo que vio Elibel, 1/10/2026). Ahora NO se pelea: se espera a
    que iOS avise de que el sonido vuelve a estar libre (Audio Session API) o a
    que toques ▶ / el botón del volante. */
-var interrumpida = 0;
+var interrumpida = 0, tSalida = 0;
+/* Al salir de la app (inicio, otra app, bloquear) en algunos iPhone el sistema manda un «pause»
+   suelto, aunque nadie más suene. Eso NO es una interrupción: la música tiene que seguir
+   (fallo visto en el iPhone de Elibel, 1/10/2026, tras la v1.34). */
+window.addEventListener('blur', function(){ tSalida = Date.now(); });
+window.addEventListener('pagehide', function(){ tSalida = Date.now(); });
+document.addEventListener('visibilitychange', function(){ if(document.hidden) tSalida = Date.now(); });
 function trasInterrupcion(){
   if(!actual || pausaMia || paradoPorMi || viendoVideo || audio.ended) return;
+  var ses = '';
+  try{ ses = navigator.audioSession && navigator.audioSession.state; }catch(_){}
+  var alSalir = (Date.now() - tSalida < 3000) && ses !== 'interrupted';
+  if(alSalir){
+    anotar('sonido', 'pausa al salir de la app (no hay otra app sonando): sigo', actual.titulo);
+    setTimeout(function(){
+      if(!actual || !audio.paused || pausaMia || paradoPorMi || viendoVideo) return;
+      if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }
+      var p = audio.play();
+      if(p && p.catch) p.catch(function(){ interrumpida = Date.now(); pintarEstado('Toca ▶ para seguir'); });
+    }, 350);
+    return;
+  }
   pausaAjena = Date.now();
   interrumpida = Date.now();
+  anotar('sonido', 'pausa por otra app: espero', actual.titulo);
   pintarEstado('En pausa · otra app está sonando');
 }
 function reanudarTrasInterrupcion(){
@@ -4938,19 +4958,49 @@ function medidasPantalla(){
   }
   return L.join('\n');
 }
-function copiarInforme(){
+async function textoInforme(){
   var e = [];
   try{ e = JSON.parse(localStorage.getItem(CAJA)||'[]'); }catch(_){}
-  var txt = 'MI MÚSICA — informe\nVersión: '+APP_VERSION+'\nFecha: '+new Date().toLocaleString('es')+
-    '\nPersona: '+yo+'\nNavegador: '+navigator.userAgent+
+  var sw = 'sin service worker', caches_ = '';
+  try{
+    if('serviceWorker' in navigator){
+      var regs = await navigator.serviceWorker.getRegistrations();
+      sw = (navigator.serviceWorker.controller ? 'controla la app' : 'registrado pero NO controla') + ' · ' + regs.length + ' registro(s)';
+    }
+    if(window.caches) caches_ = (await caches.keys()).join(', ');
+  }catch(_){}
+  var cuota = '';
+  try{ var es = await navigator.storage.estimate(); cuota = mbTxt(es.usage || 0) + ' de ' + mbTxt(es.quota || 0); }catch(_){}
+  var pers = '?';
+  try{ pers = navigator.storage && navigator.storage.persisted ? String(await navigator.storage.persisted()) : 'no disponible'; }catch(_){}
+  var ses = '';
+  try{ ses = navigator.audioSession ? navigator.audioSession.state + ' (tipo ' + navigator.audioSession.type + ')' : 'no disponible'; }catch(_){ ses = '?'; }
+  var bloq = '';
+  try{ bloq = localStorage.getItem('mm_bloqueado') || '(sin fijar)'; }catch(_){}
+  return 'MI MÚSICA — informe\nVersión: '+APP_VERSION+'\nFecha: '+new Date().toLocaleString('es')+
+    '\nPersona: '+yo+' · perfil fijado: '+bloq+'\nDirección: '+location.href+
+    '\nNavegador: '+navigator.userAgent+
     '\nInstalada: '+(window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches)+
-    '\nCanciones: '+CANCIONES.length+'\nOnline: '+navigator.onLine+
+    '\nCanciones: '+CANCIONES.length+' · Online: '+navigator.onLine+
+    '\nService worker: '+sw+'\nCachés: '+caches_+
+    '\nAlmacenamiento: '+cuota+' · protegido: '+pers+
+    '\nSesión de audio de iOS: '+ses+
+    '\nMezcla: '+(AJ.mezcla ? 'activada' : 'apagada')+' · ahorro de datos: '+(AJ.ahorro ? 'sí' : 'no')+
+    '\nSuena ahora: '+(actual ? actual.tipo+' · '+actual.titulo+(audio.paused ? ' (en pausa)' : '') : 'nada')+
     '\n\nMEDIDAS DE LA PANTALLA:\n' + medidasPantalla() +
-    '\n\nÚLTIMOS ERRORES:\n' + (e.length ? e.slice(0,20).map(function(x){
-      return x.f+' · '+x.o+' · '+x.m; }).join('\n') : '(ninguno)');
+    '\n\nÚLTIMOS AVISOS Y ERRORES:\n' + (e.length ? e.slice(0,30).map(function(x){
+      return x.f+' · '+x.o+' · '+x.m+(x.n > 1 ? ' (×'+x.n+')' : ''); }).join('\n') : '(ninguno)');
+}
+async function copiarInforme(){
+  var txt = await textoInforme();
+  // En el iPhone se abre la hoja de compartir: se manda directo por WhatsApp.
+  if(navigator.share){
+    try{ await navigator.share({title:'Informe de Mi Música', text:txt}); return; }
+    catch(err){ if(err && err.name === 'AbortError') return; }
+  }
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(txt).then(function(){
-      toast('Informe copiado. Pégaselo a Emmanuel por WhatsApp.', 'bueno', 5000);
+      toast('Informe copiado. Pégalo en un WhatsApp.', 'bueno', 5000);
     }).catch(function(){ alert(txt); });
   }else alert(txt);
 }

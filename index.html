@@ -504,6 +504,7 @@ body.coche #coche-salir{display:block}
         <button class="sg on" data-b="canciones">Todas</button>
         <button class="sg" data-b="artistas">Artistas</button>
         <button class="sg" data-b="albumes">Álbumes</button>
+        <button class="sg" data-b="generos">Géneros</button>
       </div>
       <div id="bib-selbar"></div>
     </div>
@@ -588,7 +589,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.27.0';
+var APP_VERSION = '1.28.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -3356,7 +3357,7 @@ function barajar(l){
   for(var i=a.length-1;i>0;i--){ var j = Math.floor(Math.random()*(i+1)), t = a[i]; a[i] = a[j]; a[j] = t; }
   return a;
 }
-function grupoBib(f){ return (f === 'artistas' || f === 'albumes' || f === 'canciones') ? 'canciones' : f; }
+function grupoBib(f){ return (f === 'artistas' || f === 'albumes' || f === 'canciones' || f === 'generos') ? 'canciones' : f; }
 function marcarBib(){
   var bs = document.querySelectorAll('#v-biblio [data-b]');
   for(var i=0;i<bs.length;i++){
@@ -3408,6 +3409,117 @@ function guiaAnadir(){
     '<a class="btn" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Ver la guía con más detalle</a>' +
     '<button id="guia-nunca" style="display:block;margin:10px auto 2px;background:none;border:0;color:var(--dim);' +
       'font-size:calc(12.5px * var(--esc));text-decoration:underline;padding:10px">No volver a mostrar este aviso</button>');
+}
+/* ═════════ Géneros ═══════════════════════════════════════════════
+   Cada canción lleva su género: el de sus etiquetas si lo trae; si no, se
+   le pregunta a Apple (y si no contesta, a Deezer) una sola vez y se guarda
+   en la propia canción. Con eso se agrupa y se pueden crear listas.        */
+var GENEROS_REGLAS = [
+  [/reggaet|urbano|urban|trap|dembow|perreo/i, 'Reggaetón y urbano'],
+  [/bachata/i, 'Bachata'],
+  [/salsa|tropical|merengue|cumbia|vallenat|timba|son cubano|caribe/i, 'Salsa y tropical'],
+  [/hip.?hop|\brap\b/i, 'Hip-Hop y rap'],
+  [/r&b|soul/i, 'R&B y soul'],
+  [/reggae|dancehall|ska/i, 'Reggae'],
+  [/electr|dance|house|techno|edm|club/i, 'Electrónica y dance'],
+  [/rock|metal|punk|grunge|alternativ|indie/i, 'Rock'],
+  [/jazz|blues|swing/i, 'Jazz y blues'],
+  [/cl[aá]sic|classical|opera|ópera|sinf/i, 'Clásica'],
+  [/ranchera|mariachi|regional|norte|banda|corrido/i, 'Regional mexicano'],
+  [/bolero|balada|romant/i, 'Baladas'],
+  [/llanera|folcl|folk|world|mundial|tradicional/i, 'Folclore y mundial'],
+  [/country/i, 'Country'],
+  [/soundtrack|banda sonora|bso|pel[ií]cula/i, 'Bandas sonoras'],
+  [/infantil|children|ni[nñ]os/i, 'Infantil'],
+  [/pop/i, 'Pop'],
+  [/latin|latino/i, 'Latina']
+];
+function normGenero(g){
+  g = String(g || '').replace(/\(\d+\)/g, '').replace(/\s+/g, ' ').trim();
+  if(!g || /^(other|unknown|otro|otros|desconocido|sin género|-)$/i.test(g)) return '';
+  for(var i=0;i<GENEROS_REGLAS.length;i++) if(GENEROS_REGLAS[i][0].test(g)) return GENEROS_REGLAS[i][1];
+  return g.charAt(0).toUpperCase() + g.slice(1);
+}
+function generoDe(c){ return normGenero(c && c.genero) || 'Sin clasificar'; }
+var GEN_NO = {};                     // canciones que ya se probó y no tienen género en internet
+try{ GEN_NO = JSON.parse(localStorage.getItem('mm_gen_no') || '{}') || {}; }catch(_){ GEN_NO = {}; }
+var clasificando = false, clasifHechas = 0, clasifTotal = 0, generoAbierto = null;
+async function buscarGenero(c){
+  var busca = limpiaBusqueda(c.artista) + ' ' + limpiaBusqueda(c.titulo);
+  try{
+    var d = await traerConLimite('https://itunes.apple.com/search?term=' + encodeURIComponent(busca) + '&media=music&entity=song&limit=1', 9000);
+    var x = (d && d.results || [])[0];
+    return (x && x.primaryGenreName) || '';
+  }catch(err){
+    var dz = await jsonp('https://api.deezer.com/search?q=' + encodeURIComponent(busca) + '&limit=1', 9000);
+    var y = ((dz && dz.data) || [])[0];
+    if(!y || !y.album) return '';
+    var al = await jsonp('https://api.deezer.com/album/' + y.album.id, 9000);
+    return (al && al.genres && al.genres.data && al.genres.data[0] && al.genres.data[0].name) || '';
+  }
+}
+async function clasificarGeneros(){
+  if(clasificando || !navigator.onLine || document.hidden) return;
+  var pend = CANCIONES.filter(function(c){
+    return !normGenero(c.genero) && !c.falta && !GEN_NO[clavePortada(c)] && c.artista && c.artista !== 'Artista desconocido'; });
+  if(!pend.length) return;
+  clasificando = true; clasifHechas = 0; clasifTotal = pend.length;
+  var fallos = 0;
+  for(var i=0;i<pend.length && fallos < 3;i++){
+    if(document.hidden) break;
+    var c = pend[i];
+    try{
+      var g = await buscarGenero(c);
+      fallos = 0;
+      var n = normGenero(g);
+      if(n){ c.genero = n; await guardar('canciones', limpia(c)); }
+      else{ GEN_NO[clavePortada(c)] = 1; try{ localStorage.setItem('mm_gen_no', JSON.stringify(GEN_NO)); }catch(_){} }
+    }catch(err){ fallos++; anotar('genero', err.message, c.titulo); }
+    clasifHechas++;
+    if(vistaActual === 'biblio' && filtro === 'generos' && (clasifHechas % 4 === 0)) pintarBiblio();
+    await new Promise(function(r){ setTimeout(r, 250); });
+  }
+  clasificando = false;
+  if(vistaActual === 'biblio' && filtro === 'generos') pintarBiblio();
+}
+async function crearListaDeGenero(g){
+  var ids = CANCIONES.filter(function(c){ return generoDe(c) === g && !c.falta; }).map(function(c){ return c.id; });
+  if(!ids.length) return;
+  var ya = null;
+  for(var i=0;i<LISTAS.length;i++) if(LISTAS[i].nombre === g) ya = LISTAS[i];
+  if(ya){ ya.canciones = ids; await guardar('listas', ya); }
+  else await guardar('listas', {id:'l_'+yo+'_'+Date.now(), duenyo:yo, nombre:g, canciones:ids});
+  await cargarDatos();
+  toast(ya ? 'Lista «' + g + '» actualizada (' + ids.length + ').' : 'Lista «' + g + '» creada con ' + ids.length + ' canciones.', 'bueno', 3500);
+}
+function pintarGeneros(C, LC){
+  if(generoAbierto){
+    var L = LC.filter(function(c){ return generoDe(c) === generoAbierto; });
+    if(!L.length){ generoAbierto = null; return pintarGeneros(C, LC); }
+    C.innerHTML =
+      '<button class="btn suave" data-gen-volver="1" style="margin-bottom:12px">←&nbsp; Todos los géneros</button>'+
+      '<div class="card" style="display:flex;align-items:center;gap:12px"><span class="art" style="background:'+tono(generoAbierto)+'">'+iconoEstilo({genero:generoAbierto})+'</span>'+
+        '<span class="r-x"><span class="r-t" style="font-size:calc(16px * var(--esc))">'+esc(generoAbierto)+'</span>'+
+        '<span class="r-s">'+L.length+(L.length===1?' canción':' canciones')+'</span></span></div>'+
+      '<div style="display:flex;gap:8px"><button class="btn solido" data-gen-tocar="0" style="flex:1">▶&nbsp; Reproducir</button>'+
+        '<button class="btn solido" data-gen-tocar="1" style="flex:1">🔀&nbsp; Aleatorio</button></div>'+
+      (generoAbierto !== 'Sin clasificar' ? '<button class="btn" data-gen-lista="1">☰&nbsp; Crear lista «'+esc(generoAbierto)+'»</button>' : '')+
+      L.map(function(c){ return filaCancion(c); }).join('');
+    return;
+  }
+  var m = {};
+  LC.forEach(function(c){ var g = generoDe(c); (m[g] = m[g] || []).push(c); });
+  var ks = Object.keys(m).sort(function(a, b){
+    if(a === 'Sin clasificar') return 1; if(b === 'Sin clasificar') return -1;
+    return m[b].length - m[a].length || a.localeCompare(b, 'es'); });
+  C.innerHTML =
+    (clasificando ? '<div class="note">⏳ Clasificando tu música… '+clasifHechas+' de '+clasifTotal+'</div>' : '')+
+    ks.map(function(g){
+      var l = m[g];
+      return '<div class="row" data-gen-abrir="'+esc(g)+'"><span class="art" style="background:'+tono(g)+'">'+iconoEstilo({genero:g})+'</span>'+
+        '<span class="r-x"><span class="r-t">'+esc(g)+'</span><span class="r-s">'+l.length+(l.length===1?' canción':' canciones')+'</span></span>'+
+        '<span class="r-a">›</span></div>'; }).join('');
+  setTimeout(clasificarGeneros, 300);
 }
 function pintarBiblio(){
   var C = $('bib-cuerpo');
@@ -3507,6 +3619,7 @@ function pintarBiblio(){
       + '<button class="btn" id="b-lista">➕&nbsp; Crear una lista</button>';
     return;
   }
+  if(filtro === 'generos'){ pintarGeneros(C, LC); return; }
   var clave = filtro === 'artistas' ? 'artista' : 'album';
   var m = {};
   LC.forEach(function(c){ (m[c[clave]] = m[c[clave]] || []).push(c); });
@@ -4008,6 +4121,16 @@ document.addEventListener('click', async function(ev){
     for(var j=0;j<L.length;j++) if(L[j].nombre === el.dataset.emisora){ tocarRadio(L[j]); break; }
     pintarVista(); return;
   }
+  if((el = t.closest('[data-gen-abrir]'))){ generoAbierto = el.dataset.genAbrir; pintarBiblio(); return; }
+  if(t.closest('[data-gen-volver]')){ generoAbierto = null; pintarBiblio(); return; }
+  if((el = t.closest('[data-gen-tocar]'))){
+    var idsG = CANCIONES.filter(function(c){ return generoDe(c) === generoAbierto && !c.falta; }).map(function(c){ return c.id; });
+    if(!idsG.length) return;
+    if(el.dataset.genTocar === '1') idsG = barajar(idsG);
+    aleatorio = false; pintarModos(); viendoVideo = false;
+    await tocarCancion(idsG[0], idsG); pintarVista(); return;
+  }
+  if(t.closest('[data-gen-lista]')){ await crearListaDeGenero(generoAbierto); return; }
   if((el = t.closest('[data-grupo]'))){
     var pr = el.dataset.grupo.split('|'), cl = pr[0], val = pr.slice(1).join('|');
     var ids = CANCIONES.filter(function(c){ return c[cl] === val; }).map(function(c){ return c.id; });
@@ -4546,6 +4669,7 @@ async function entrar(p){
   await revisarBiblioteca();
   recuperarCola();
   autoReparar();
+  setTimeout(clasificarGeneros, 6000);
   $('barra').classList.add('on');
   ir('inicio');
 }

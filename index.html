@@ -612,7 +612,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.36.3';
+var APP_VERSION = '1.36.4';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -4191,6 +4191,7 @@ function trasInterrupcion(){
   pintarEstado('En pausa · otra app está sonando');
 }
 function reanudarTrasInterrupcion(){
+  linea('reanudarTrasInterrupcion llamada (interrumpida=' + (interrumpida ? Math.round((Date.now() - interrumpida) / 1000) + ' s' : 'no') + ')');
   var hace = Date.now() - interrumpida;
   if(!interrumpida || hace > 20 * 60 * 1000){ interrumpida = 0; return; }
   if(!actual || !audio.paused || pausaMia || paradoPorMi || viendoVideo){ interrumpida = 0; return; }
@@ -4200,8 +4201,10 @@ function reanudarTrasInterrupcion(){
   if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }       // en directo: se reengancha al directo
   var intentos = 0;
   (function volver(){
-    if(!actual || !audio.paused || pausaMia || paradoPorMi) return;
+    if(!actual || !audio.paused || pausaMia || paradoPorMi){ linea('seguir: cancelado (ya suena o lo paré yo)'); return; }
+    linea('seguir: intento de play() nº ' + (intentos + 1) + (document.hidden ? ' [en segundo plano]' : ''));
     var p = audio.play();
+    if(p && p.then) p.then(function(){ linea('seguir: play() aceptado'); });
     if(p && p.catch) p.catch(function(er){
       linea('play() tras la interrupción rechazado: ' + (er && er.name));
       if(++intentos < 3) setTimeout(volver, 800 * intentos);
@@ -4218,6 +4221,7 @@ try{
       // principio de la interrupción y los siguientes son el final (visto en el informe de Elibel).
       // Pasados unos segundos desde la pausa, un aviso nuevo = la otra app terminó → seguir.
       if(interrumpida && (st === 'active' || Date.now() - interrumpida > 2500)){
+        linea('aviso de iOS tras la pausa (' + Math.round((Date.now() - interrumpida) / 1000) + ' s): voy a intentar seguir');
         clearTimeout(window.__tReanuda);
         window.__tReanuda = setTimeout(reanudarTrasInterrupcion, 1500);
       }

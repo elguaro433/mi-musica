@@ -612,7 +612,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.36.2';
+var APP_VERSION = '1.36.3';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -4198,18 +4198,43 @@ function reanudarTrasInterrupcion(){
   anotar('sonido', 'el sonido vuelve a estar libre: sigo con ' + actual.titulo);
   try{ if(MZ.listo) MZ.ctx.resume(); }catch(_){}
   if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }       // en directo: se reengancha al directo
-  var p = audio.play(); if(p && p.catch) p.catch(function(){ pintarEstado('Toca ▶ para seguir'); });
+  var intentos = 0;
+  (function volver(){
+    if(!actual || !audio.paused || pausaMia || paradoPorMi) return;
+    var p = audio.play();
+    if(p && p.catch) p.catch(function(er){
+      linea('play() tras la interrupción rechazado: ' + (er && er.name));
+      if(++intentos < 3) setTimeout(volver, 800 * intentos);
+      else{ interrumpida = Date.now(); pintarEstado('Toca la pantalla para seguir'); }
+    });
+  })();
 }
 try{
   if(navigator.audioSession && navigator.audioSession.addEventListener){
     navigator.audioSession.addEventListener('statechange', function(){
       var st = navigator.audioSession.state;
       anotar('sonido', 'iOS dice: ' + st, actual ? actual.titulo : '');      // para ver en el informe qué pasa de verdad
-      if(st === 'active' && interrumpida) setTimeout(reanudarTrasInterrupcion, 1200);
+      // En iOS 18.7 el estado llega como «undefined», pero el AVISO sí llega: el primero es el
+      // principio de la interrupción y los siguientes son el final (visto en el informe de Elibel).
+      // Pasados unos segundos desde la pausa, un aviso nuevo = la otra app terminó → seguir.
+      if(interrumpida && (st === 'active' || Date.now() - interrumpida > 2500)){
+        clearTimeout(window.__tReanuda);
+        window.__tReanuda = setTimeout(reanudarTrasInterrupcion, 1500);
+      }
     });
   }
 }catch(_){}
 audio.addEventListener('playing', function(){ interrumpida = 0; if(MZ.listo && MZ.huboInterrupcion){ MZ.huboInterrupcion = false; setTimeout(comprobarSonidoMezcla, 2500); } });
+/* Una vez que la otra app termina, la web no recibe ningún aviso en segundo plano (iOS la
+   «duerme»): a veces iOS reanuda la música solo, y si no, hay tres formas de seguir —
+   volver a la app (se reanuda sola), tocar CUALQUIER sitio de la pantalla, o el botón ▶ de la
+   pantalla de bloqueo / Centro de control / coche. */
+['focus','pageshow'].forEach(function(n){
+  window.addEventListener(n, function(){ if(interrumpida) setTimeout(reanudarTrasInterrupcion, 600); });
+});
+document.addEventListener('pointerdown', function(){
+  if(interrumpida && actual && audio.paused && !pausaMia && !paradoPorMi) reanudarTrasInterrupcion();     // el toque cuenta como permiso de iOS
+}, true);
 /* Volver a la app (tras una llamada, la cámara, WhatsApp…): si la música se paró por
    una interrupción y ya nada más suena, sigue. Si iOS no avisa por Audio Session. */
 document.addEventListener('visibilitychange', function(){

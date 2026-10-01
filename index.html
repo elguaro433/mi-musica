@@ -612,7 +612,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.35.4';
+var APP_VERSION = '1.35.5';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -4085,31 +4085,41 @@ function pausarYo(){
    otra app (fallo que vio Elibel, 1/10/2026). Ahora NO se pelea: se espera a
    que iOS avise de que el sonido vuelve a estar libre (Audio Session API) o a
    que toques ▶ / el botón del volante. */
-var interrumpida = 0, tSalida = 0;
-/* Al salir de la app (inicio, otra app, bloquear) en algunos iPhone el sistema manda un «pause»
-   suelto, aunque nadie más suene. Eso NO es una interrupción: la música tiene que seguir
-   (fallo visto en el iPhone de Elibel, 1/10/2026, tras la v1.34). */
-window.addEventListener('blur', function(){ tSalida = Date.now(); });
-window.addEventListener('pagehide', function(){ tSalida = Date.now(); });
-document.addEventListener('visibilitychange', function(){ if(document.hidden) tSalida = Date.now(); });
+var interrumpida = 0, tSalida = 0, intentosSalida = 0;
+/* Al SALIR de la app (inicio, WhatsApp, galería, cámara…) algunos iPhone mandan un «pause»
+   suelto aunque nadie más suene. Eso NO es una interrupción: la música tiene que seguir.
+   Una interrupción de verdad (audio de WhatsApp, llamada, grabar vídeo) llega varios
+   segundos DESPUÉS de haber salido: esa sí se respeta y espera. El «pause» puede llegar un
+   pelín antes o un pelín después del aviso de «salí de la app»; se cubren los dos órdenes. */
+function seguirTrasSalir(){
+  if(!actual || !audio.paused || pausaMia || paradoPorMi || viendoVideo || audio.ended) return;
+  anotar('sonido', 'pausa al salir de la app (no es otra app): sigo', actual.titulo);
+  interrumpida = 0; intentosSalida = 0;
+  (function intentar(){
+    if(!actual || !audio.paused || pausaMia || paradoPorMi || viendoVideo) return;
+    if(actual.tipo === 'radio' && intentosSalida === 0){ try{ audio.src = actual.url; }catch(_){} }
+    var p = audio.play();
+    if(p && p.catch) p.catch(function(){
+      intentosSalida++;
+      if(intentosSalida < 4) setTimeout(intentar, 700 * intentosSalida);
+      else{ interrumpida = Date.now(); pintarEstado('Toca ▶ para seguir'); anotar('sonido', 'no me dejó seguir al salir'); }
+    });
+  })();
+}
+function marcarSalida(){
+  tSalida = Date.now();
+  // el «pause» llegó justo antes de este aviso
+  if(interrumpida && Date.now() - interrumpida < 3500) setTimeout(seguirTrasSalir, 250);
+}
+window.addEventListener('blur', marcarSalida);
+window.addEventListener('pagehide', marcarSalida);
+document.addEventListener('visibilitychange', function(){ if(document.hidden) marcarSalida(); });
 function trasInterrupcion(){
   if(!actual || pausaMia || paradoPorMi || viendoVideo || audio.ended) return;
-  var ses = '';
-  try{ ses = navigator.audioSession && navigator.audioSession.state; }catch(_){}
-  var alSalir = (Date.now() - tSalida < 3000) && ses !== 'interrupted';
-  if(alSalir){
-    anotar('sonido', 'pausa al salir de la app (no hay otra app sonando): sigo', actual.titulo);
-    setTimeout(function(){
-      if(!actual || !audio.paused || pausaMia || paradoPorMi || viendoVideo) return;
-      if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }
-      var p = audio.play();
-      if(p && p.catch) p.catch(function(){ interrumpida = Date.now(); pintarEstado('Toca ▶ para seguir'); });
-    }, 350);
-    return;
-  }
+  if(Date.now() - tSalida < 3500){ setTimeout(seguirTrasSalir, 300); return; }
   pausaAjena = Date.now();
   interrumpida = Date.now();
-  anotar('sonido', 'pausa por otra app: espero', actual.titulo);
+  anotar('sonido', 'pausa por otra app (llegó ' + Math.round((Date.now() - tSalida) / 1000) + ' s después de salir): espero', actual.titulo);
   pintarEstado('En pausa · otra app está sonando');
 }
 function reanudarTrasInterrupcion(){

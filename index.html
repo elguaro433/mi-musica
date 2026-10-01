@@ -589,7 +589,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.28.0';
+var APP_VERSION = '1.29.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2359,7 +2359,7 @@ function filaCancion(c, dentroDe){
    Apple publica sin clave y con CORS (probado el 30/09/2026):
    · /{pais}/rss/topsongs/.../genre=12/json  -> los éxitos latinos de hoy
    · /search?term=...&entity=song            -> las canciones de un cantante
-   Dan carátula y 30 s de vista previa. La canción entera no se puede dar
+   Dan carátula y un fragmento (que YA NO se ofrece: él quiere la canción entera). La canción entera no se puede dar
    desde aquí: para eso está YouTube (se oye, no se baja). El usuario NO quiere
    enlaces de compra (Apple, Amazon, Qobuz): los quitó el 30/09/2026. */
 var PAISES_INI = [['es','🇪🇸','España'], ['ve','🇻🇪','Venezuela'], ['co','🇨🇴','Colombia'],
@@ -2700,7 +2700,7 @@ function filaApple(p, g, i){
   return '<div class="row'+(son?' sonando':'')+'" data-gr="'+g+'|'+i+'">' + cuadroPista(p) +
     '<span class="r-x"><span class="r-t">'+esc(p.titulo)+'</span>'+
     '<span class="r-s"><span class="enc">'+esc(p.artista)+(p.genero?' · '+esc(p.genero):'')+'</span></span></span>'+
-    '<span class="r-a">⋯</span></div>';
+    '<span class="r-a" data-ap-mas="'+g+'|'+i+'">⋯</span></div>';
 }
 
 function hidratarIni(){
@@ -2792,6 +2792,24 @@ function pintarInicio(){
   if(!INI.cargando && !INI.fallo) cargarInicio();
 }
 
+/* Canción entera, nunca un fragmento. Primero se busca en Audius (suena entera
+   y sigue con la pantalla apagada); si no está, se abre el vídeo en YouTube. */
+function normTxt(t){
+  return String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/\(.*?\)|\[.*?\]/g,' ').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+}
+async function reproducirCompleta(p){
+  cerrarHoja();
+  toast('Buscando la canción entera…', null, 1800);
+  try{
+    var r = await buscarAudius(p.artista + ' ' + p.titulo);
+    var nt = normTxt(p.titulo), na = normTxt(p.artista).split(' ')[0], m = null;
+    for(var i=0;i<r.length && !m;i++)
+      if(normTxt(r[i].titulo).indexOf(nt) >= 0 && normTxt(r[i].artista).indexOf(na) >= 0) m = r[i];
+    if(m){ m.tipo = 'audius'; viendoVideo = false; tocarAudius(m, r); pintarVista(); return; }
+  }catch(err){ anotar('completa', err.message); }
+  escucharCompleta(p);
+}
 /* ── la hoja de una canción de Apple ── */
 function hojaApple(p, lista){
   apAbierta = {p:p, lista:lista || [p]};
@@ -2800,8 +2818,6 @@ function hojaApple(p, lista){
     '<h4>'+esc(p.titulo)+'</h4><div class="sub">'+esc(p.artista)+(p.genero?' · '+esc(p.genero):'')+'</div>' +
     '<button class="opc" data-ap-yt="1"><span class="em">▶️</span><span class="tx"><b>Escucharla entera</b>'+
       '<small>en YouTube, dentro de la app · no se baja</small></span></button>' +
-    (p.url ? '<button class="opc" data-ap-previa="1"><span class="em">🎧</span><span class="tx"><b>Vista previa de 30 s</b>'+
-      '<small>suena aquí y con la pantalla apagada</small></span></button>' : '') +
     '<button class="opc" data-ap-fav="1"><span class="em">'+(fav?'❤️':'♡')+'</span><span class="tx"><b>'+
       (fav?'Quitar de favoritas':'Guardar en favoritas')+'</b></span></button>' +
     '<button class="opc" data-cerrar-hoja="1"><span class="em">✕</span><span class="tx"><b>Cerrar</b></span></button>');
@@ -2842,11 +2858,11 @@ function reproducirHisto(h){
   if(h.k === 'c'){ tocarCancion(h.dat).then(pintarVista); }
   else if(h.k === 'r'){ viendoVideo = false; tocarRadio(h.dat); pintarVista(); }
   else if(h.k === 'u'){ tocarAudius(h.dat, [h.dat]); pintarVista(); }
-  else if(h.k === 'a'){ hojaApple(h.dat, [h.dat]); }
+  else if(h.k === 'a'){ reproducirCompleta(h.dat); }
   else if(h.k === 'y'){ ir('buscar'); ponerPestana('youtube'); abrirVideoId(h.dat, h.titulo, h.sub, h.img); }
 }
 function abrirItem(it, lista){
-  if(it.tipo === 'apple') hojaApple(it, lista);
+  if(it.tipo === 'apple') reproducirCompleta(it);
   else if(it.tipo === 'audius'){ tocarAudius(it, lista); pintarVista(); }
   else if(it.tipo === 'radio'){ viendoVideo = false; tocarRadio(it); pintarVista(); }
   else if(it.tipo === 'hist') reproducirHisto(it);
@@ -4097,17 +4113,16 @@ document.addEventListener('click', async function(ev){
     var nA = el.dataset.artista;
     if(!(vistaActual === 'buscar' && pestana === 'musica')){ ir('buscar'); ponerPestana('musica'); }
     $('q').value = nA; lanzarBusquedaMusica(nA); $('v-buscar').scrollTop = 0; return; }
+  if((el = t.closest('[data-ap-mas]'))){
+    ev.stopPropagation();
+    var gm = el.dataset.apMas.split('|'), itM = (GR[gm[0]] || [])[+gm[1]];
+    if(itM) hojaApple(itM, GR[gm[0]]);
+    return; }
   if((el = t.closest('[data-gr]'))){
     var gp = el.dataset.gr.split('|'), itG = (GR[gp[0]] || [])[+gp[1]];
     if(itG) abrirItem(itG, GR[gp[0]]);
     return; }
   if((el = t.closest('[data-ap-yt]'))){ if(apAbierta) escucharCompleta(apAbierta.p); return; }
-  if((el = t.closest('[data-ap-previa]'))){
-    if(apAbierta){
-      var lP = apAbierta.lista.filter(function(x){ return x.url; });
-      cerrarHoja(); viendoVideo = false; tocarAudius(apAbierta.p, lP); pintarVista();
-    }
-    return; }
   if((el = t.closest('[data-ap-fav]'))){
     if(apAbierta){
       var puestaA = marcarAudius(apAbierta.p);

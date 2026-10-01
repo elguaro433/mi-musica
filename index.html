@@ -590,7 +590,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.30.0';
+var APP_VERSION = '1.31.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2704,6 +2704,122 @@ function filaApple(p, g, i){
     '<span class="r-a" data-ap-mas="'+g+'|'+i+'">⋯</span></div>';
 }
 
+/* ═════════ Listas automáticas, radio de un toque, novedades ═════════ */
+function listasAuto(){
+  var L = [];
+  function add(id, nombre, icono, arr){
+    var ids = arr.filter(function(c){ return !c.falta; }).map(function(c){ return c.id; });
+    if(ids.length) L.push({id:id, nombre:nombre, icono:icono, ids:ids});
+  }
+  add('auto_todo', 'Toda mi música', '🔀', CANCIONES);
+  add('auto_mas', 'Lo más escuchado', '🔥', CANCIONES.filter(function(c){ return c.veces; })
+      .sort(function(a, b){ return (b.veces||0) - (a.veces||0); }).slice(0, 25));
+  add('auto_nuevas', 'Añadidas hace poco', '🆕', CANCIONES.slice()
+      .sort(function(a, b){ return (b.anadida||0) - (a.anadida||0); }).slice(0, 25));
+  add('auto_favs', 'Tus favoritas', '❤️', CANCIONES.filter(function(c){ return c.fav; }));
+  var gm = {};
+  CANCIONES.forEach(function(c){ var g = generoDe(c); if(g !== 'Sin clasificar') (gm[g] = gm[g] || []).push(c); });
+  Object.keys(gm).filter(function(g){ return gm[g].length >= 3; })
+    .sort(function(a, b){ return gm[b].length - gm[a].length; }).slice(0, 4)
+    .forEach(function(g){ add('auto_g_' + g, g, iconoEstilo({genero:g}), gm[g]); });
+  return L;
+}
+async function tocarAuto(id){
+  var l = null, A = listasAuto();
+  for(var i=0;i<A.length;i++) if(A[i].id === id) l = A[i];
+  if(!l) return;
+  var ids = barajar(l.ids);                 // siempre mezcladas: un toque y suena
+  aleatorio = false; pintarModos(); viendoVideo = false;
+  await tocarCancion(ids[0], ids);
+  pintarVista();
+}
+function chipsAuto(){
+  var A = listasAuto();
+  if(!A.length) return '';
+  return '<div class="hscroll" style="margin:12px 0 4px">' + A.map(function(l){
+    return '<button class="tab" data-auto="'+esc(l.id)+'">'+l.icono+'&nbsp; '+esc(l.nombre)+'</button>'; }).join('') + '</div>';
+}
+function radioRapida(){
+  var c = conteoRadio(), lista = [], vistas = {};
+  function poner(e){ if(e && e.url && !vistas[e.url]){ vistas[e.url] = 1; lista.push(e); } }
+  try{
+    var u = JSON.parse(localStorage.getItem('mm_ultimo_' + yo) || 'null');
+    if(u && u.tipo === 'radio' && u.url && c[u.url] && c[u.url].e) poner(c[u.url].e);
+  }catch(_){}
+  Object.keys(c).filter(function(k){ return c[k].e; })
+    .sort(function(a, b){ return (c[b].n - c[a].n) || (c[b].t - c[a].t); })
+    .forEach(function(k){ poner(c[k].e); });
+  lista = lista.slice(0, 4);
+  if(!lista.length) return '';
+  return '<div class="shelf-t">📻 Radio · un toque</div><div class="hscroll">' + lista.map(function(e, i){
+    return '<div class="tile" data-radio-rapida="'+esc(e.url)+'">'+cuadroEmisora(e)+
+      '<div class="t">'+esc(e.nombre)+'</div><div class="s">'+(i === 0 && lista.length > 0 ? 'La última' : 'La que más oyes')+'</div></div>'; }).join('') + '</div>';
+}
+
+/* Novedades: discos recientes de tus cantantes (los de tu música + los que sigas). */
+var NOV = {items:[], t:0, cargando:false, yo:''};
+function cantantesSeguidos(){
+  var m = {};
+  CANCIONES.forEach(function(c){
+    var a = String(c.artista || '').split(/,| & | feat\.?| ft\.?| x /i)[0].trim();
+    if(a && a !== 'Artista desconocido') m[a] = (m[a] || 0) + 1; });
+  var base = Object.keys(m).sort(function(a, b){ return m[b] - m[a]; }).slice(0, 8);
+  var extra = [];
+  try{ extra = JSON.parse(localStorage.getItem('mm_sigue_' + yo) || '[]') || []; }catch(_){}
+  var out = [];
+  extra.concat(base).forEach(function(a){ if(out.indexOf(a) < 0) out.push(a); });
+  return out.slice(0, 12);
+}
+async function cargarNovedades(forzar){
+  if(NOV.cargando || !navigator.onLine) return;
+  if(NOV.yo !== yo){
+    NOV = {items:[], t:0, cargando:false, yo:yo};
+    try{ var c = JSON.parse(localStorage.getItem('mm_nov_' + yo) || 'null'); if(c){ NOV.items = c.items || []; NOV.t = c.t || 0; } }catch(_){}
+    if(NOV.items.length) repintarInicio();
+  }
+  if(!forzar && NOV.t && (AJ.ahorro || Date.now() - NOV.t < 24 * 3600 * 1000)) return;
+  var quien = cantantesSeguidos();
+  if(!quien.length) return;
+  NOV.cargando = true;
+  var res = [], desde = Date.now() - 400 * 24 * 3600 * 1000, fallos = 0;
+  for(var i=0;i<quien.length && fallos < 3;i++){
+    try{
+      var d = await traerConLimite('https://itunes.apple.com/search?term=' + encodeURIComponent(quien[i]) + '&entity=musicArtist&limit=1', 9000);
+      var ar = (d.results || [])[0];
+      if(!ar || !ar.artistId) continue;
+      var l = await traerConLimite('https://itunes.apple.com/lookup?id=' + ar.artistId + '&entity=album&sort=recent&limit=6', 9000);
+      (l.results || []).forEach(function(x){
+        if(x.wrapperType !== 'collection' || !x.releaseDate) return;
+        var f = Date.parse(x.releaseDate);
+        if(f < desde || f > Date.now() + 3 * 24 * 3600 * 1000) return;
+        var nombre = String(x.collectionName || '').replace(/\s*-\s*(Single|EP)$/i, '');
+        var img = x.artworkUrl100 ? String(x.artworkUrl100).replace('100x100bb', '240x240bb') : '';
+        var p = pistaApple('nv' + x.collectionId, nombre, x.artistName || quien[i], img, '', '', '', '');
+        if(p){ p.fecha = f; res.push(p); }
+      });
+      fallos = 0;
+    }catch(err){ fallos++; anotar('novedades', err.message, quien[i]); }
+  }
+  NOV.cargando = false;
+  if(res.length || !fallos){
+    var vistos = {};
+    NOV.items = res.sort(function(a, b){ return b.fecha - a.fecha; })
+      .filter(function(p){ var k = normTxt(p.titulo + p.artista); if(vistos[k]) return false; vistos[k] = 1; return true; }).slice(0, 14);
+    NOV.t = Date.now();
+    try{ localStorage.setItem('mm_nov_' + yo, JSON.stringify({t:NOV.t, items:NOV.items})); }catch(_){}
+  }
+  repintarInicio();
+}
+function seguirCantante(){
+  var n = prompt('¿Qué cantante quieres seguir?');
+  if(!n || !n.trim()) return;
+  var ex = []; try{ ex = JSON.parse(localStorage.getItem('mm_sigue_' + yo) || '[]') || []; }catch(_){}
+  ex.unshift(n.trim());
+  try{ localStorage.setItem('mm_sigue_' + yo, JSON.stringify(ex.slice(0, 12))); }catch(_){}
+  cargarNovedades(true);
+  toast('Ahora sigues a ' + n.trim() + '.', 'bueno', 2500);
+}
+
 function hidratarIni(){
   var cc = paisIni();
   if(INI.yo !== yo){ INI.yo = yo; INI.art = {}; INI.t = 0; }
@@ -2737,10 +2853,22 @@ function pintarInicio(){
     h += '<button class="btn suave" id="seguir" style="margin-top:2px">▶&nbsp; Seguir con «'+esc(ult.titulo)+'»</button>';
   if(AJ.cocheEnInicio)
     h += '<button class="btn" id="b-coche" style="margin-top:8px">🚗&nbsp; Modo coche</button>';
+  h += chipsAuto();
+  h += radioRapida();
 
   if(CANCIONES.length){
     h += '<div class="shelf-t">🎵 Tu música <span class="vermas" data-ir="biblio">Ver todas ›</span></div><div class="hscroll" id="ini-tu">' +
       filasTuMusica() + '</div>';
+  }
+
+  if(NOV.items.length){
+    GR.nv = NOV.items;
+    h += '<div class="shelf-t">🆕 Novedades <span class="vermas" data-seguir-cantante="1">Seguir a otro ›</span></div><div class="hscroll">' +
+      NOV.items.map(function(p, i){
+        var f = new Date(p.fecha);
+        return '<div class="tile" data-gr="nv|'+i+'">'+cuadroPista(p)+'<div class="t">'+esc(p.titulo)+'</div><div class="s">'+esc(p.artista)+'</div></div>'; }).join('') + '</div>';
+  }else if(CANCIONES.length){
+    h += '<button class="btn" data-seguir-cantante="1" style="margin-top:10px">🆕&nbsp; Seguir un cantante y ver sus novedades</button>';
   }
 
   // De qué país quieres los éxitos
@@ -2791,6 +2919,7 @@ function pintarInicio(){
   h += '<button class="btn" data-ini-refresh="1">'+(INI.cargando ? '⏳&nbsp; Actualizando…' : '↻&nbsp; Actualizar')+'</button>';
   C.innerHTML = h;
   if(!INI.cargando && !INI.fallo) cargarInicio();
+  setTimeout(function(){ cargarNovedades(false); }, 1200);
 }
 
 /* Canción entera, nunca un fragmento. Primero se busca en Audius (suena entera
@@ -3667,7 +3796,11 @@ function pintarBiblio(){
             'Toca <b>➕ Añadir canciones</b> y elige las que quieras.</div>');
       return;
     }
-    C.innerHTML = (LISTAS.length ? LISTAS.map(function(l){
+    var autoH = listasAuto().map(function(l){
+      return '<div class="row" data-auto="'+esc(l.id)+'"><span class="art" style="background:'+tono(l.nombre)+'">'+l.icono+'</span>'+
+        '<span class="r-x"><span class="r-t">'+esc(l.nombre)+'</span><span class="r-s">'+l.ids.length+' canciones · se mezcla sola</span></span>'+
+        '<span class="r-a">▶</span></div>'; }).join('');
+    C.innerHTML = (autoH ? '<div class="city">⚡ Automáticas</div>' + autoH + '<div class="city">☰ Tus listas</div>' : '') + (LISTAS.length ? LISTAS.map(function(l){
       return '<div class="row" data-abrir-lista="'+esc(l.id)+'"><span class="art" style="background:'+tono(l.nombre)+'">☰</span>'+
         '<span class="r-x"><span class="r-t">'+esc(l.nombre)+'</span>'+
         '<span class="r-s">'+(l.canciones||[]).length+' canciones</span></span>'+
@@ -4154,6 +4287,12 @@ document.addEventListener('click', async function(ev){
     var nA = el.dataset.artista;
     if(!(vistaActual === 'buscar' && pestana === 'musica')){ ir('buscar'); ponerPestana('musica'); }
     $('q').value = nA; lanzarBusquedaMusica(nA); $('v-buscar').scrollTop = 0; return; }
+  if((el = t.closest('[data-auto]'))){ await tocarAuto(el.dataset.auto); return; }
+  if(t.closest('[data-seguir-cantante]')){ seguirCantante(); return; }
+  if((el = t.closest('[data-radio-rapida]'))){
+    var cr = conteoRadio(), er = cr[el.dataset.radioRapida] && cr[el.dataset.radioRapida].e;
+    if(er){ viendoVideo = false; tocarRadio(er); pintarVista(); }
+    return; }
   if((el = t.closest('[data-ap-mas]'))){
     ev.stopPropagation();
     var gm = el.dataset.apMas.split('|'), itM = (GR[gm[0]] || [])[+gm[1]];

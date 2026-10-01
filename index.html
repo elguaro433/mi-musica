@@ -138,6 +138,13 @@ button{font-family:inherit;color:inherit}
 .row:active{background:rgba(169,112,255,.1)}
 .row.sonando .r-t{color:var(--purple)}
 .row.falta{opacity:.45}
+.chipauto{flex:0 0 auto;display:flex;align-items:center;gap:10px;min-height:56px;padding:10px 20px 10px 16px;border-radius:30px;
+  background:var(--card);border:1px solid var(--line);color:var(--ink,#f6f2ff);font-size:calc(16px * var(--esc));font-weight:600;cursor:pointer}
+.chipauto:active{transform:scale(.96)}
+.chipauto.principal{background:linear-gradient(135deg,rgba(169,112,255,.28),rgba(255,95,166,.22));border-color:rgba(169,112,255,.6);
+  box-shadow:0 4px 18px rgba(169,112,255,.25)}
+#mini{touch-action:pan-y;transition:transform .2s ease,opacity .2s}
+#mini.mov{transition:none}
 .row.desl{position:relative;touch-action:pan-y;transition:transform .22s ease}
 .row.desl.mov{transition:none}
 .swa{display:none;position:absolute;left:100%;top:3px;bottom:3px;width:128px;gap:6px;padding-left:8px;box-sizing:border-box}
@@ -590,7 +597,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.31.1';
+var APP_VERSION = '1.32.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2733,11 +2740,13 @@ async function tocarAuto(id){
   await tocarCancion(ids[0], ids);
   pintarVista();
 }
+var IC_MEZCLA = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="url(#gmz)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><defs><linearGradient id="gmz" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a970ff"/><stop offset="1" stop-color="#ff5fa6"/></linearGradient></defs><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>';
 function chipsAuto(){
   var A = listasAuto();
   if(!A.length) return '';
-  return '<div class="hscroll" style="margin:12px 0 4px">' + A.map(function(l){
-    return '<button class="tab" data-auto="'+esc(l.id)+'">'+l.icono+'&nbsp; '+esc(l.nombre)+'</button>'; }).join('') + '</div>';
+  return '<div class="hscroll" style="margin:6px 0 6px">' + A.map(function(l, i){
+    var ico = l.id === 'auto_todo' ? IC_MEZCLA : '<span style="font-size:22px;line-height:1">'+l.icono+'</span>';
+    return '<button class="chipauto'+(i === 0 ? ' principal' : '')+'" data-auto="'+esc(l.id)+'">'+ico+'<span>'+esc(l.nombre)+'</span></button>'; }).join('') + '</div>';
 }
 function radioRapida(){
   var c = conteoRadio(), lista = [], vistas = {};
@@ -2849,8 +2858,6 @@ function pintarInicio(){
   INI.nombres = nombresParaTi();
   var ult = null;
   try{ ult = JSON.parse(localStorage.getItem('mm_ultimo_'+yo)||'null'); }catch(_){}
-  if(ult && ult.titulo)
-    h += '<button class="btn suave" id="seguir" style="margin-top:2px">▶&nbsp; Seguir con «'+esc(ult.titulo)+'»</button>';
   if(AJ.cocheEnInicio)
     h += '<button class="btn" id="b-coche" style="margin-top:8px">🚗&nbsp; Modo coche</button>';
   h += chipsAuto();
@@ -4579,6 +4586,57 @@ document.addEventListener('change', function(e){
   }
   caja.addEventListener('pointerup', soltar);
   caja.addEventListener('pointercancel', function(){ arrastrando = false; delete caja.dataset.arr; pintarProgreso(); });
+})();
+
+/* Quitar la reproducción: con la música PARADA, se desliza la barrita de abajo hacia la
+   izquierda y desaparece (la música guardada no se toca; solo se olvida lo que sonaba). */
+function quitarReproduccion(){
+  paradoPorMi = true; viendoVideo = false; recuperarAlVolver = false;
+  clearTimeout(reintento); clearTimeout(vigilante); dormir && clearTimeout(dormir);
+  try{ if(MZ && MZ.puente) abortarPuente(); }catch(_){}
+  try{ audio.pause(); }catch(_){}
+  try{ audio.removeAttribute('src'); audio.load(); }catch(_){}
+  soltarURLs(); soltarCaratula();
+  actual = null; cola = []; colaPos = -1; sigPre = null;
+  guardarCola();
+  $('mini').classList.remove('on'); $('now').classList.remove('on');
+  if('mediaSession' in navigator){
+    try{ navigator.mediaSession.metadata = null; navigator.mediaSession.playbackState = 'none'; }catch(_){}
+  }
+  pintarVista();
+}
+(function(){
+  var mini = $('mini'), x0 = 0, y0 = 0, dx = 0, activo = false, mov = false;
+  mini.addEventListener('pointerdown', function(e){
+    if(!actual || !audio.paused) return;               // solo con la música parada
+    if(e.target.closest && e.target.closest('#m-pp')) return;
+    activo = true; mov = false; x0 = e.clientX; y0 = e.clientY; dx = 0;
+  });
+  mini.addEventListener('pointermove', function(e){
+    if(!activo) return;
+    var ax = e.clientX - x0, ay = e.clientY - y0;
+    if(!mov){
+      if(Math.abs(ay) > 12 && Math.abs(ay) > Math.abs(ax)){ activo = false; return; }
+      if(ax > -10) return;
+      mov = true; mini.classList.add('mov');
+    }
+    dx = Math.min(0, ax);
+    mini.style.transform = 'translateX(' + dx + 'px)';
+    mini.style.opacity = String(Math.max(.25, 1 + dx / 300));
+  });
+  function fin(){
+    if(!activo) return;
+    activo = false;
+    if(!mov) return;
+    mini.classList.remove('mov');
+    window.__swipe = Date.now();
+    if(dx < -90){
+      mini.style.transform = 'translateX(-110%)'; mini.style.opacity = '0';
+      setTimeout(function(){ quitarReproduccion(); mini.style.transform = ''; mini.style.opacity = ''; }, 200);
+    }else{ mini.style.transform = ''; mini.style.opacity = ''; }
+  }
+  mini.addEventListener('pointerup', fin);
+  mini.addEventListener('pointercancel', fin);
 })();
 
 /* Deslizar una fila hacia la izquierda enseña ❤️ y 🗑 (canciones y emisoras). */

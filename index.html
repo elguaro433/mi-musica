@@ -612,7 +612,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.35.1';
+var APP_VERSION = '1.35.2';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1413,9 +1413,22 @@ function recrearAudio(){
 
 /* ═════════ Guardián 2 y 3 · radio que se reconecta sola ═════════ */
 var reintento = null, espera = 1000, fallosRadio = 0;
+/* ¿Otra app (WhatsApp, una llamada…) tiene el sonido? Entonces la radio NO se reconecta:
+   reenganchar el stream le quitaba el audio a la otra app y no la dejaba sonar. */
+function otraAppTieneElSonido(){
+  var ses = '';
+  try{ ses = navigator.audioSession && navigator.audioSession.state; }catch(_){}
+  return ses === 'interrupted' || (pausaAjena && Date.now() - pausaAjena < 20000 && audio.paused);
+}
 function programarReconexion(){
   if(!actual || actual.tipo !== 'radio') return;
   if(paradoPorMi || viendoVideo) return;   // la paraste tú, o manda el vídeo
+  if(otraAppTieneElSonido()){
+    interrumpida = interrumpida || Date.now();
+    clearTimeout(reintento);
+    pintarEstado('En pausa · otra app está sonando');
+    return;
+  }
   clearTimeout(reintento);
   if(fallosRadio >= 10){
     pintarEstado('Esta emisora no responde. Prueba otra.');
@@ -1431,6 +1444,7 @@ function programarReconexion(){
   pintarEstado('Reconectando… (' + Math.round(espera/1000) + ' s)');
   reintento = setTimeout(function(){
     if(!actual || actual.tipo !== 'radio') return;
+    if(otraAppTieneElSonido()){ interrumpida = interrumpida || Date.now(); pintarEstado('En pausa · otra app está sonando'); return; }
     fallosRadio++;
     anotar('radio', 'reintento ' + fallosRadio + ' de ' + actual.titulo);
     var u = actual.url;
@@ -1540,7 +1554,8 @@ function iniciarMezcla(){
     MZ.gainB = MZ.ctx.createGain(); MZ.gainB.gain.value = 0.0001; MZ.gainB.connect(MZ.ctx.destination);
     MZ.ctx.createMediaElementSource(MZ.b).connect(MZ.gainB);
     MZ.listo = true;
-    MZ.ctx.onstatechange = function(){ if(MZ.ctx.state === 'interrupted' || MZ.ctx.state === 'suspended') try{ MZ.ctx.resume(); }catch(_){} };
+    // NO se reanuda sola: si otra app tomó el sonido (WhatsApp, una llamada), se le deja.
+    MZ.ctx.onstatechange = function(){ anotar('sonido', 'mezcla: el audio pasó a ' + MZ.ctx.state); };
     // iOS solo deja arrancar un reproductor nuevo si antes lo tocaste con el dedo.
     // Con el primer toque se "desbloquea" el segundo, en silencio.
     document.addEventListener('click', function des(){
@@ -4083,6 +4098,7 @@ function reanudarTrasInterrupcion(){
   if(!actual || !audio.paused || pausaMia || paradoPorMi || viendoVideo){ interrumpida = 0; return; }
   interrumpida = 0; pintarEstado(null);
   anotar('sonido', 'el sonido vuelve a estar libre: sigo con ' + actual.titulo);
+  try{ if(MZ.listo) MZ.ctx.resume(); }catch(_){}
   if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }       // en directo: se reengancha al directo
   var p = audio.play(); if(p && p.catch) p.catch(function(){ pintarEstado('Toca ▶ para seguir'); });
 }

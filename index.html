@@ -620,7 +620,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.36.7';
+var APP_VERSION = '1.36.8';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -4292,7 +4292,7 @@ document.addEventListener('visibilitychange', function(){
    anterior lo veía porque todos miraban audio.paused. Ahora: al volver, al tocar y cuando iOS
    avisa de un cambio de sonido, se MIDE si el tiempo avanza; si no, se hace pausa+play (o se
    recarga la fuente) y, si iOS no deja, se enseña ▶ de verdad. */
-var revisandoFantasma = false;
+var revisandoFantasma = false, intentosFantasma = 0;
 function volverAPonerFicha(){
   try{
     if(!('mediaSession' in navigator) || !navigator.mediaSession.metadata) return;
@@ -4303,12 +4303,17 @@ function volverAPonerFicha(){
 }
 function reengancharAudio(){
   var t = audio.currentTime, esCancion = actual && actual.tipo === 'cancion';
+  var nivel = intentosFantasma++;
+  linea('fantasma: reenganche nivel ' + nivel);
+  if(nivel >= 4){ pausaMia = true; try{ audio.pause(); }catch(_){} setTimeout(function(){ pausaMia = false; }, 900); interrumpida = Date.now(); pintarBotones(false); pintarEstado('Toca ▶ para seguir'); intentosFantasma = 0; return; }
+  if(nivel >= 2){ recrearAudio(); setTimeout(function(){ revisarFantasma('verificación'); }, 2500); return; }   // elemento nuevo
+  setTimeout(function(){ revisarFantasma('verificación'); }, 2500);
   pausaMia = true;                                         // este pause lo provoco yo: que no cuente como interrupción
   try{ audio.pause(); }catch(_){}
   setTimeout(function(){ pausaMia = false; }, 900);
-  if(actual.tipo === 'radio' || audio.error || audio.readyState === 0){
+  if(nivel >= 1 || actual.tipo === 'radio' || audio.error || audio.readyState === 0){      // nivel 1: recargar la fuente
     var src = actual.tipo === 'radio' ? actual.url : audio.src;
-    try{ audio.src = src; }catch(_){}
+    try{ audio.load(); audio.src = src; }catch(_){}
     if(esCancion && t > 1) audio.addEventListener('loadedmetadata', function(){ try{ audio.currentTime = t; }catch(_){} }, {once:true});
   }
   var p = audio.play();
@@ -4328,7 +4333,7 @@ function revisarFantasma(motivo){
     revisandoFantasma = false;
     if(!actual || paradoPorMi || pausaMia || viendoVideo || audio.ended) return;
     if(audio.paused){ pintarBotones(false); return; }                  // el botón dice la verdad
-    if(audio.currentTime > t0 + 0.05){ pintarBotones(true); return; }  // suena bien
+    if(audio.currentTime > t0 + 0.05){ pintarBotones(true); intentosFantasma = 0; return; }  // suena bien
     anotar('sonido', 'fantasma (' + motivo + '): la app creía que sonaba y no avanza; lo reengancho', actual.titulo);
     linea('fantasma detectado (' + motivo + ')');
     reengancharAudio();

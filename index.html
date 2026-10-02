@@ -620,7 +620,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.36.6';
+var APP_VERSION = '1.36.7';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -4284,6 +4284,67 @@ document.addEventListener('visibilitychange', function(){
     reanudarTrasInterrupcion();
   }, 900);
 });
+
+/* ─── Audio «fantasma» (fallo de Elibel y Emmanuel, 2/10/2026) ──────
+   Tras un audio de WhatsApp, iOS a veces deja el <audio> con paused=false pero MUDO y sin avanzar,
+   y sin avisar con ningún «pause». Efectos: la app enseña ⏸ aunque no suena, play() no hace nada
+   (cree que ya suena), y la pantalla de bloqueo/coche se queda sin ficha. Ningún reintento
+   anterior lo veía porque todos miraban audio.paused. Ahora: al volver, al tocar y cuando iOS
+   avisa de un cambio de sonido, se MIDE si el tiempo avanza; si no, se hace pausa+play (o se
+   recarga la fuente) y, si iOS no deja, se enseña ▶ de verdad. */
+var revisandoFantasma = false;
+function volverAPonerFicha(){
+  try{
+    if(!('mediaSession' in navigator) || !navigator.mediaSession.metadata) return;
+    var m = navigator.mediaSession.metadata;
+    navigator.mediaSession.metadata = new MediaMetadata({title:m.title, artist:m.artist, album:m.album, artwork:m.artwork ? Array.prototype.slice.call(m.artwork) : []});
+    navigator.mediaSession.playbackState = 'playing';
+  }catch(_){}
+}
+function reengancharAudio(){
+  var t = audio.currentTime, esCancion = actual && actual.tipo === 'cancion';
+  pausaMia = true;                                         // este pause lo provoco yo: que no cuente como interrupción
+  try{ audio.pause(); }catch(_){}
+  setTimeout(function(){ pausaMia = false; }, 900);
+  if(actual.tipo === 'radio' || audio.error || audio.readyState === 0){
+    var src = actual.tipo === 'radio' ? actual.url : audio.src;
+    try{ audio.src = src; }catch(_){}
+    if(esCancion && t > 1) audio.addEventListener('loadedmetadata', function(){ try{ audio.currentTime = t; }catch(_){} }, {once:true});
+  }
+  var p = audio.play();
+  if(p && p.then) p.then(function(){ linea('fantasma: play() aceptado'); volverAPonerFicha(); });
+  if(p && p.catch) p.catch(function(er){
+    linea('fantasma: play() rechazado: ' + (er && er.name));
+    interrumpida = Date.now();
+    pintarBotones(false);
+    pintarEstado('Toca ▶ para seguir');
+  });
+}
+function revisarFantasma(motivo){
+  if(revisandoFantasma || !actual || paradoPorMi || pausaMia || viendoVideo || audio.ended || audio.paused) return;
+  revisandoFantasma = true;
+  var t0 = audio.currentTime;
+  setTimeout(function(){
+    revisandoFantasma = false;
+    if(!actual || paradoPorMi || pausaMia || viendoVideo || audio.ended) return;
+    if(audio.paused){ pintarBotones(false); return; }                  // el botón dice la verdad
+    if(audio.currentTime > t0 + 0.05){ pintarBotones(true); return; }  // suena bien
+    anotar('sonido', 'fantasma (' + motivo + '): la app creía que sonaba y no avanza; lo reengancho', actual.titulo);
+    linea('fantasma detectado (' + motivo + ')');
+    reengancharAudio();
+  }, 1400);
+}
+document.addEventListener('visibilitychange', function(){ if(!document.hidden){ pintarBotones(!!actual && !audio.paused); revisarFantasma('volví a la app'); } });
+['focus','pageshow'].forEach(function(n){ window.addEventListener(n, function(){ revisarFantasma(n); }); });
+document.addEventListener('pointerdown', function(){ revisarFantasma('toque'); }, true);
+try{
+  if(navigator.audioSession && navigator.audioSession.addEventListener){
+    navigator.audioSession.addEventListener('statechange', function(){
+      setTimeout(function(){ revisarFantasma('iOS avisó (+2 s)'); }, 2000);
+      setTimeout(function(){ revisarFantasma('iOS avisó (+6 s)'); }, 6000);
+    });
+  }
+}catch(_){}
 
 /* ─── Mantener la pantalla encendida (móvil en el soporte) ───────── */
 var candado = null;

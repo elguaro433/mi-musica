@@ -620,7 +620,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.36.9';
+var APP_VERSION = '1.36.10';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -830,9 +830,25 @@ function todos(store, indice, valor){
   var s = tx([store]).objectStore(store);
   return pedir(indice ? s.index(indice).getAll(valor) : s.getAll());
 }
-function guardar(store, obj){
+function guardarCrudo(store, obj){
   var t = tx([store],'readwrite');
   return pedir(t.objectStore(store).put(obj));
+}
+/* iOS a veces responde «Error preparing Blob/File data» al volver a escribir la carátula leída de la
+   base (se perdían veces/favorito/género). Se reintenta con una copia nueva del blob y, si ni así,
+   sin carátula (se vuelve a pedir sola) antes que perder el resto del registro. */
+async function guardar(store, obj){
+  try{ return await guardarCrudo(store, obj); }
+  catch(e){
+    if(store !== 'canciones' || !obj || !obj.caratula || !/blob|file/i.test(String(e && e.message))) throw e;
+    try{
+      var b = obj.caratula, copia = new Blob([await b.arrayBuffer()], {type: b.type});
+      return await guardarCrudo(store, Object.assign({}, obj, {caratula: copia}));
+    }catch(_){
+      anotar('guardar', 'carátula ilegible: guardo la canción sin ella', obj.titulo);
+      return await guardarCrudo(store, Object.assign({}, obj, {caratula: null}));
+    }
+  }
 }
 function borrar(store, k){
   var t = tx([store],'readwrite');
@@ -1568,13 +1584,17 @@ function iniciarMezcla(){
     MZ.an = MZ.ctx.createAnalyser(); MZ.an.fftSize = 512; MZ.gain.connect(MZ.an);
     MZ.ctx.onstatechange = function(){
       var st = MZ.ctx.state;
+      if(MZ.reiniciando) return;                       // el suspend/resume de abajo es mío: no es una interrupción
       anotar('sonido', 'mezcla: el audio pasó a ' + st);
       linea('mezcla:' + st);
       if(st === 'interrupted' || st === 'suspended') MZ.rota = true;
       if(st === 'running' && MZ.rota){
         MZ.rota = false;
         // 1º el truco habitual (parar y arrancar el motor); 2º se mide si suena de verdad
-        try{ MZ.ctx.suspend().then(function(){ return MZ.ctx.resume(); }).catch(function(){}); }catch(_){}
+        // OJO: sin la bandera esto se llamaba a sí mismo en bucle (visto en el informe del 2/10: 30 vueltas en 70 ms)
+        MZ.reiniciando = true;
+        var libre = function(){ setTimeout(function(){ MZ.reiniciando = false; }, 400); };
+        try{ MZ.ctx.suspend().then(function(){ return MZ.ctx.resume(); }).then(libre, libre); }catch(_){ libre(); }
         setTimeout(comprobarSonidoMezcla, 2500);
       }
     };
@@ -4340,10 +4360,12 @@ function reengancharAudio(){
 function revisarFantasma(motivo){
   if(revisandoFantasma || !actual || paradoPorMi || pausaMia || viendoVideo || audio.ended || audio.paused) return;
   revisandoFantasma = true;
-  var t0 = audio.currentTime;
+  var t0 = audio.currentTime, id0 = actual.id, src0 = audio.currentSrc || audio.src;
   setTimeout(function(){
     revisandoFantasma = false;
     if(!actual || paradoPorMi || pausaMia || viendoVideo || audio.ended) return;
+    // Cambió de canción (tocaste otra, pasó a la siguiente) mientras medía: no es un fantasma.
+    if(actual.id !== id0 || (audio.currentSrc || audio.src) !== src0 || audio.currentTime < t0 - 0.5){ intentosFantasma = 0; return; }
     if(audio.paused){ pintarBotones(false); return; }                  // el botón dice la verdad
     if(audio.currentTime > t0 + 0.05){ pintarBotones(true); intentosFantasma = 0; return; }  // suena bien
     anotar('sonido', 'fantasma (' + motivo + '): la app creía que sonaba y no avanza; lo reengancho', actual.titulo);

@@ -620,7 +620,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.36.10';
+var APP_VERSION = '1.37.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1852,6 +1852,12 @@ function playPause(){
       fallosRadio = 0; espera = 1000;
       audio.src = actual.url;
       pintarEstado('Conectando…');
+    }
+    // Tras una pausa larga la fuente puede haberse soltado: se vuelve a cargar desde el último segundo.
+    if(actual.tipo === 'cancion' && !document.hidden && (audio.error || audio.readyState === 0 || audio.networkState === 3) && actual.url){
+      var t = audio.currentTime;
+      linea('▶: la fuente estaba muerta; recargo desde t=' + Math.round(t));
+      try{ audio.src = actual.url; if(t > 1) audio.addEventListener('loadedmetadata', function(){ try{ audio.currentTime = t; }catch(_){} }, {once:true}); }catch(_){}
     }
     var p = audio.play();
     if(p && p.catch) p.catch(function(err){ anotar('playPause', err.message); });
@@ -4207,6 +4213,28 @@ try{
 }catch(e){ linea('audioSession error ' + e.message); }
 
 var interrumpida = 0, tSalida = 0, intentosSalida = 0;
+/* Reintento «consciente de la suspensión» (técnica de los reproductores PWA para iOS): iOS congela la
+   página mientras otra app tiene el sonido, y al despertarla los temporizadores atrasados se disparan
+   de golpe. Si el aviso llega MÁS de 5 s tarde, la página estuvo dormida: no se arranca solo (sería sonar
+   de repente, o pelearse con la otra app); se deja el ▶ a mano y un toque lo reanuda. */
+function reintentarSiDespierto(fn, ms){
+  var t0 = Date.now();
+  setTimeout(function(){
+    if(Date.now() - t0 > ms + 5000){
+      linea('reintento llegó ' + Math.round((Date.now() - t0 - ms) / 1000) + ' s tarde: la página estuvo dormida; dejo ▶');
+      quedarEnPausaVisible(); return;
+    }
+    fn();
+  }, ms);
+}
+/* Que se vea y funcione el ▶ (app, pantalla de bloqueo y coche) cuando la música quedó en pausa por otra app. */
+function quedarEnPausaVisible(){
+  if(!actual) return;
+  if(!interrumpida) interrumpida = Date.now();
+  pintarBotones(false);                         // también pone mediaSession.playbackState = 'paused'
+  pintarEstado('Toca ▶ para seguir');
+  try{ volverAPonerFicha(); navigator.mediaSession.playbackState = 'paused'; }catch(_){}
+}
 /* Al SALIR de la app (inicio, WhatsApp, galería, cámara…) algunos iPhone mandan un «pause»
    suelto aunque nadie más suene. Eso NO es una interrupción: la música tiene que seguir.
    Una interrupción de verdad (audio de WhatsApp, llamada, grabar vídeo) llega varios
@@ -4223,7 +4251,7 @@ function seguirTrasSalir(){
     if(p && p.catch) p.catch(function(er){
       linea('play() rechazado: ' + (er && er.name) + ' · ' + String((er && er.message) || '').slice(0, 60));
       intentosSalida++;
-      if(intentosSalida < 4) setTimeout(intentar, 700 * intentosSalida);
+      if(intentosSalida < 4) reintentarSiDespierto(intentar, 700 * intentosSalida);
       else{ interrumpida = Date.now(); pintarEstado('Toca ▶ para seguir'); anotar('sonido', 'no me dejó seguir al salir'); }
     });
   })();
@@ -4244,11 +4272,16 @@ function trasInterrupcion(){
   MZ.huboInterrupcion = true;
   anotar('sonido', 'pausa por otra app (llegó ' + Math.round((Date.now() - tSalida) / 1000) + ' s después de salir): espero', actual.titulo);
   pintarEstado('En pausa · otra app está sonando');
+  pintarBotones(false);
 }
 function reanudarTrasInterrupcion(){
   linea('reanudarTrasInterrupcion llamada (interrumpida=' + (interrumpida ? Math.round((Date.now() - interrumpida) / 1000) + ' s' : 'no') + ')');
   var hace = Date.now() - interrumpida;
-  if(!interrumpida || hace > 20 * 60 * 1000){ interrumpida = 0; return; }
+  if(!interrumpida){ return; }
+  if(hace > 20 * 60 * 1000){            // pasó mucho rato: no arranca sola de repente, pero el ▶ queda a mano
+    if(actual && audio.paused && !pausaMia && !paradoPorMi && !viendoVideo) quedarEnPausaVisible();
+    return;
+  }
   if(!actual || !audio.paused || pausaMia || paradoPorMi || viendoVideo){ interrumpida = 0; return; }
   interrumpida = 0; pintarEstado(null);
   anotar('sonido', 'el sonido vuelve a estar libre: sigo con ' + actual.titulo);
@@ -4262,7 +4295,7 @@ function reanudarTrasInterrupcion(){
     if(p && p.then) p.then(function(){ linea('seguir: play() aceptado'); });
     if(p && p.catch) p.catch(function(er){
       linea('play() tras la interrupción rechazado: ' + (er && er.name));
-      if(++intentos < 3) setTimeout(volver, 800 * intentos);
+      if(++intentos < 3) reintentarSiDespierto(volver, 800 * intentos);
       else{ interrumpida = Date.now(); pintarEstado('Toca la pantalla para seguir'); }
     });
   })();
@@ -4335,7 +4368,7 @@ function reengancharAudio(){
   var t = audio.currentTime, nivel = intentosFantasma++, oculta = document.hidden;
   linea('fantasma: reenganche nivel ' + nivel + (oculta ? ' [en segundo plano]' : ''));
   if(nivel >= (oculta ? 2 : 3)){ pausaLimpia(); return; }
-  setTimeout(function(){ revisarFantasma('verificación'); }, 3200);
+  reintentarSiDespierto(function(){ revisarFantasma('verificación'); }, 3200);
   pausaMia = true;                                         // este pause lo provoco yo: que no cuente como interrupción
   try{ audio.pause(); }catch(_){}
   // reactivar la sesión de audio de iOS (el atasco es de la sesión, no del archivo)

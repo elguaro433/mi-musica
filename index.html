@@ -620,7 +620,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.36.8';
+var APP_VERSION = '1.36.9';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -4301,29 +4301,41 @@ function volverAPonerFicha(){
     navigator.mediaSession.playbackState = 'playing';
   }catch(_){}
 }
+function pausaLimpia(){
+  // Dejarlo en pausa de verdad (con la ficha de bloqueo y el ▶ a mano): un toque o el ▶ de la
+  // pantalla de bloqueo SÍ lo reanudan. Con la pantalla apagada iOS no deja cargar fuentes nuevas.
+  pausaMia = true; try{ audio.pause(); }catch(_){}
+  setTimeout(function(){ pausaMia = false; }, 900);
+  interrumpida = Date.now(); intentosFantasma = 0;
+  pintarBotones(false); pintarEstado('Toca ▶ para seguir');
+  try{ navigator.mediaSession.playbackState = 'paused'; }catch(_){}
+  linea('fantasma: no se pudo curar solo; queda en pausa limpia (▶)');
+}
 function reengancharAudio(){
-  var t = audio.currentTime, esCancion = actual && actual.tipo === 'cancion';
-  var nivel = intentosFantasma++;
-  linea('fantasma: reenganche nivel ' + nivel);
-  if(nivel >= 4){ pausaMia = true; try{ audio.pause(); }catch(_){} setTimeout(function(){ pausaMia = false; }, 900); interrumpida = Date.now(); pintarBotones(false); pintarEstado('Toca ▶ para seguir'); intentosFantasma = 0; return; }
-  if(nivel >= 2){ recrearAudio(); setTimeout(function(){ revisarFantasma('verificación'); }, 2500); return; }   // elemento nuevo
-  setTimeout(function(){ revisarFantasma('verificación'); }, 2500);
+  var t = audio.currentTime, nivel = intentosFantasma++, oculta = document.hidden;
+  linea('fantasma: reenganche nivel ' + nivel + (oculta ? ' [en segundo plano]' : ''));
+  if(nivel >= (oculta ? 2 : 3)){ pausaLimpia(); return; }
+  setTimeout(function(){ revisarFantasma('verificación'); }, 3200);
   pausaMia = true;                                         // este pause lo provoco yo: que no cuente como interrupción
   try{ audio.pause(); }catch(_){}
-  setTimeout(function(){ pausaMia = false; }, 900);
-  if(nivel >= 1 || actual.tipo === 'radio' || audio.error || audio.readyState === 0){      // nivel 1: recargar la fuente
-    var src = actual.tipo === 'radio' ? actual.url : audio.src;
-    try{ audio.load(); audio.src = src; }catch(_){}
-    if(esCancion && t > 1) audio.addEventListener('loadedmetadata', function(){ try{ audio.currentTime = t; }catch(_){} }, {once:true});
-  }
-  var p = audio.play();
-  if(p && p.then) p.then(function(){ linea('fantasma: play() aceptado'); volverAPonerFicha(); });
-  if(p && p.catch) p.catch(function(er){
-    linea('fantasma: play() rechazado: ' + (er && er.name));
-    interrumpida = Date.now();
-    pintarBotones(false);
-    pintarEstado('Toca ▶ para seguir');
-  });
+  // reactivar la sesión de audio de iOS (el atasco es de la sesión, no del archivo)
+  try{ if(navigator.audioSession){ navigator.audioSession.type = 'auto'; navigator.audioSession.type = 'playback'; } }catch(_){}
+  setTimeout(function(){ pausaMia = false; }, 1500);
+  setTimeout(function(){
+    if(!actual || paradoPorMi || viendoVideo) return;
+    // solo con la app a la vista se permite recargar la fuente (nivel 1 en adelante)
+    if(!oculta && (nivel >= 1 || actual.tipo === 'radio' || audio.error || audio.readyState === 0)){
+      var src = actual.tipo === 'radio' ? actual.url : audio.src;
+      try{ audio.load(); audio.src = src; }catch(_){}
+      if(actual.tipo === 'cancion' && t > 1) audio.addEventListener('loadedmetadata', function(){ try{ audio.currentTime = t; }catch(_){} }, {once:true});
+    }else if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }
+    var p = audio.play();
+    if(p && p.then) p.then(function(){ linea('fantasma: play() aceptado'); volverAPonerFicha(); });
+    if(p && p.catch) p.catch(function(er){
+      linea('fantasma: play() rechazado: ' + (er && er.name));
+      pausaLimpia();
+    });
+  }, 450);
 }
 function revisarFantasma(motivo){
   if(revisandoFantasma || !actual || paradoPorMi || pausaMia || viendoVideo || audio.ended || audio.paused) return;

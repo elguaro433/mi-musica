@@ -620,7 +620,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.37.0';
+var APP_VERSION = '1.37.1';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1041,17 +1041,42 @@ var PIPED = ['https://api.piped.private.coffee', 'https://pipedapi.ducks.party',
              'https://pipedapi.kavin.rocks', 'https://pipedapi.adminforge.de',
              'https://pipedapi.darkness.services'];
 
+/* Cada llamada a internet pasa por aquí. Tres defensas (v1.37.1):
+   · interruptor por servidor: tras 3 fallos seguidos se le da un descanso (1 min, luego 2, 4… hasta 10)
+     y se falla al instante en vez de gastar batería y datos; en cuanto responde bien se olvida.
+   · una sola petición idéntica a la vez (Inicio, Novedades y portadas pedían lo mismo varias veces).
+   · un reintento tras 700 ms solo si fue un fallo de red suelto («Load failed»), no un 4xx/5xx. */
+var SERV = {}, EN_VUELO = {};
+function hostDe(url){ var m = /^https?:\/\/([^\/?#]+)/i.exec(url); return m ? m[1] : url; }
 function traerConLimite(url, ms){
-  // AbortController: si un servidor se queda colgado, lo cortamos y probamos el siguiente.
-  var ctrl = new AbortController();
-  var reloj = setTimeout(function(){ ctrl.abort(); }, ms || 9000);
-  return fetch(url, {signal: ctrl.signal, mode: 'cors', credentials: 'omit'})
-    .then(function(r){
-      clearTimeout(reloj);
-      if(!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .catch(function(e){ clearTimeout(reloj); throw e; });
+  var h = hostDe(url), st = SERV[h] || (SERV[h] = {fallos:0, hasta:0, tanda:0});
+  if(navigator.onLine === false) return Promise.reject(new Error('sin conexión'));
+  if(Date.now() < st.hasta) return Promise.reject(new Error('servidor en descanso (' + h + ')'));
+  if(EN_VUELO[url]) return EN_VUELO[url];
+  function intento(){
+    var ctrl = new AbortController();
+    var reloj = setTimeout(function(){ ctrl.abort(); }, ms || 9000);
+    return fetch(url, {signal: ctrl.signal, mode: 'cors', credentials: 'omit'})
+      .then(function(r){
+        clearTimeout(reloj);
+        if(!r.ok){ var e = new Error('HTTP ' + r.status); e.http = r.status; throw e; }
+        return r.json();
+      })
+      .catch(function(e){ clearTimeout(reloj); throw e; });
+  }
+  var pr = intento().catch(function(e){
+    if(e.http || (e && e.name === 'AbortError')) throw e;                 // el servidor contestó o se colgó: no se repite
+    return new Promise(function(ok){ setTimeout(ok, 700); }).then(intento);
+  }).then(function(d){
+    st.fallos = 0; st.tanda = 0; return d;
+  }, function(e){
+    if(++st.fallos >= 3){ st.tanda = Math.min((st.tanda || 0) + 1, 4); st.hasta = Date.now() + 60000 * Math.pow(2, st.tanda - 1); st.fallos = 0; anotar('red', 'descanso para ' + h, e.message); }
+    throw e;
+  });
+  EN_VUELO[url] = pr;
+  var fin = function(){ delete EN_VUELO[url]; };
+  pr.then(fin, fin);
+  return pr;
 }
 
 function servidoresPorOrden(lista, clave){

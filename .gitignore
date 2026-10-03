@@ -1,2 +1,9 @@
 .claude/
 _prueba/
+native/node_modules/
+native/ios/
+native/www/
+native/build/
+native/Payload/
+native/*.ipa
+native/capacitor.config.json

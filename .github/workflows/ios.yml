@@ -1,0 +1,84 @@
+name: App iOS (sin firmar)
+
+# Compila Mi Música como app de iOS en un Mac de GitHub (gratis en repos públicos) y deja el .ipa
+# SIN FIRMAR en la «release» ios-latest. Se firma después desde el PC (Sideloadly) o con una cuenta de pago.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'native/**'
+      - '.github/workflows/ios.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  construir:
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        persona: [emmanuel, elibel]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Preparar la web que irá dentro de la app
+        run: |
+          set -e
+          mkdir -p native/www
+          cp index.html sw.js manifest.json manifest-elibel.json favicon.ico icon-*.png logo.png native/www/
+          python3 native/fijar_perfil.py native/www/index.html ${{ matrix.persona }}
+
+      - name: Crear el proyecto de iOS
+        working-directory: native
+        run: |
+          set -e
+          if [ "${{ matrix.persona }}" = "elibel" ]; then NOMBRE="Elibel"; else NOMBRE="Emmanuel"; fi
+          python3 - "$NOMBRE" "${{ matrix.persona }}" <<'PY'
+          import json, sys
+          json.dump({
+            "appId": "com.familiadiazgonzalez.mimusica." + sys.argv[2],
+            "appName": sys.argv[1],
+            "webDir": "www",
+            "ios": {"contentInset": "never", "backgroundColor": "#000000"}
+          }, open("capacitor.config.json", "w"), indent=2)
+          PY
+          npm install
+          npx cap add ios
+
+      - name: Ajustes de iOS (audio en segundo plano, icono)
+        working-directory: native/ios/App/App
+        run: |
+          set -e
+          cp ../../../AppDelegate.swift AppDelegate.swift
+          /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" Info.plist || true
+          sips -z 1024 1024 ../../../../icon-512.png --out Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
+          ls Assets.xcassets/AppIcon.appiconset
+
+      - name: Copiar la web y compilar
+        working-directory: native
+        run: |
+          set -e
+          npx cap sync ios
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Release \
+            -sdk iphoneos -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build | tail -n 40
+          APP=$(find build/Build/Products -name "App.app" -maxdepth 3 | head -n 1)
+          echo "App: $APP"
+          rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
+          zip -qry "MiMusica-${{ matrix.persona }}.ipa" Payload
+          ls -la *.ipa
+
+      - name: Publicar el .ipa
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ios-latest
+          name: App iOS (sin firmar)
+          prerelease: true
+          files: native/MiMusica-${{ matrix.persona }}.ipa

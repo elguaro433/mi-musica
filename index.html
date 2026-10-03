@@ -623,7 +623,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.37.3';
+var APP_VERSION = '1.37.4';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -4302,6 +4302,17 @@ function trasInterrupcion(){
   pintarEstado('En pausa · otra app está sonando');
   pintarBotones(false);
 }
+/* Solo en la app nativa (iOS): el envoltorio avisa de lo que dice AVAudioSession. En Safari esto nunca se llama. */
+window.mmNativo = function(tipo, detalle){
+  try{
+    linea('nativo: ' + tipo + (detalle ? ' (' + detalle + ')' : ''));
+    if(tipo === 'inicio' || tipo === 'ruta' && detalle === 'dispositivo-desconectado') return;
+    if(tipo === 'fin'){                                 // iOS dice «puedes seguir»
+      if(!interrumpida && actual && audio.paused && !pausaMia && !paradoPorMi && !viendoVideo) interrumpida = Date.now();
+      reanudarTrasInterrupcion();
+    }
+  }catch(e){ linea('nativo error ' + e.message); }
+};
 function reanudarTrasInterrupcion(){
   linea('reanudarTrasInterrupcion llamada (interrumpida=' + (interrumpida ? Math.round((Date.now() - interrumpida) / 1000) + ' s' : 'no') + ')');
   var hace = Date.now() - interrumpida;

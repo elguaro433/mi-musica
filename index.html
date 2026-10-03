@@ -623,7 +623,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.37.2';
+var APP_VERSION = '1.37.3';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -4041,8 +4041,7 @@ async function pintarAjustes(){
       '<span class="sw'+(AJ.cocheEnInicio?' on':'')+'" data-aj="cocheEnInicio"></span></div>'+
     '<div class="kv"><span>Pantalla siempre encendida</span>'+
       '<span class="sw'+(AJ.pantalla?' on':'')+'" data-aj="pantalla"></span></div>'+
-    '<div class="kv"><span>Mezclar canciones (prueba)<br><span class="pista">Una baja mientras la siguiente sube. Reinicia la app. Puede dejar el sonido mudo tras una llamada o un audio de WhatsApp: si pasa, se apaga sola.</span></span>'+
-      '<span class="sw'+(AJ.mezcla?' on':'')+'" data-aj="mezcla"></span></div></div>'+
+    '</div>'+
 
   '<div class="card"><h3>Internet</h3>'+
     '<div class="kv"><span>Ocultar novedades de cantantes<br><span class="pista">Quita esa fila de Inicio</span></span>'+
@@ -5413,6 +5412,9 @@ function guardarAjustes(){
 }
 function cargarAjustes(){
   try{ AJ = JSON.parse(localStorage.getItem('mm_ajustes') || '{}') || {}; }catch(_){ AJ = {}; }
+  // La mezcla (Web Audio) se retiró en la 1.37.3: en CarPlay metía un zumbido/hormigueo de baja calidad
+  // en todo el sonido y no dejaba reanudar tras una interrupción. Se apaga aunque estuviera guardada.
+  if(AJ.mezcla){ AJ.mezcla = false; try{ localStorage.setItem('mm_ajustes', JSON.stringify(AJ)); }catch(_){} }
   ponerEscala(AJ.letra);
   ponerColor(AJ.color);
 }

@@ -63,6 +63,8 @@ jobs:
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations:2" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations:1" Info.plist || true
           sips -z 1024 1024 ../../../../icon-512.png --out Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
           cd ../../..
           npx cap sync ios

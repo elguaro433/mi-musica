@@ -62,6 +62,8 @@ jobs:
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" Info.plist || true
           # Solo usamos HTTPS (cifrado exento): evita la pregunta de «cumplimiento de exportación» en cada subida
           /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations:2" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations:1" Info.plist || true
           sips -z 1024 1024 ../../../../icon-512.png --out Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
           ls Assets.xcassets/AppIcon.appiconset
 

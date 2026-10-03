@@ -20,10 +20,10 @@ Las normas cambian: antes de enviar cada app hay que releerlas en https://develo
 
 | Requisito | Estado |
 |---|---|
-| Compilar con **Xcode 26 / SDK de iOS 26** (obligatorio al subir desde el 28/04/2026) | Hecho: el flujo usa `macos-26`. |
+| Compilar con **Xcode 26 / SDK de iOS 26** (obligatorio al subir desde el 28/04/2026) | Hecho y comprobado: la app compila con el SDK iphoneos26.5 (Xcode 26.6). |
 | Manifiesto de privacidad `PrivacyInfo.xcprivacy` | Hecho (`native/PrivacyInfo.xcprivacy`), se añade al proyecto en cada compilación. |
 | Cifrado: `ITSAppUsesNonExemptEncryption = false` (solo HTTPS) | Hecho. |
-| Solo iPhone y solo vertical (así no piden capturas de iPad) | Hecho (iPhone). La orientación se revisa tras ver el proyecto generado. |
+| Solo iPhone y solo vertical (así no piden capturas de iPad) | Hecho: iPhone y vertical. |
 | Icono 1024×1024 **sin transparencia** | Se genera desde `icon-512.png` (ampliado). **Falta un icono propio en 1024 real.** |
 | Permiso de audio en segundo plano (`UIBackgroundModes: audio`) | Hecho. Apple lo acepta si la app reproduce audio de verdad. |
 | Firmar y subir a TestFlight desde GitHub | Preparado (`.github/workflows/testflight.yml`), **sin probar**: hace falta la cuenta. |

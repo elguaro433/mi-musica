@@ -1,0 +1,108 @@
+name: Subir a TestFlight
+
+# SIN PROBAR: necesita la cuenta de Apple Developer (99 €/año) y estos «secrets» del repositorio:
+#   APPLE_TEAM_ID   (10 caracteres, en developer.apple.com → Membership)
+#   ASC_KEY_ID      (clave de API de App Store Connect → Usuarios y acceso → Claves)
+#   ASC_ISSUER_ID   (en la misma página)
+#   ASC_KEY_P8      (el contenido del archivo .p8 que se descarga UNA vez)
+# Y haber creado la app en App Store Connect con el mismo identificador (Bundle ID).
+on:
+  workflow_dispatch:
+    inputs:
+      persona:
+        description: 'Quién usa esta app'
+        required: true
+        default: emmanuel
+        type: choice
+        options: [emmanuel, elibel]
+      version:
+        description: 'Número de versión que se ve (1.0.0)'
+        required: true
+        default: '1.0.0'
+
+permissions:
+  contents: read
+
+jobs:
+  subir:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Preparar la web
+        run: |
+          set -e
+          mkdir -p native/www
+          cp index.html sw.js manifest.json manifest-elibel.json favicon.ico icon-*.png logo.png native/www/
+          python3 native/fijar_perfil.py native/www/index.html ${{ inputs.persona }}
+
+      - name: Crear y parchear el proyecto de iOS
+        working-directory: native
+        run: |
+          set -e
+          if [ "${{ inputs.persona }}" = "elibel" ]; then NOMBRE="Elibel"; else NOMBRE="Emmanuel"; fi
+          python3 - "$NOMBRE" "${{ inputs.persona }}" <<'PY'
+          import json, sys
+          json.dump({
+            "appId": "com.familiadiazgonzalez.mimusica." + sys.argv[2],
+            "appName": sys.argv[1],
+            "webDir": "www",
+            "ios": {"contentInset": "never", "backgroundColor": "#000000"}
+          }, open("capacitor.config.json", "w"), indent=2)
+          PY
+          npm install
+          npx cap add ios
+          python3 parchear_ios.py .
+          sudo gem install xcodeproj --no-document || gem install xcodeproj --no-document
+          ruby anadir_privacidad.rb .
+          cd ios/App/App
+          /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" Info.plist || true
+          sips -z 1024 1024 ../../../../icon-512.png --out Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
+          cd ../../..
+          npx cap sync ios
+
+      - name: Guardar la clave de API (solo en este Mac temporal)
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/clave"
+          printf '%s' "$ASC_KEY_P8" > "$RUNNER_TEMP/clave/AuthKey.p8"
+
+      - name: Archivar, firmar y subir
+        working-directory: native
+        env:
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -e
+          if [ -d ios/App/App.xcworkspace ]; then DEST="-workspace ios/App/App.xcworkspace"; else DEST="-project ios/App/App.xcodeproj"; fi
+          AUTH="-allowProvisioningUpdates -authenticationKeyPath $RUNNER_TEMP/clave/AuthKey.p8 -authenticationKeyID $KEY_ID -authenticationKeyIssuerID $ISSUER"
+          xcodebuild $DEST -scheme App -configuration Release -destination 'generic/platform=iOS' \
+            -archivePath build/App.xcarchive $AUTH \
+            DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic \
+            MARKETING_VERSION="${{ inputs.version }}" CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            archive | tail -n 30
+          cat > build/ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath build/App.xcarchive -exportOptionsPlist build/ExportOptions.plist \
+            -exportPath build/export $AUTH | tail -n 30
+
+      - name: Borrar la clave
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/clave"

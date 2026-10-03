@@ -2,12 +2,12 @@
   "name": "mi-musica-ios",
   "version": "1.0.0",
   "private": true,
-  "description": "Envoltorio nativo (Capacitor) de Mi Música. El código web vive en la raíz del repositorio.",
+  "description": "Envoltorio nativo (Capacitor) de Mi M\u00fasica. El c\u00f3digo web vive en la ra\u00edz del repositorio.",
   "dependencies": {
-    "@capacitor/core": "6.2.1",
-    "@capacitor/ios": "6.2.1"
+    "@capacitor/core": "8.5.2",
+    "@capacitor/ios": "8.5.2"
   },
   "devDependencies": {
-    "@capacitor/cli": "6.2.1"
+    "@capacitor/cli": "8.5.2"
   }
 }

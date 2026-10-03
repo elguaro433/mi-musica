@@ -1,34 +1,35 @@
-import UIKit
-import Capacitor
-import AVFoundation
 
-/* Mi Música (nativa) — lo único que añade sobre la web:
+/* ═════ Mi Música (nativa): audio ═════
+   Esto se AÑADE al AppDelegate.swift que genera Capacitor (lo hace parchear_ios.py), así no depende de la plantilla.
    1) Sesión de audio «playback» activa desde el arranque (suena con la pantalla apagada y con el interruptor de silencio).
    2) Escucha las interrupciones de iOS (audio de WhatsApp, llamadas, Siri). Cuando acaban y iOS dice
       «puedes seguir» (shouldResume), reactiva la sesión y avisa a la web (window.mmNativo) para que reanude.
-      Esto es justo lo que una web instalada en Safari NO puede hacer. */
-@UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+      Es justo lo que una web instalada en Safari NO puede hacer. */
+final class MiAudio: NSObject {
 
-    var window: UIWindow?
+    static let shared = MiAudio()
+    private var preparado = false
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        prepararAudio()
-        return true
+    func preparar() {
+        if preparado { return }
+        preparado = true
+        activarSesion()
+        let c = NotificationCenter.default
+        let s = AVAudioSession.sharedInstance()
+        c.addObserver(self, selector: #selector(interrupcion(_:)), name: AVAudioSession.interruptionNotification, object: s)
+        c.addObserver(self, selector: #selector(cambioRuta(_:)), name: AVAudioSession.routeChangeNotification, object: s)
+        c.addObserver(self, selector: #selector(serviciosReiniciados(_:)), name: AVAudioSession.mediaServicesWereResetNotification, object: s)
+        c.addObserver(self, selector: #selector(volvioALaApp(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
 
-    private func prepararAudio() {
+    private func activarSesion() {
         let s = AVAudioSession.sharedInstance()
         do {
             try s.setCategory(.playback, mode: .default, options: [])
             try s.setActive(true)
         } catch {
-            avisarWeb("error", "setCategory")
+            avisarWeb("error", "sesion")
         }
-        let c = NotificationCenter.default
-        c.addObserver(self, selector: #selector(interrupcion(_:)), name: AVAudioSession.interruptionNotification, object: s)
-        c.addObserver(self, selector: #selector(cambioRuta(_:)), name: AVAudioSession.routeChangeNotification, object: s)
-        c.addObserver(self, selector: #selector(serviciosReiniciados(_:)), name: AVAudioSession.mediaServicesWereResetNotification, object: s)
     }
 
     @objc private func interrupcion(_ n: Notification) {
@@ -54,31 +55,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     @objc private func serviciosReiniciados(_ n: Notification) {
-        let s = AVAudioSession.sharedInstance()
-        try? s.setCategory(.playback, mode: .default, options: [])
-        try? s.setActive(true)
+        activarSesion()
         avisarWeb("servicios-reiniciados", "")
+    }
+
+    @objc private func volvioALaApp(_ n: Notification) {
+        try? AVAudioSession.sharedInstance().setActive(true)
+    }
+
+    private func webView() -> WKWebView? {
+        for escena in UIApplication.shared.connectedScenes {
+            guard let ws = escena as? UIWindowScene else { continue }
+            for ventana in ws.windows {
+                if let vc = ventana.rootViewController as? CAPBridgeViewController, let w = vc.bridge?.webView { return w }
+            }
+        }
+        return nil
     }
 
     private func avisarWeb(_ tipo: String, _ detalle: String) {
         DispatchQueue.main.async {
-            guard let vc = self.window?.rootViewController as? CAPBridgeViewController,
-                  let web = vc.bridge?.webView else { return }
+            guard let web = self.webView() else { return }
             let t = tipo.replacingOccurrences(of: "'", with: "")
             let d = detalle.replacingOccurrences(of: "'", with: "")
             web.evaluateJavaScript("window.mmNativo && window.mmNativo('\(t)','\(d)')", completionHandler: nil)
         }
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        try? AVAudioSession.sharedInstance().setActive(true)
-    }
-
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
-    }
-
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
 }

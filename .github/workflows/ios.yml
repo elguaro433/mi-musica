@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   construir:
-    runs-on: macos-14
+    runs-on: macos-26
     strategy:
       fail-fast: false
       matrix:
@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Preparar la web que irá dentro de la app
         run: |
@@ -50,13 +50,18 @@ jobs:
           npm install
           npx cap add ios
 
-      - name: Ajustes de iOS (audio en segundo plano, icono)
-        working-directory: native/ios/App/App
+      - name: Ajustes de iOS (audio en segundo plano, privacidad, icono)
+        working-directory: native
         run: |
           set -e
-          cp ../../../AppDelegate.swift AppDelegate.swift
+          python3 parchear_ios.py .
+          sudo gem install xcodeproj --no-document || gem install xcodeproj --no-document
+          ruby anadir_privacidad.rb .
+          cd ios/App/App
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" Info.plist || true
+          # Solo usamos HTTPS (cifrado exento): evita la pregunta de «cumplimiento de exportación» en cada subida
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" Info.plist || true
           sips -z 1024 1024 ../../../../icon-512.png --out Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
           ls Assets.xcassets/AppIcon.appiconset
 
@@ -65,12 +70,13 @@ jobs:
         run: |
           set -e
           npx cap sync ios
-          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Release \
-            -sdk iphoneos -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
-            build | tail -n 40
+          xcodebuild -version
+          ls ios/App
+          if [ -d ios/App/App.xcworkspace ]; then DEST="-workspace ios/App/App.xcworkspace"; else DEST="-project ios/App/App.xcodeproj"; fi
+          xcodebuild $DEST -scheme App -configuration Release             -sdk iphoneos -derivedDataPath build             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""             build | tail -n 40
           APP=$(find build/Build/Products -name "App.app" -maxdepth 3 | head -n 1)
           echo "App: $APP"
+          ls "$APP" | head -30
           rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
           zip -qry "MiMusica-${{ matrix.persona }}.ipa" Payload
           ls -la *.ipa

@@ -1,7 +1,7 @@
 name: App iOS (sin firmar)
 
 # Compila Mi Música como app de iOS en un Mac de GitHub (gratis en repos públicos) y deja el .ipa
-# SIN FIRMAR en la «release» ios-latest. Se firma después desde el PC (Sideloadly) o con una cuenta de pago.
+# SIN FIRMAR en la «release» ios-latest. Se firma después con la cuenta de pago de Apple Developer (TestFlight).
 on:
   workflow_dispatch:
   push:

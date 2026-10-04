@@ -623,7 +623,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.37.4';
+var APP_VERSION = '1.37.5';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -4301,6 +4301,32 @@ function trasInterrupcion(){
   anotar('sonido', 'pausa por otra app (llegó ' + Math.round((Date.now() - tSalida) / 1000) + ' s después de salir): espero', actual.titulo);
   pintarEstado('En pausa · otra app está sonando');
   pintarBotones(false);
+  if(document.hidden) programarRescate(0);
+}
+/* Rescate de pausas sin causa (informe 4/10/2026): con la pantalla apagada llegó un «pause» 8-15 min
+   después de salir, sin ningún aviso de iOS que marcara el final, y la música se quedó parada 2 h.
+   Una interrupción de verdad (WhatsApp, llamada) termina con un aviso de audioSession, que ya
+   reanuda sola. Si pasa un buen rato SIN ese aviso, no hay nadie más sonando: se intenta seguir.
+   Dos intentos (45 s y 3 min) para no pisar un audio largo de otra app; si iOS no deja, queda el ▶. */
+var RESCATE_MS = [45000, 135000];
+function programarRescate(n){
+  clearTimeout(window.__tRescate);
+  if(n >= RESCATE_MS.length) return;
+  var t0 = Date.now();
+  window.__tRescate = setTimeout(function(){
+    if(!actual || !audio.paused || !interrumpida || pausaMia || paradoPorMi || viendoVideo) return;
+    if(Date.now() - t0 > RESCATE_MS[n] + 5000){ linea('rescate: la página estuvo dormida; dejo ▶'); quedarEnPausaVisible(); return; }
+    linea('rescate nº ' + (n + 1) + ': sigue en pausa sin aviso de fin; intento play()');
+    anotar('sonido', 'rescate: pausa sin aviso de fin, intento seguir', actual.titulo);
+    if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }
+    var p = audio.play();
+    if(p && p.then) p.then(function(){ linea('rescate: play() aceptado'); });
+    if(p && p.catch) p.catch(function(er){
+      linea('rescate: play() rechazado ' + (er && er.name));
+      if(n + 1 < RESCATE_MS.length) programarRescate(n + 1); else quedarEnPausaVisible();
+    });
+    else programarRescate(n + 1);
+  }, RESCATE_MS[n]);
 }
 /* Solo en la app nativa (iOS): el envoltorio avisa de lo que dice AVAudioSession. En Safari esto nunca se llama. */
 window.mmNativo = function(tipo, detalle){

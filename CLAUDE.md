@@ -8,6 +8,13 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
+## 🆕 Sesión del 4/10/2026 (v1.37.5) — VERSIÓN PÚBLICA EN `publica/`
+
+- **v1.37.5:** informe de Emmanuel: con la pantalla apagada llegaba un `pause` 8-15 min después de salir, sin aviso de fin de iOS, y la música quedaba parada ~2 h. `programarRescate()` (tras `trasInterrupcion`, solo en segundo plano) intenta `play()` a los 45 s y a los 3 min si sigue en pausa sin aviso de fin; si iOS no deja, queda el ▶. SIN CONFIRMAR en iPhone: buscar `rescate:` en la línea de tiempo del informe.
+- **Él pidió: la app de su móvil y la de Elibel NO SE TOCAN; la que va a la App Store es una copia aparte.** Está en `publica/web/` y se GENERA con `python publica/crear_publica.py` desde el `index.html` de la raíz (quita perfiles, créditos, Piped/pestaña YouTube, fuentes de Google, avisos de PWA y autoactualización web; cada sustitución falla en voz alta si ya no encaja). Si se cambia la privada, volver a ejecutar el script. Aparte, a mano: `manifest.json`, `sw.js`, `guia.html` (genérica), `privacidad.html` (con huecos [FECHA], [CORREO], [NOMBRE], [PAÍS] que rellena él), iconos nuevos genéricos (nota musical, PROVISIONALES) y `.github/workflows/ios-publica.yml` (release `ios-publica-latest`, bundle id `com.familiadiazgonzalez.mimusica`: él decide el definitivo).
+- **Idiomas:** Apple NO exige varios; solo español es válido. Inglés = fase 2 (todos los textos están en español dentro del código).
+- Pendiente de la pública: fuentes locales (descargar Sora, DM Sans y Caveat con su permiso; ahora cae a la letra del sistema), nombre único en la tienda, capturas, ficha, probar en iPhone.
+
 ## 🆕 Sesión del 3/10/2026 (v1.37.3 → v1.37.4) — APP NATIVA DE iOS
 
 - **Informe de Emmanuel (v1.37.2):** con la mezcla ACTIVA, la música se paró sola a los ~6 min de salir (364 s y 339 s) y no volvió; en el coche oía un «hormigueo» de baja calidad en toda la música. Sospecha: Web Audio (la mezcla) re-muestrea el sonido. **v1.37.3 quitó la mezcla del todo** (se fuerza `AJ.mezcla=false` en `cargarAjustes` y se quitó el interruptor). SIN CONFIRMAR en el coche. «Load failed» a itunes.apple.com sale en AMBOS iPhone aunque Apple contesta bien (CORS ok): es de la red del móvil (Relay privado/bloqueadores).

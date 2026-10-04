@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0913">
+<title>Añadir tu música · Mi Música</title>
+<link rel="icon" href="favicon.ico">
+<style>
+:root{ --bg:#0b0913; --card:#171226; --card2:#211a36; --line:#34295a; --ink:#f5f2ff; --muted:#b9b0d6;
+  --purple:#a78bfa; --pink:#ff5fa6; --cyan:#4dd8d0; --ok:#63e6a1; }
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:radial-gradient(900px 500px at 10% -10%,#2a1a55 0,transparent 60%),radial-gradient(700px 500px at 110% 10%,#3a1236 0,transparent 55%),var(--bg);
+  color:var(--ink);font:17px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  padding:max(18px,env(safe-area-inset-top)) 18px max(40px,env(safe-area-inset-bottom))}
+main{max-width:560px;margin:0 auto}
+h1{font-size:28px;line-height:1.15;margin:8px 0 6px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0 0 22px}
+h2{font-size:19px;margin:30px 0 12px}
+.paso{display:flex;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px 16px;margin:0 0 12px}
+.n{flex:0 0 38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));color:#14102a;font-weight:800;
+  display:grid;place-items:center;font-size:19px}
+.paso b{display:block;font-size:18px;margin-bottom:2px}
+.paso span{color:var(--muted);font-size:15.5px}
+.boton{display:block;text-align:center;text-decoration:none;background:var(--purple);color:#14102a;font-weight:800;
+  border-radius:16px;padding:16px;margin:16px 0 0;font-size:18px}
+.nota{background:var(--card);border-left:4px solid var(--cyan);border-radius:12px;padding:13px 15px;margin:14px 0;color:var(--muted);font-size:15.5px}
+.nota b{color:var(--ink)}
+.nota.aviso{border-left-color:#ffb454}
+.ok{color:var(--ok);font-weight:700}
+ul{padding-left:20px;margin:8px 0}
+li{margin:6px 0;color:var(--muted);font-size:16px}
+li b{color:var(--ink)}
+footer{margin-top:34px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<main>
+<h1>🎵 Añadir tu música</h1>
+<p class="sub">Se hace una vez y después todo suena sin internet. Mejor con wifi.</p>
+
+<div class="paso"><div class="n">1</div><div><b>Ten tus canciones en el iPhone</b><span>Guárdalas en la app <b>Archivos</b> (en «En mi iPhone» o en iCloud Drive). Sirven los MP3 y la mayoría de formatos de audio normales.</span></div></div>
+<div class="paso"><div class="n">2</div><div><b>Abre Mi Música</b><span>Toca <b>Biblioteca</b> y luego <b>➕ Añadir música</b>.</span></div></div>
+<div class="paso"><div class="n">3</div><div><b>Elige los archivos</b><span>Toca <b>Seleccionar archivos</b>, busca tu carpeta, toca <b>Seleccionar</b> arriba a la derecha, marca las canciones y toca <b>Abrir</b>.</span></div></div>
+
+<div class="nota"><b>¿Cómo sé que ha funcionado?</b> Pon el móvil en modo avión y dale a una canción. Si suena, ya es tuya sin internet. La radio, en cambio, necesita internet.</div>
+
+<h2>Si algo no sale</h2>
+<ul>
+<li>Si no deja añadir muchas a la vez, hazlo de pocas en pocas. La app ignora las repetidas.</li>
+<li>La música que añades <b>solo está en tu teléfono</b>: no se sube a ningún servidor.</li>
+<li>Para quitar canciones: Ajustes → Tus datos, o desliza una canción a la izquierda.</li>
+</ul>
+<footer>Mi Música</footer>
+</main>
+</body>
+</html>

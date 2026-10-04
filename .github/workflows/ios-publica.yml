@@ -1,0 +1,87 @@
+name: App iOS PÚBLICA (sin firmar)
+
+# Compila la versión PÚBLICA de Mi Música (carpeta publica/web, sin datos personales) como app de iOS en un Mac de GitHub (gratis en repos públicos) y deja el .ipa
+# SIN FIRMAR en la «release» ios-publica-latest. Se firma después con la cuenta de pago de Apple Developer (TestFlight).
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'publica/**'
+      - '.github/workflows/ios-publica.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  construir:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Preparar la web que irá dentro de la app
+        run: |
+          set -e
+          mkdir -p native/www
+          cp publica/web/* native/www/
+          rm -f native/www/icon-1024.png
+
+      - name: Crear el proyecto de iOS
+        working-directory: native
+        run: |
+          set -e
+          python3 - <<'PY'
+          import json, sys
+          json.dump({
+            "appId": "com.familiadiazgonzalez.mimusica",   # CAMBIAR si eliges otro identificador (Bundle ID) en App Store Connect
+            "appName": "Mi Música",
+            "webDir": "www",
+            "ios": {"contentInset": "never", "backgroundColor": "#000000"}
+          }, open("capacitor.config.json", "w"), indent=2)
+          PY
+          npm install
+          npx cap add ios
+
+      - name: Ajustes de iOS (audio en segundo plano, privacidad, icono)
+        working-directory: native
+        run: |
+          set -e
+          python3 parchear_ios.py .
+          sudo gem install xcodeproj --no-document || gem install xcodeproj --no-document
+          ruby anadir_privacidad.rb .
+          cd ios/App/App
+          /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" Info.plist || true
+          # Solo usamos HTTPS (cifrado exento): evita la pregunta de «cumplimiento de exportación» en cada subida
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations:2" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations:1" Info.plist || true
+          sips -z 1024 1024 ../../../../publica/web/icon-1024.png --out Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
+          ls Assets.xcassets/AppIcon.appiconset
+
+      - name: Copiar la web y compilar
+        working-directory: native
+        run: |
+          set -e
+          npx cap sync ios
+          xcodebuild -version
+          ls ios/App
+          if [ -d ios/App/App.xcworkspace ]; then DEST="-workspace ios/App/App.xcworkspace"; else DEST="-project ios/App/App.xcodeproj"; fi
+          xcodebuild $DEST -scheme App -configuration Release             -sdk iphoneos -derivedDataPath build             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""             build | tail -n 40
+          APP=$(find build/Build/Products -name "App.app" -maxdepth 3 | head -n 1)
+          echo "App: $APP"
+          ls "$APP" | head -30
+          rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
+          zip -qry "MiMusica-publica.ipa" Payload
+          ls -la *.ipa
+
+      - name: Publicar el .ipa
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ios-publica-latest
+          name: App iOS PÚBLICA (sin firmar)
+          prerelease: true
+          files: native/MiMusica-publica.ipa

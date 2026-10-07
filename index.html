@@ -623,7 +623,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.37.5';
+var APP_VERSION = '1.37.6';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1394,7 +1394,8 @@ var vigilante = null, intentosVigilante = 0;
 function vigilar(){
   clearTimeout(vigilante);
   if(!actual || paradoPorMi || viendoVideo) return;
-  var margen = actual.tipo === 'radio' ? 12000 : 4000;
+  // Margen más largo de fondo porque iOS congela los timers (hasta 10+ s).
+  var margen = document.hidden && actual.tipo !== 'radio' ? 8000 : (actual.tipo === 'radio' ? 12000 : 4000);
   var t0 = audio.currentTime, leidoEn = Date.now();
   vigilante = setTimeout(function(){
     if(!actual || audio.paused || paradoPorMi) return;
@@ -1413,7 +1414,8 @@ function vigilar(){
     anotar('vigilante', 'sin avance, intento ' + intentosVigilante);
     if(document.hidden){
       // De fondo solo se permite lo más suave: darle al play otra vez.
-      if(intentosVigilante > 8){
+      // Rendirse rápido (4 intentos ≈ 6 s) para dejar que el rescate tome control.
+      if(intentosVigilante > 4){
         recuperarAlVolver = true;
         anotar('vigilante', 'me rindo de fondo; lo retomo al volver');
         return;
@@ -1426,11 +1428,12 @@ function vigilar(){
       if(p1 && p1.catch) p1.catch(function(){});
       setTimeout(vigilar, 1500);
     }else if(intentosVigilante <= 3){
-      // Reasignar la fuente sobre el MISMO elemento (así no perdemos el
-      // desbloqueo de iOS). Solo con la app a la vista.
-      var src = audio.src;
-      try{ audio.load(); }catch(_){}
-      audio.src = src;
+      // Reasignar la fuente solo si la app está a la vista. De fondo causaría que iOS paude automáticamente.
+      if(!document.hidden){
+        var src = audio.src;
+        try{ audio.load(); }catch(_){}
+        audio.src = src;
+      }
       var p = audio.play();
       if(p && p.catch) p.catch(function(){});
       setTimeout(vigilar, 1500);

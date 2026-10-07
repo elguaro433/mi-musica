@@ -8,7 +8,9 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
-## 🆕 Sesión del 7/10/2026 (v1.37.6) — ARREGLO: VIGILANTE DEMASIADO AGRESIVO
+## 🆕 Sesión del 7/10/2026 (v1.37.6 → v1.37.7) — ARREGLO: VIGILANTE + CONTROLES DE RADIO
+
+- **v1.37.7:** Reportaje de Emmanuel: «radio da muchos problemas para pausarla, para pasarla» + cambio abierto de botones. **ARREGLOS:** (1) Mini reproductor: añadidos botones de **retroceder** (anterior), **parar** y **siguiente** en fila horizontal; estilos `.m-botones` y `.ctrl` más compactos (32×32 px) + `.pp` (36×36 px); (2) **Radio siempre con controles** (antes se ocultaba el botón siguiente en radio); (3) Event handlers: `#m-prev` → `anterior()`, `#m-stop` → `pausarYo()` (suelta el src, dice «Radio parada», no consume datos); función `pausarYo()` ya hacía eso bien pero no era evidente; (4) Exclusión de botones del deslize a «Ahora suena» (`#m-prev, #m-stop` añadidos a la guarda). SIN PROBAR en iPhone: verificar que se pueda cambiar de emisora y parar con los botones.
 
 - **v1.37.6:** Auditoría del informe de v1.37.5 — **PROBLEMA:** pausas repetidas cada ~210 s. Culprit: vigilante (`vigilar()`) reasignaba `audio.src` incluso de fondo (línea 1431-1433), lo que causaba que iOS pausara automáticamente. Ciclo: (1) vigilante ve que no avanza (porque iOS congela timers) → (2) reasigna src → iOS pausa → (3) `trasInterrupcion()` → `programarRescate()` → intenta play() a 45 s → (4) música vuelve 200 s → (5) repeat. **Arreglos:** (a) vigilante de fondo solo intenta `play()`, nunca toca `src` (línea 1428-1436); (b) umbral de rendición de fondo: 8 intentos → 4 (6 s en lugar de 12 s) para dejar control al rescate (línea 1416); (c) margen de chequeo: 4 s → 8 s de fondo porque iOS congela timers hasta 10+ s (línea 1397-1398). SIN PROBAR en iPhone: pedir informe tras reproducir con música de fondo con pantalla apagada.
 

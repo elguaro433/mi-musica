@@ -330,12 +330,15 @@ a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box
   align-items:center;gap:11px;z-index:40;cursor:pointer}
 #mini.on{display:flex}
 #mini .art{width:40px;height:40px;border-radius:9px;font-size:calc(16px * var(--esc))}
+#mini .r-x{flex:1}
 #mini .r-t{font-size:calc(13.5px * var(--esc))}
 #mini .r-s{font-size:calc(12px * var(--esc))}
-.pp{width:38px;height:38px;flex:0 0 auto;border-radius:50%;background:linear-gradient(135deg,#a970ff,#ff5fa6);color:#fff;
-  display:grid;place-items:center;border:0;cursor:pointer;padding:9px}
-#mini .sig{width:38px;height:38px;flex:0 0 auto;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;display:grid;place-items:center;border:0;cursor:pointer;padding:10px;margin-left:-4px}
-#mini .sig[hidden]{display:none}
+#mini .m-botones{display:flex;gap:6px;align-items:center;flex:0 0 auto}
+.pp{width:36px;height:36px;flex:0 0 auto;border-radius:50%;background:linear-gradient(135deg,#a970ff,#ff5fa6);color:#fff;
+  display:grid;place-items:center;border:0;cursor:pointer;padding:7px}
+.ctrl{width:32px;height:32px;flex:0 0 auto;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;
+  display:grid;place-items:center;border:0;cursor:pointer;padding:6px;transition:background .15s}
+.ctrl:active{background:rgba(255,255,255,.25)}
 #mini .prog{position:absolute;left:11px;right:11px;bottom:4px;height:2px;background:var(--pista);
   border-radius:2px;overflow:hidden}
 #mini .prog i{display:block;height:100%;background:var(--purple);width:0}
@@ -577,8 +580,12 @@ body.coche #coche-salir{display:block}
   <div id="mini">
     <span class="art" id="m-art"></span>
     <span class="r-x"><span class="r-t" id="m-t"></span><span class="r-s" id="m-s"></span></span>
-    <button class="pp" id="m-pp" aria-label="Reproducir o pausar"></button>
-    <button class="sig" id="m-next" aria-label="Siguiente"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M15.6 5H18v14h-2.4zM4 5.6v12.8a.8.8 0 0 0 1.25.66l8.85-5.4a.8.8 0 0 0 0-1.32L5.25 6.94A.8.8 0 0 0 4 5.6z"/></svg></button>
+    <div class="m-botones">
+      <button class="ctrl" id="m-prev" aria-label="Anterior" title="Anterior"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M8.4 5H6v14h2.4zM20 5.6v12.8a.8.8 0 0 1-1.25.66l-8.85-5.4a.8.8 0 0 1 0-1.32l8.85-5.4a.8.8 0 0 1 1.25.66z"/></svg></button>
+      <button class="ctrl" id="m-stop" aria-label="Parar" title="Parar"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></button>
+      <button class="pp" id="m-pp" aria-label="Reproducir o pausar" title="Reproducir o pausar"></button>
+      <button class="ctrl" id="m-next" aria-label="Siguiente" title="Siguiente"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M15.6 5H18v14h-2.4zM4 5.6v12.8a.8.8 0 0 0 1.25.66l8.85-5.4a.8.8 0 0 0 0-1.32L5.25 6.94A.8.8 0 0 0 4 5.6z"/></svg></button>
+    </div>
     <span class="prog"><i id="m-prog"></i></span>
   </div>
 
@@ -623,7 +630,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.37.6';
+var APP_VERSION = '1.37.7';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2031,7 +2038,7 @@ async function pintarAhora(cancion){
   $('n-cal').textContent = actual.cal || '';
   $('now-fav').textContent = actual.fav ? '❤️' : '♡';
   $('mini').classList.add('on');
-  $('m-next').hidden = actual.tipo === 'radio';        // en la radio no hay «siguiente» que se espere
+  // Los botones de control funcionan tanto para canciones como para radio
   pintarBotones(!audio.paused);
   pintarCola();
   refrescarTuMusica();
@@ -4922,8 +4929,10 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#a-informe')){ copiarInforme(); return; }
   if(t.closest('#a-reparar')){ if(confirm('Se limpiará la app y se recargará.\n\nTu música NO se borra.')) reparar(); return; }
 
-  if(t.closest('#m-next')){ ev.stopPropagation(); siguiente(); return; }
+  if(t.closest('#m-prev')){ ev.stopPropagation(); anterior(); return; }
+  if(t.closest('#m-stop')){ ev.stopPropagation(); pausarYo(); return; }
   if(t.closest('#m-pp') || t.closest('#b-pp')){ ev.stopPropagation(); playPause(); return; }
+  if(t.closest('#m-next')){ ev.stopPropagation(); siguiente(); return; }
   if(t.closest('#b-next')){ siguiente(); return; }
   if(t.closest('#b-prev')){ anterior(); return; }
   if(t.closest('#b-shuf')){ aleatorio = !aleatorio; pintarModos(); guardarCola();
@@ -5051,7 +5060,7 @@ function quitarReproduccion(){
   var mini = $('mini'), x0 = 0, y0 = 0, dx = 0, activo = false, mov = false;
   mini.addEventListener('pointerdown', function(e){
     if(!actual || !audio.paused) return;               // solo con la música parada
-    if(e.target.closest && e.target.closest('#m-pp, #m-next')) return;
+    if(e.target.closest && e.target.closest('#m-prev, #m-stop, #m-pp, #m-next')) return;
     activo = true; mov = false; x0 = e.clientX; y0 = e.clientY; dx = 0;
   });
   mini.addEventListener('pointermove', function(e){

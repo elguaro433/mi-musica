@@ -4078,7 +4078,7 @@ async function pintarAjustes(){
     '<div class="credito">Propiedad de la <b>Familia Díaz González</b><br>Creador: <b>Emmanuel Díaz</b><br>Versión '+APP_VERSION+'</div>'+
     '<div class="sign">Emmanuel Díaz</div>'+
     '<button class="btn" id="a-informe">📋&nbsp; Enviar informe (WhatsApp)</button>'+
-    '<button class="btn" id="a-reparar">🛟&nbsp; Reparar la app (conserva la música)</button></div>';
+    '<button class="btn" id="a-reparar">🧹&nbsp; Limpiar caché y SW (conserva la música)</button></div>';
 }
 
 /* ═════════ Diagnóstico (la prueba del coche, dentro de la app) ══ */
@@ -4927,7 +4927,7 @@ document.addEventListener('click', async function(ev){
     return;
   }
   if(t.closest('#a-informe')){ copiarInforme(); return; }
-  if(t.closest('#a-reparar')){ if(confirm('Se limpiará la app y se recargará.\n\nTu música NO se borra.')) reparar(); return; }
+  if(t.closest('#a-reparar')){ if(confirm('Limpiaré el caché y el Service Worker.\nLa app se recargará.\n\nTu música NO se borra.')) reparar(); return; }
 
   if(t.closest('#m-prev')){ ev.stopPropagation(); anterior(); return; }
   if(t.closest('#m-stop')){ ev.stopPropagation(); pausarYo(); return; }

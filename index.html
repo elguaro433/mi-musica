@@ -3303,10 +3303,11 @@ function filaVideoFav(v){
 var ytTituloActual = {vid:'', titulo:'', canal:''};
 function pintarYouTube(){
   var C = $('tab-cuerpo'), h = '';
+  // El vídeo va en su propio marco y NO se vuelve a crear si ya está puesto: guardarlo en favoritos
+  // (o cualquier repintado) reiniciaba el vídeo desde el principio (informe 8/10/2026).
+  var marco = $('yt-marco'), mismo = !!(ytVerId && marco && C.contains(marco) && marco.dataset.vid === ytVerId);
   if(ytVerId){
-    h += '<div style="position:relative;padding-top:56.25%;border-radius:13px;overflow:hidden;background:#000;margin-bottom:10px">'+
-         '<div id="yt-host"></div></div>'+
-         '<button class="btn '+(esFavVideo(ytVerId)?'suave':'solido')+'" data-fav-video="'+esc(ytVerId)+'">'+
+    h += '<button class="btn '+(esFavVideo(ytVerId)?'suave':'solido')+'" data-fav-video="'+esc(ytVerId)+'">'+
            (esFavVideo(ytVerId)?'❤️&nbsp; Guardado en Favoritas':'♡&nbsp; Guardar vídeo')+'</button>';
   }
   if(ytBuscando) h += '<div class="note">Buscando en YouTube…</div>';
@@ -3339,7 +3340,9 @@ function pintarYouTube(){
   if(VIDEOS.length){
     h += '<div class="shelf-t">❤️ Tus vídeos favoritos</div>' + VIDEOS.map(filaVideoFav).join('');
   }
-  C.innerHTML = h;
+  if(mismo){ $('yt-resto').innerHTML = h; return; }
+  C.innerHTML = (ytVerId ? '<div id="yt-marco" data-vid="'+esc(ytVerId)+'" style="position:relative;padding-top:56.25%;border-radius:13px;overflow:hidden;background:#000;margin-bottom:10px">'+
+    '<div id="yt-host"></div></div>' : '') + '<div id="yt-resto">' + h + '</div>';
   if(ytVerId) montarReproductorYT();
 }
 /* Reproductor con la API de YouTube: si el dueño no deja verlo aquí (errores

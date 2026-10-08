@@ -8,6 +8,10 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
+## 🆕 v2.3 (8/10/2026 noche) — gestos con el dedo «en todo»
+
+- Le gustó bajar «Sonando ahora» y pidió ponerlo en todo. `gestoBajar(o)` (genérico, touch events) se usa en `#now` y en la hoja `#hoja` (baja `#hoja-caja`, el velo se aclara). La barrita `#mini` deslizada hacia ARRIBA abre «Sonando ahora». Deslizar desde el borde izquierdo (<28 px) hacia la derecha = atrás (`volverAtras`/`hayAtras`: botones `data-cerrar-lista`, `data-gen-volver`, `data-cerrar-ia`, `data-cerrar-yt` o el vídeo de YouTube abierto). Todos ponen `window.__swipe` para que el final del gesto no sea un toque; ojo: un `.click()` propio tras un gesto debe poner antes `window.__swipe = 0` (si no, la guarda en captura lo traga). Probado en Chrome con toques simulados; SIN CONFIRMAR en iPhone. No hay deslizar entre pestañas (chocaría con deslizar filas a la izquierda).
+
 ## 🆕 v2.2 (8/10/2026 noche) — «Sonando ahora» no se dejaba cerrar
 
 - Él tocó la flecha con la letra abierta y no cerró (tuvo que cerrar la app). La flecha era un `<span>` que solo cerraba con `click`; en iOS ese click se pierde a veces (la letra se desplaza sola con `scrollTo` suave y el toque se gasta en pararla). Ahora es `<button>`, cierra en `pointerup` (`cerrarAhora()`, y pone `window.__swipe` para que el click fantasma no caiga debajo) y **deslizar hacia abajo** cierra toda la pantalla (>120 px o gesto rápido; si `#now` está desplazado o el dedo empieza en la barra o en la letra desplazada, no). Probado en Chrome con toques simulados. SIN CONFIRMAR en iPhone.

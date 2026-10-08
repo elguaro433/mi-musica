@@ -300,9 +300,21 @@ a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box
 .col span{font-size:calc(11px * min(var(--esc),1.15));font-weight:700;color:#12101e;
   background:rgba(255,255,255,.72);border-radius:20px;padding:1px 9px}
 .col.on{border-color:var(--ink);box-shadow:0 0 0 3px rgba(255,255,255,.14)}
-.perfil-card{display:flex;flex-direction:column;align-items:center;padding:22px 16px 18px}
-.avatar-wrap{position:relative;width:96px;height:96px}
-.av-toque{display:block;width:96px;height:96px;cursor:pointer;position:relative}
+.perfil-card{display:flex;flex-direction:row;align-items:center;gap:16px;padding:14px 16px}
+.perfil-card .perfil-n{margin-top:0!important;text-align:left!important}
+.avatar-wrap{position:relative;width:64px;height:64px;flex:0 0 auto}
+.av-toque{display:block;width:64px;height:64px;cursor:pointer;position:relative}
+.av-toque .av{width:64px!important;height:64px!important}
+.perfil-card .av-cam{width:24px;height:24px;font-size:14px;border-width:2px}
+.perfil-card .av-x{width:24px;height:24px;font-size:11px;right:-6px;top:-4px}
+.card.plegable{padding:0;margin-bottom:10px}
+.card.plegable > h3{margin:0;padding:16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;
+  -webkit-user-select:none;user-select:none}
+.card.plegable > h3::after{content:"";width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;
+  transform:rotate(45deg) translateY(-3px);transition:transform .2s;flex:0 0 auto;margin-left:10px}
+.card.plegable.abierta > h3::after{transform:rotate(-135deg) translateY(-3px)}
+.card.plegable > .cuerpo{display:none;padding:0 16px 16px}
+.card.plegable.abierta > .cuerpo{display:block}
 .av-toque .av{display:grid;box-shadow:0 6px 22px rgba(169,112,255,.35)}
 .av-cam{position:absolute;right:-2px;bottom:-2px;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#a970ff,#ff5fa6);
   color:#fff;display:grid;place-items:center;font-size:18px;font-weight:700;border:3px solid var(--bg,#120e1e)}
@@ -390,7 +402,7 @@ a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box
 #barra button.on{color:var(--purple)}
 
 /* ---------- sonando ahora ---------- */
-#now{position:fixed;inset:0;background:var(--bg2);z-index:70;display:none;flex-direction:column;
+#now{position:fixed;inset:0;background:radial-gradient(130% 75% at 50% 0%,var(--nowc,transparent),transparent 72%),var(--bg2);z-index:70;display:none;flex-direction:column;
   padding:calc(var(--sat) + 14px) calc(26px + var(--sar)) calc(var(--sab) + 22px) calc(26px + var(--sal));
   overflow-y:auto;scrollbar-width:none}
 #now::-webkit-scrollbar{display:none}
@@ -428,6 +440,35 @@ a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box
 .ctrls .big.suena{animation:latido 2.4s ease-in-out infinite}
 @keyframes latido{0%,100%{box-shadow:0 8px 26px rgba(169,112,255,.5),0 0 0 6px rgba(169,112,255,.12)}50%{box-shadow:0 8px 30px rgba(255,95,166,.6),0 0 0 12px rgba(255,95,166,.08)}}
 .cola{margin-top:auto;padding-top:14px}
+.cola .row{padding:5px 0;gap:10px}
+.cola .qb{flex:0 0 auto;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted);
+  font-size:calc(15px * var(--esc));background:rgba(255,255,255,.05);cursor:pointer}
+.cola .vermas-cola{display:block;text-align:center;color:var(--purple);font-size:calc(13px * var(--esc));padding:10px 0 2px;cursor:pointer}
+/* letra de la canción (LRCLIB) */
+.now-extra{display:flex;justify-content:center;margin:14px 0 0;flex:0 0 auto}
+.pill{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);border-radius:999px;
+  padding:9px 18px;font:inherit;font-size:calc(13px * var(--esc));font-weight:600;cursor:pointer}
+.pill.on{background:linear-gradient(135deg,#a970ff,#ff5fa6);border-color:transparent;color:#fff}
+#letra{display:none;flex:0 0 auto;max-height:42vh;overflow-y:auto;margin:14px -6px 0;padding:6px 6px 30px;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(transparent,#000 12%,#000 82%,transparent);mask-image:linear-gradient(transparent,#000 12%,#000 82%,transparent)}
+#letra::-webkit-scrollbar{display:none}
+#letra.on{display:block}
+#letra .ln{font-family:var(--font-d);font-weight:700;font-size:calc(19px * var(--esc));line-height:1.35;color:var(--dim);
+  text-align:center;padding:6px 4px;transition:color .25s,transform .25s;cursor:pointer}
+#letra .ln.ya{color:var(--muted)}
+#letra .ln.act{color:var(--ink);transform:scale(1.04)}
+#letra .plano{white-space:pre-line;text-align:center;color:var(--muted);font-size:calc(16px * var(--esc));line-height:1.55}
+#letra .nota-l{text-align:center;color:var(--dim);font-size:calc(13px * var(--esc));padding:14px 0}
+/* aviso fijo en Inicio (copia de seguridad, espacio) */
+.avisoi{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--purple);border-radius:14px;
+  padding:12px 14px;margin:8px 0;font-size:calc(13.5px * var(--esc));color:var(--ink)}
+.avisoi.malo{border-left-color:var(--red)}
+.avisoi .acc{display:flex;gap:8px;margin-top:10px}
+.avisoi .acc button{flex:1;margin:0}
+/* emisora que no respondió la última vez */
+.row.muerta{opacity:.45}
+svg.cor{display:inline-block;vertical-align:-0.18em;flex:0 0 auto}
+.r-i svg.cor{vertical-align:middle}
 .cola h4{font-family:var(--font-d);font-size:calc(11px * var(--esc));letter-spacing:.13em;text-transform:uppercase;
   color:var(--dim);margin:0 0 8px}
 
@@ -558,7 +599,7 @@ body.coche #coche-salir{display:block}
 
   <!-- Sonando ahora -->
   <div id="now">
-    <div class="now-top"><span id="now-cerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></span><span style="letter-spacing:.14em;font-size:calc(11px * var(--esc));cursor:default">SONANDO AHORA</span><span style="display:flex;gap:16px;align-items:center"><span id="now-mas">⋯</span><span id="now-fav">♡</span></span></div>
+    <div class="now-top"><span id="now-cerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></span><span style="letter-spacing:.14em;font-size:calc(11px * var(--esc));cursor:default">SONANDO AHORA</span><span style="display:flex;gap:16px;align-items:center"><span id="now-mas">⋯</span><span id="now-fav"><svg class="cor" viewBox="0 0 24 24" width="26" height="26"><path d="M12 20.5s-7.4-4.5-9.4-9.1C1.1 8 3.2 4.6 6.6 4.6c2 0 3.5 1.1 5.4 3.1 1.9-2 3.4-3.1 5.4-3.1 3.4 0 5.5 3.4 4 6.8-2 4.6-9.4 9.1-9.4 9.1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg></span></span></div>
     <div class="art" id="n-art"></div>
     <h3 id="n-t">—</h3>
     <div id="n-s">—</div>
@@ -572,6 +613,8 @@ body.coche #coche-salir{display:block}
       <button id="b-next" aria-label="Siguiente"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M15.6 5H18v14h-2.4zM4 5.6v12.8a.8.8 0 0 0 1.25.66l8.85-5.4a.8.8 0 0 0 0-1.32L5.25 6.94A.8.8 0 0 0 4 5.6z"/></svg></button>
       <button class="sm" id="b-rep" aria-label="Repetir"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg></button>
     </div>
+    <div class="now-extra"><button class="pill" id="b-letra">🎤&nbsp; Letra</button></div>
+    <div id="letra"></div>
     <div class="cola" id="cola"></div>
     <button id="coche-salir">✕&nbsp; Salir del modo coche</button>
   </div>
@@ -581,8 +624,6 @@ body.coche #coche-salir{display:block}
     <span class="art" id="m-art"></span>
     <span class="r-x"><span class="r-t" id="m-t"></span><span class="r-s" id="m-s"></span></span>
     <div class="m-botones">
-      <button class="ctrl" id="m-prev" aria-label="Anterior" title="Anterior"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M8.4 5H6v14h2.4zM20 5.6v12.8a.8.8 0 0 1-1.25.66l-8.85-5.4a.8.8 0 0 1 0-1.32l8.85-5.4a.8.8 0 0 1 1.25.66z"/></svg></button>
-      <button class="ctrl" id="m-stop" aria-label="Parar" title="Parar"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></button>
       <button class="pp" id="m-pp" aria-label="Reproducir o pausar" title="Reproducir o pausar"></button>
       <button class="ctrl" id="m-next" aria-label="Siguiente" title="Siguiente"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M15.6 5H18v14h-2.4zM4 5.6v12.8a.8.8 0 0 0 1.25.66l8.85-5.4a.8.8 0 0 0 0-1.32L5.25 6.94A.8.8 0 0 0 4 5.6z"/></svg></button>
     </div>
@@ -630,7 +671,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.37.11';
+var APP_VERSION = '2.0';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -855,10 +896,51 @@ async function guardar(store, obj){
       var b = obj.caratula, copia = new Blob([await b.arrayBuffer()], {type: b.type});
       return await guardarCrudo(store, Object.assign({}, obj, {caratula: copia}));
     }catch(_){
+      // v1.37.12: antes se guardaba SIN carátula y se perdía para siempre (el informe del 8/10 lo hizo 11+ veces).
+      // La carátula sigue dentro del MP3: se vuelve a sacar de ahí, nueva, y se guarda con ella.
+      try{
+        var nueva = await caratulaDelAudio(obj.hash);
+        if(nueva){
+          var r = await guardarCrudo(store, Object.assign({}, obj, {caratula: nueva}));
+          var enMem = buscarCancion(obj.id); if(enMem) enMem.caratula = nueva;
+          return r;
+        }
+      }catch(_){}
       anotar('guardar', 'carátula ilegible: guardo la canción sin ella', obj.titulo);
       return await guardarCrudo(store, Object.assign({}, obj, {caratula: null}));
     }
   }
+}
+/* La carátula que va DENTRO del MP3 (ID3v2), leída solo de la cabecera, sin traerse la canción entera. */
+async function caratulaDelAudio(hash){
+  var a = await leer('audios', hash);
+  if(!a || !a.blob) return null;
+  var cab = new Uint8Array(await a.blob.slice(0, 10).arrayBuffer());
+  if(cab[0] !== 0x49 || cab[1] !== 0x44 || cab[2] !== 0x33) return null;          // sin «ID3»: no hay carátula
+  var tam = ((cab[6] & 127) << 21) | ((cab[7] & 127) << 14) | ((cab[8] & 127) << 7) | (cab[9] & 127);
+  var buf = await a.blob.slice(0, Math.min(a.blob.size, tam + 20)).arrayBuffer();
+  var m = etiquetas(buf, '');
+  return (m && m.caratula) || null;
+}
+/* Al entrar: las canciones que perdieron la carátula la recuperan de su propio MP3 (con la app a la vista). */
+async function repararCaratulas(){
+  if(document.hidden || !CANCIONES.length) return;
+  var no = {};
+  try{ no = JSON.parse(localStorage.getItem('mm_carat_no') || '{}') || {}; }catch(_){ no = {}; }
+  var bien = 0, mirados = 0;
+  for(var i=0;i<CANCIONES.length && mirados < 60;i++){
+    var c = CANCIONES[i];
+    if(c.caratula || c.falta || no[c.hash]) continue;
+    if(document.hidden) break;
+    mirados++;
+    try{
+      var cb = await caratulaDelAudio(c.hash);
+      if(cb){ c.caratula = cb; await guardarCrudo('canciones', limpia(c)); bien++; }
+      else no[c.hash] = 1;
+    }catch(e){ no[c.hash] = 1; anotar('carátulas', e.message, c.titulo); }
+  }
+  try{ localStorage.setItem('mm_carat_no', JSON.stringify(no)); }catch(_){}
+  if(bien){ anotar('reparado', bien + ' carátulas recuperadas del MP3'); soltarCaratulas(); pintarVistaSuave(); }
 }
 function borrar(store, k){
   var t = tx([store],'readwrite');
@@ -1493,6 +1575,7 @@ function programarReconexion(){
   }
   clearTimeout(reintento);
   if(fallosRadio >= 10){
+    marcarEmisoraMal(actual.titulo, true);
     pintarEstado('Esta emisora no responde. Prueba otra.');
     toast('📻 ' + esc(actual.titulo) + ' no responde ahora mismo.', 'malo', 5000);
     fallosRadio = 0; espera = 1000;
@@ -1520,7 +1603,15 @@ function programarReconexion(){
   }, espera + jitter);
   espera = Math.min(espera * 2, 30000);
 }
-function radioBien(){ fallosRadio = 0; espera = 1000; clearTimeout(reintento); }
+function radioBien(){ fallosRadio = 0; espera = 1000; clearTimeout(reintento); if(actual) marcarEmisoraMal(actual.titulo, false); }
+/* Emisoras que no respondieron la última vez: salen en gris 3 días (se pueden tocar igual). Al sonar bien, se olvida. */
+function emisorasMal(){ try{ return JSON.parse(localStorage.getItem('mm_emi_mal') || '{}') || {}; }catch(_){ return {}; } }
+function marcarEmisoraMal(nombre, mal){
+  var m = emisorasMal();
+  if(mal) m[nombre] = Date.now(); else if(m[nombre]) delete m[nombre]; else return;
+  try{ localStorage.setItem('mm_emi_mal', JSON.stringify(m)); }catch(_){}
+}
+function emisoraMal(nombre){ var t = emisorasMal()[nombre]; return !!(t && Date.now() - t < 3 * 864e5); }
 window.addEventListener('online', function(){
   toast('Conexión recuperada', 'bueno', 2000);
   if(actual && actual.tipo === 'radio' && audio.paused && !paradoPorMi){
@@ -1808,7 +1899,8 @@ document.addEventListener('visibilitychange', function(){
     guardar('canciones', limpia(c)).catch(function(e){ anotar('guardar', e.message); });
   });
 });
-async function tocarCancion(id, listaIds){
+async function tocarCancion(id, listaIds, opc){
+  opc = opc || {};
   var c = null;
   for(var i=0;i<CANCIONES.length;i++) if(CANCIONES[i].id === id) c = CANCIONES[i];
   if(!c) return;
@@ -1834,12 +1926,23 @@ async function tocarCancion(id, listaIds){
               fav:!!c.fav, cal:textoCalidad(c.cal, c.bytes || (a.bytes||0), c.dur)};
     audio.src = urlActual;
     intentosVigilante = 0; paradoPorMi = false; recuperarAlVolver = false;
+    if(opc.seg > 3){
+      var sp = opc.seg;
+      audio.addEventListener('loadedmetadata', function irA(){ audio.removeEventListener('loadedmetadata', irA); try{ audio.currentTime = sp; }catch(_){} });
+    }
+    if(opc.sinSonar){
+      // Preparada al abrir la app: lista con el ▶ (y el volante), en el segundo donde te quedaste. No suena sola.
+      paradoPorMi = true;
+      await pintarAhora(c); pintarBotones(false);
+      precargarSiguiente();
+      return;
+    }
     mezclaEntrada(c);
     audio.addEventListener('playing', function ok(){ audio.removeEventListener('playing', ok); saltosSeguidos = 0; });
     var p = audio.play();
     if(p && p.catch) p.catch(function(err){
       anotar('play', err.message, c.titulo);
-      toast('Toca ▶ para empezar a sonar.', 'malo', 4000);
+      toast(opc.alAbrir ? 'Lista para sonar: toca ▶ o el botón del volante.' : 'Toca ▶ para empezar a sonar.', opc.alAbrir ? 'bueno' : 'malo', 4000);
       pintarBotones(false);
     });
     c.veces = (c.veces||0) + 1; c.ultima = Date.now();
@@ -1856,16 +1959,17 @@ async function tocarCancion(id, listaIds){
   }
 }
 
-function tocarRadio(e){
+function tocarRadio(e, preparar){
   clearTimeout(reintento); clearTimeout(vigilante);
   soltarURLs(); soltarCaratula();
   fallosRadio = 0; espera = 1000; intentosVigilante = 0;
-  paradoPorMi = false; recuperarAlVolver = false;
+  paradoPorMi = !!preparar; recuperarAlVolver = false;
   actual = {tipo:'radio', titulo:e.nombre, sub:nombreCiudad(e.ciudad) + ' · ' + e.genero,
             url:e.url, ciudad:e.ciudad, genero:e.genero, logo:e.logo || '',
             fav:!!FAV_RADIO[e.nombre], kbps:e.kbps || 0,
             cal: e.kbps ? ((e.codec||'') + ' ' + e.kbps + ' kbps').trim() : ''};
   cola = []; colaPos = -1;
+  if(preparar){ pintarAhora(null); return; }     // sin src: el ▶ la conecta en directo (playPause)
   audio.src = e.url;
   var p = audio.play();
   if(p && p.catch) p.catch(function(){
@@ -1976,6 +2080,33 @@ setInterval(function(){
   }else tickRadio = 0;
 }, 5000);
 
+/* Al abrir la app (v1.37.12): Ajustes → «Al abrir la app». Por defecto deja preparada la última canción
+   o emisora (barrita con ▶, volante); «aleatorio» arranca Toda mi música barajada (si iOS no deja sonar
+   sin un toque, queda lista para el ▶ o el volante); «nada» como antes. */
+async function alAbrirApp(){
+  if(actual) return;
+  var modo = AJ.alAbrir || 'seguir';
+  // Atajo de Siri («Oye Siri, pon Mi Música»): el enlace lleva ?accion=aleatorio y manda sobre el ajuste.
+  if(/[?&]accion=aleatorio(&|$)/.test(location.search)) modo = 'aleatorio';
+  try{
+    if(modo === 'aleatorio'){
+      var A = listasAuto().filter(function(l){ return l.id === 'auto_todo'; })[0];
+      if(A){
+        var ids = barajarMusica(A.ids);
+        aleatorio = false; pintarModos();
+        await tocarCancion(ids[0], ids, {alAbrir:true});
+        return;
+      }
+    }
+    if(modo === 'nada') return;
+    var u = JSON.parse(localStorage.getItem('mm_ultimo_'+yo) || 'null');
+    if(!u) return;
+    if(u.tipo === 'radio'){
+      var L = listaEmisoras();
+      for(var i=0;i<L.length;i++) if(L[i].nombre === u.titulo){ tocarRadio(L[i], true); return; }
+    }else if(u.id && buscarCancion(u.id)) await tocarCancion(u.id, null, {sinSonar:true, seg:u.seg || 0});
+  }catch(err){ anotar('al abrir', err.message); }
+}
 async function retomar(){
   try{
     var u = JSON.parse(localStorage.getItem('mm_ultimo_'+yo) || 'null');
@@ -2027,6 +2158,9 @@ async function pintarAhora(cancion){
     if(ver !== pintaVer || actual !== yoActual) return;      // mientras tanto cambió la canción
   }
   var imagen = elegida ? elegida.u : '', tieneImg = !!(elegida && elegida.blob);
+  colorAhora(imagen);
+  $('b-letra').parentNode.style.display = (actual.tipo === 'radio') ? 'none' : '';
+  if(LET.abierta) cargarLetra();
   ['n-art','m-art'].forEach(function(id){
     var el = $(id);
     if(imagen){
@@ -2044,7 +2178,7 @@ async function pintarAhora(cancion){
   $('m-s').innerHTML = (actual.tipo==='radio' ? '<span class="live">EN VIVO</span> ' : '') + esc(actual.sub);
   $('n-b').textContent = actual.tipo==='radio' ? 'en directo' : tiempo(actual.dur);
   $('n-cal').textContent = actual.cal || '';
-  $('now-fav').textContent = actual.fav ? '❤️' : '♡';
+  $('now-fav').innerHTML = corazon(actual.fav, 26);
   $('mini').classList.add('on');
   // Los botones de control funcionan tanto para canciones como para radio
   pintarBotones(!audio.paused);
@@ -2084,6 +2218,112 @@ async function pintarAhora(cancion){
     }catch(err){ anotar('mediaSession', err.message); }
   }
 }
+/* Fondo de «Sonando ahora» del color de la carátula, como Spotify y Apple Music (v1.37.12).
+   Se mide la imagen en pequeño (12×12) y se elige el color más vivo, oscurecido para que el texto se lea.
+   Si la imagen no deja leerse (otra web sin permiso), queda el fondo de siempre. */
+function colorAhora(url){
+  var now = $('now');
+  if(!url){ now.style.removeProperty('--nowc'); return; }
+  var img = new Image();
+  if(url.indexOf('blob:') !== 0 && url.indexOf('data:') !== 0) img.crossOrigin = 'anonymous';
+  img.onload = function(){
+    try{
+      var cv = document.createElement('canvas'); cv.width = cv.height = 12;
+      var x = cv.getContext('2d'); x.drawImage(img, 0, 0, 12, 12);
+      var d = x.getImageData(0, 0, 12, 12).data, mejor = null, pm = -1, sr = 0, sg = 0, sb = 0, n = 0;
+      for(var i=0;i<d.length;i+=4){
+        var r = d[i], g = d[i+1], b = d[i+2], mx = Math.max(r,g,b), mn = Math.min(r,g,b);
+        var sat = mx ? (mx - mn) / mx : 0, peso = sat * (mx / 255);
+        sr += r; sg += g; sb += b; n++;
+        if(peso > pm){ pm = peso; mejor = [r, g, b]; }
+      }
+      if(!mejor || pm < 0.12) mejor = [sr / n, sg / n, sb / n];
+      var k = 150 / Math.max(1, Math.max(mejor[0], mejor[1], mejor[2]));     // tope de brillo
+      if(k > 1) k = 1;
+      now.style.setProperty('--nowc', 'rgba(' + Math.round(mejor[0]*k) + ',' + Math.round(mejor[1]*k) + ',' + Math.round(mejor[2]*k) + ',.75)');
+    }catch(_){ now.style.removeProperty('--nowc'); }
+  };
+  img.onerror = function(){ now.style.removeProperty('--nowc'); };
+  img.src = url;
+}
+
+/* ═════════ Letra de la canción (LRCLIB: gratis, sin clave) ═════════
+   Solo se pide al tocar «Letra». Sale a internet el título, el cantante y la duración.
+   Se guarda en el teléfono (las últimas 80) para no volver a gastar datos. */
+var LET = {abierta:false, clave:'', lineas:null, plano:'', ver:0, act:-1};
+function claveLetra(){ return actual ? (actual.artista || '') + '|' + actual.titulo : ''; }
+function limpiarTituloLetra(t){
+  return String(t || '').replace(/\s*[\(\[][^\)\]]*(feat|ft\.|official|oficial|video|v[ií]deo|audio|lyric|letra|remaster|visualizer)[^\)\]]*[\)\]]/gi, '')
+    .replace(/\s+-\s+(official|oficial).*$/i, '').trim();
+}
+function primerArtista(a){ return String(a || '').split(/\s*(?:,|&|\sx\s|\sy\s|feat\.?|ft\.)\s*/i)[0].trim(); }
+function cacheLetras(){ try{ return JSON.parse(localStorage.getItem('mm_letras') || '{}') || {}; }catch(_){ return {}; } }
+function guardarLetraCache(k, v){
+  var c = cacheLetras(); v.t = Date.now(); c[k] = v;
+  var ks = Object.keys(c).sort(function(a, b){ return c[a].t - c[b].t; });
+  while(ks.length > 80) delete c[ks.shift()];
+  try{ localStorage.setItem('mm_letras', JSON.stringify(c)); }catch(_){}
+}
+function leerLRC(txt){
+  var L = [];
+  String(txt || '').split('\n').forEach(function(linea){
+    var m = /^\s*\[(\d+):(\d+(?:\.\d+)?)\]\s*(.*)$/.exec(linea);
+    if(m) L.push({t: (+m[1]) * 60 + (+m[2]), x: m[3]});
+  });
+  return L.length ? L : null;
+}
+async function cargarLetra(){
+  var caja = $('letra'), k = claveLetra(), ver = ++LET.ver;
+  if(!actual || actual.tipo === 'radio'){ caja.innerHTML = ''; return; }
+  if(LET.clave === k && (LET.lineas || LET.plano)){ pintarLetra(); return; }
+  LET.clave = k; LET.lineas = null; LET.plano = ''; LET.act = -1;
+  var c = cacheLetras()[k];
+  if(c && (c.s || c.p || Date.now() - c.t < 7 * 864e5)){
+    LET.lineas = leerLRC(c.s); LET.plano = c.p || ''; pintarLetra(); return;
+  }
+  caja.innerHTML = '<div class="nota-l">Buscando la letra…</div>';
+  var tit = limpiarTituloLetra(actual.titulo), art = primerArtista(actual.artista), dur = audio.duration || actual.dur || 0;
+  var res = [];
+  try{
+    res = await traerConLimite('https://lrclib.net/api/search?track_name=' + encodeURIComponent(tit) + '&artist_name=' + encodeURIComponent(art), 9000);
+    if(!res || !res.length) res = await traerConLimite('https://lrclib.net/api/search?q=' + encodeURIComponent(art + ' ' + tit), 9000);
+  }catch(e){
+    if(ver !== LET.ver) return;
+    anotar('letra', e.message, actual.titulo);
+    LET.clave = '';
+    caja.innerHTML = '<div class="nota-l">No se pudo traer la letra ahora mismo. Prueba en un rato.</div>'; return;
+  }
+  if(ver !== LET.ver || k !== claveLetra()) return;
+  res = (res || []).filter(function(r){ return !r.instrumental && (r.syncedLyrics || r.plainLyrics); });
+  function nota(r){ return (r.syncedLyrics ? 0 : 100) + (dur && r.duration ? Math.min(Math.abs(r.duration - dur), 60) : 30); }
+  res.sort(function(a, b){ return nota(a) - nota(b); });
+  var r0 = res[0];
+  var v = r0 ? {s: (r0.syncedLyrics && (!dur || !r0.duration || Math.abs(r0.duration - dur) < 8)) ? r0.syncedLyrics : '', p: r0.plainLyrics || ''} : {s:'', p:''};
+  guardarLetraCache(k, v);
+  LET.lineas = leerLRC(v.s); LET.plano = v.p;
+  pintarLetra();
+}
+function pintarLetra(){
+  var caja = $('letra');
+  if(LET.lineas){
+    caja.innerHTML = LET.lineas.map(function(l, i){ return '<div class="ln" data-ln="'+i+'">'+(esc(l.x) || '♪')+'</div>'; }).join('');
+    LET.act = -1; seguirLetra();
+  }else if(LET.plano){
+    caja.innerHTML = '<div class="nota-l">Letra sin sincronizar</div><div class="plano">' + esc(LET.plano) + '</div>';
+  }else caja.innerHTML = '<div class="nota-l">No hay letra para esta canción.</div>';
+}
+function seguirLetra(){
+  if(!LET.abierta || !LET.lineas || LET.clave !== claveLetra()) return;
+  var t = audio.currentTime + 0.25, i = -1;
+  for(var k=0;k<LET.lineas.length;k++){ if(LET.lineas[k].t <= t) i = k; else break; }
+  if(i === LET.act) return;
+  LET.act = i;
+  var caja = $('letra'), ls = caja.querySelectorAll('.ln');
+  for(var j=0;j<ls.length;j++) ls[j].className = 'ln' + (j < i ? ' ya' : j === i ? ' act' : '');
+  var el = ls[Math.max(i, 0)];
+  if(el) caja.scrollTo({top: el.offsetTop - caja.clientHeight / 2 + el.clientHeight / 2, behavior: 'smooth'});
+}
+
 /* Lo que ve el coche. iOS no carga bien carátulas «blob:», así que la de dentro
    del MP3 se encoge a 512 px y se pasa como imagen incrustada (data:); la de
    Apple/Deezer o el logo de la emisora van por https; el icono, de último. */
@@ -2133,6 +2373,7 @@ function pintarBotones(sonando){
 }
 function pintarProgreso(){
   if(!actual) return;
+  seguirLetra();
   if(actual.tipo === 'radio'){
     $('m-prog').style.width = '100%'; $('n-seek').style.width = '100%'; $('n-seek-caja').classList.add('vivo');
     $('n-a').textContent = '●';
@@ -2165,19 +2406,36 @@ function pintarEstado(msg){
     $('m-s').innerHTML = (actual.tipo==='radio' ? '<span class="live">EN VIVO</span> ' : '') + esc(actual.sub);
   }
 }
+/* «A continuación»: al tocar una canción se abre una hoja con las opciones escritas (ponerla ya, que suene la siguiente, quitarla). */
+var colaVer = 5;
 function pintarCola(){
   var c = $('cola');
-  if(!actual || actual.tipo === 'radio' || cola.length < 2){ c.innerHTML = ''; return; }
-  var sig = [];
-  for(var i=1;i<=3;i++){
-    var id = cola[(colaPos+i) % cola.length];
-    for(var k=0;k<CANCIONES.length;k++) if(CANCIONES[k].id === id) sig.push(CANCIONES[k]);
-  }
-  c.innerHTML = '<h4>A continuación</h4>' + sig.map(function(s){
-    return '<div class="row" style="padding:5px 0">'+cuadroCancion(s).replace('<span class="art','<span class="art ch')+
+  if(!actual || actual.tipo === 'radio' || actual.remota || cola.length < 2){ c.innerHTML = ''; return; }
+  var resto = cola.length - 1, n = Math.min(colaVer, resto), h = '';
+  for(var i=1;i<=n;i++){
+    var idx = (colaPos + i) % cola.length, s = buscarCancion(cola[idx]);
+    if(!s) continue;
+    h += '<div class="row" data-cola-tocar="'+idx+'">'+cuadroCancion(s).replace('<span class="art','<span class="art ch')+
       '<span class="r-x"><span class="r-t" style="font-size:calc(13px * var(--esc))">'+esc(s.titulo)+'</span>'+
-      '<span class="r-s" style="font-size:calc(11px * var(--esc))">'+esc(s.artista)+'</span></span></div>';
-  }).join('');
+      '<span class="r-s" style="font-size:calc(11px * var(--esc))">'+esc(s.artista)+'</span></span>'+
+      '</div>';
+  }
+  c.innerHTML = '<h4>A continuación · ' + resto + '</h4>' + h +
+    (resto > n ? '<span class="vermas-cola" data-cola-mas="1">Ver más (' + (resto - n) + ')</span>' : '');
+}
+function colaQuitar(idx){
+  if(idx === colaPos || idx < 0 || idx >= cola.length) return;
+  cola.splice(idx, 1);
+  if(idx < colaPos) colaPos--;
+  sigPre = null; guardarCola(); pintarCola(); precargarSiguiente();
+}
+function colaSubir(idx){
+  if(idx === colaPos || idx < 0 || idx >= cola.length) return;
+  var id = cola.splice(idx, 1)[0];
+  if(idx < colaPos) colaPos--;
+  cola.splice(colaPos + 1, 0, id);
+  sigPre = null; guardarCola(); pintarCola(); precargarSiguiente();
+  toast('Suena la siguiente.', 'bueno', 1600);
 }
 
 /* ═════════════════ AÑADIR MÚSICA ════════════════════════════════ */
@@ -2196,7 +2454,7 @@ function guardarDuracion(id, d){
 
 async function anadirFicheros(lista){
   if(!lista || !lista.length) return;
-  var ok = 0, repes = 0, malos = 0;
+  var ok = 0, repes = 0, malos = 0, mejoradas = 0;
   toast('Añadiendo ' + lista.length + (lista.length===1?' canción…':' canciones…'));
 
   // Las huellas que YA tiene esta persona, leídas una sola vez (no una por fichero).
@@ -2226,6 +2484,18 @@ async function anadirFicheros(lista){
 
       // ¿ya la tiene ESTA persona?
       if(mias[h]){ repes++; continue; }
+      // ¿Es otra versión de una que ya tienes (mismo título y cantante; p. ej. con el volumen igualado)?
+      // Se cambia el audio y se conserva todo lo demás: ❤️, veces, listas y cola (v1.37.12).
+      var vieja = mismaCancion(meta);
+      if(vieja && vieja.hash !== h){
+        var hv = vieja.hash;
+        vieja.hash = h; vieja.bytes = f.size; vieja.cal = cal; vieja.dur = 0; vieja.falta = false;
+        if(meta.caratula) vieja.caratula = meta.caratula;
+        await guardar('canciones', limpia(vieja));
+        mias[h] = true; delete mias[hv];
+        if(!(actual && actual.hash === hv)) await soltarAudioSiHuerfano(hv);
+        mejoradas++; continue;
+      }
       mias[h] = true;
 
       await guardar('canciones', limpia({
@@ -2240,10 +2510,26 @@ async function anadirFicheros(lista){
   }
   await cargarDatos();
   pintarVista();
-  var msg = ok + (ok===1?' canción añadida':' canciones añadidas');
+  var msg = (ok || !mejoradas) ? ok + (ok===1?' canción añadida':' canciones añadidas') : '';
+  if(mejoradas) msg += (msg ? ' · ' : '') + mejoradas + (mejoradas===1?' cambiada por la versión nueva (conserva favorita y listas)':' cambiadas por la versión nueva (conservan favoritas y listas)');
   if(repes) msg += ' · ' + repes + ' ya la' + (repes===1?' tenías':'s tenías');
   if(malos) msg += ' · ' + malos + ' no se pudo leer';
-  toast(msg, ok?'bueno':'malo', 4500);
+  toast(msg, (ok || mejoradas)?'bueno':'malo', 4500);
+}
+function mismaCancion(meta){
+  var t = String(meta.titulo || '').toLowerCase().trim(), a = String(meta.artista || '').toLowerCase().trim();
+  if(!t) return null;
+  for(var i=0;i<CANCIONES.length;i++){
+    var c = CANCIONES[i];
+    if(String(c.titulo || '').toLowerCase().trim() === t && String(c.artista || '').toLowerCase().trim() === a) return c;
+  }
+  return null;
+}
+async function soltarAudioSiHuerfano(hash){
+  try{
+    var usa = (await todos('canciones')).some(function(x){ return x.hash === hash; });
+    if(!usa) await borrar('audios', hash);
+  }catch(err){ anotarSeguro('borrar/audio', err); }
 }
 function anotarSeguro(o, err, extra){ anotar(o, (err && err.message) || err, extra); }
 
@@ -2258,6 +2544,20 @@ async function hayHueco(bytes){
     if(e.usage / e.quota > 0.8) toast('⚠️ Estás usando más del 80% del espacio.', 'malo', 5000);
     return true;
   }catch(_){ return true; }
+}
+/* Aviso de poco espacio ANTES de que iOS no pueda abrir la base de datos (error del 30/09/2026). */
+var ESPACIO_BAJO = '';
+async function comprobarEspacio(){
+  try{
+    if(!navigator.storage || !navigator.storage.estimate) return;
+    var e = await navigator.storage.estimate();
+    if(!e.quota) return;
+    var libre = e.quota - e.usage;
+    ESPACIO_BAJO = (libre < 400 * 1024 * 1024 || e.usage / e.quota > 0.85)
+      ? 'Queda poco espacio para la app (' + mbTxt(libre) + ' libres). Borra fotos, vídeos o apps que no uses, o canciones de aquí, antes de añadir más.'
+      : '';
+    if(ESPACIO_BAJO) anotar('espacio', 'poco espacio', mbTxt(libre) + ' libres de ' + mbTxt(e.quota));
+  }catch(_){}
 }
 async function pedirPersistencia(){
   try{
@@ -2306,15 +2606,57 @@ async function exportarCopia(){
       favAu: favAudius(), hist: histo(), radioN: conteoRadio(), pais: paisIni(),
       foto: fotoDe(yo), ajustes: AJ
     };
+    var nombre = 'MiMusica-' + yo + '-' + new Date().toISOString().slice(0,10) + '.json';
     var b = new Blob([JSON.stringify(datos, null, 1)], {type:'application/json'});
-    var u = URL.createObjectURL(b);
-    var a = document.createElement('a');
-    a.href = u;
-    a.download = 'MiMusica-' + yo + '-' + new Date().toISOString().slice(0,10) + '.json';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function(){ URL.revokeObjectURL(u); }, 4000);
-    toast('Copia guardada. Déjala en iCloud Drive.', 'bueno', 4500);
+    COPIA_LISTA = {blob:b, nombre:nombre};
+    // iOS solo deja abrir «Compartir» justo tras un toque: por eso la copia se prepara y se guarda con un segundo toque.
+    var fich = null;
+    try{ fich = new File([b], nombre, {type:'application/json'}); }catch(_){}
+    var puede = !!(fich && navigator.canShare && navigator.canShare({files:[fich]}));
+    abrirHoja('<h4>💾 Copia lista</h4>'+
+      '<div class="sub">Guárdala en <b>Archivos → iCloud Drive</b>. Si un día el iPhone borra los datos de la app, con ella recuperas favoritos, listas, emisoras e historial (los MP3 no van dentro).</div>'+
+      (puede ? '<button class="btn solido" id="copia-compartir">📤&nbsp; Guardar en Archivos</button>' : '')+
+      '<button class="btn'+(puede ? '' : ' solido')+'" id="copia-bajar">⬇️&nbsp; Descargar</button>'+
+      '<button class="btn" data-cerrar-hoja="1">Cancelar</button>');
   }catch(err){ anotar('exportar', err.message); toast('No se pudo crear la copia.', 'malo'); }
+}
+var COPIA_LISTA = null;
+function copiaHecha(){
+  try{ localStorage.setItem('mm_copia_' + yo, String(Date.now())); }catch(_){}
+  cerrarHoja(); toast('Copia guardada. Te la vuelvo a pedir dentro de una semana.', 'bueno', 4000);
+  if(vistaActual === 'inicio') pintarVista();
+}
+function compartirCopia(){
+  if(!COPIA_LISTA) return;
+  var fich = new File([COPIA_LISTA.blob], COPIA_LISTA.nombre, {type:'application/json'});
+  navigator.share({files:[fich], title:'Copia de Mi Música'}).then(copiaHecha, function(e){
+    if(e && e.name === 'AbortError') return;                      // la cerraste tú
+    anotar('copia', e && e.message); bajarCopia();
+  });
+}
+function bajarCopia(){
+  if(!COPIA_LISTA) return;
+  var u = URL.createObjectURL(COPIA_LISTA.blob), a = document.createElement('a');
+  a.href = u; a.download = COPIA_LISTA.nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(u); }, 4000);
+  copiaHecha();
+}
+function diasSinCopia(){
+  var t = 0; try{ t = +(localStorage.getItem('mm_copia_' + yo) || 0); }catch(_){}
+  return t ? (Date.now() - t) / 864e5 : Infinity;
+}
+/* Los avisos de arriba de Inicio: poco espacio y la copia de la semana (con «Luego» = 2 días). */
+function avisosInicio(){
+  var h = '';
+  if(ESPACIO_BAJO) h += '<div class="avisoi malo">⚠️ ' + esc(ESPACIO_BAJO) + '</div>';
+  var luego = 0; try{ luego = +(localStorage.getItem('mm_copia_luego_' + yo) || 0); }catch(_){}
+  var d = diasSinCopia();
+  if(CANCIONES.length && d > 7 && Date.now() - luego > 2 * 864e5){
+    h += '<div class="avisoi">💾 ' + (d === Infinity ? 'Aún no tienes copia de seguridad de tus favoritos y listas.' : 'Hace ' + Math.floor(d) + ' días de tu última copia de seguridad.') +
+      '<div class="acc"><button class="btn solido" id="a-exportar">Hacer copia</button><button class="btn" id="copia-luego">Luego</button></div></div>';
+  }
+  return h;
 }
 async function importarCopia(file){
   try{
@@ -2511,9 +2853,9 @@ function filaCancion(c, dentroDe){
   var son = actual && actual.tipo==='cancion' && actual.id === c.id;
   var der = dentroDe
     ? '<span class="r-a" data-quitar="'+esc(dentroDe)+'" data-quitar-id="'+esc(c.id)+'">✕</span>'
-    : (c.fav ? '<span class="r-i">❤️</span>' : '');
+    : (c.fav ? '<span class="r-i">'+corazon(true, 17)+'</span>' : '');
   var acc = dentroDe ? '' :
-    '<span class="swa"><span class="swb fav" data-fav="'+esc(c.id)+'">'+(c.fav?'❤️':'🤍')+'</span>'+
+    '<span class="swa"><span class="swb fav" data-fav="'+esc(c.id)+'">'+corazon(c.fav, 26)+'</span>'+
     '<span class="swb del" data-borrar-pedir="'+esc(c.id)+'">🗑</span></span>';
   return '<div class="row'+(dentroDe?'':' desl')+(son?' sonando':'')+(c.falta?' falta':'')+'" data-cancion="'+esc(c.id)+'">'+
     cuadroCancion(c)+
@@ -2881,7 +3223,7 @@ function listasAuto(){
       .sort(function(a, b){ return (b.veces||0) - (a.veces||0); }).slice(0, 25));
   add('auto_nuevas', 'Añadidas hace poco', '🆕', CANCIONES.slice()
       .sort(function(a, b){ return (b.anadida||0) - (a.anadida||0); }).slice(0, 25));
-  add('auto_favs', 'Tus favoritas', '❤️', CANCIONES.filter(function(c){ return c.fav; }));
+  add('auto_favs', 'Tus favoritas', corazon(true, 24), CANCIONES.filter(function(c){ return c.fav; }));
   var gm = {};
   CANCIONES.forEach(function(c){ var g = generoDe(c); if(g !== 'Sin clasificar') (gm[g] = gm[g] || []).push(c); });
   Object.keys(gm).filter(function(g){ return gm[g].length >= 3; })
@@ -3042,6 +3384,7 @@ function pintarInicio(){
   INI.nombres = nombresParaTi();
   var ult = null;
   try{ ult = JSON.parse(localStorage.getItem('mm_ultimo_'+yo)||'null'); }catch(_){}
+  h += avisosInicio();
   if(AJ.cocheEnInicio)
     h += '<button class="btn" id="b-coche" style="margin-top:8px">🚗&nbsp; Modo coche</button>';
   h += chipsAuto();
@@ -3094,7 +3437,7 @@ function pintarInicio(){
   var mas  = CANCIONES.slice().sort(function(a,b){ return (b.veces||0)-(a.veces||0); })
                       .filter(function(c){ return c.veces; }).slice(0, 5);
   var favR = listaEmisoras().filter(function(e){ return FAV_RADIO[e.nombre]; }).slice(0, 8);
-  if(favs.length) h += '<div class="shelf-t">❤️ Tus favoritas</div>' + favs.map(function(c){ return filaCancion(c); }).join('');
+  if(favs.length) h += '<div class="shelf-t">'+corazon(true, 16)+' Tus favoritas</div>' + favs.map(function(c){ return filaCancion(c); }).join('');
   if(mas.length)  h += '<div class="shelf-t">🔥 Tus más escuchadas</div>' + mas.map(function(c){ return filaCancion(c); }).join('');
   if(favR.length) h += '<div class="shelf-t">📻 Tus emisoras</div>' + favR.map(function(e){
         return '<div class="row" data-emisora="'+esc(e.nombre)+'">'+ cuadroEmisora(e) +
@@ -3137,7 +3480,7 @@ function hojaApple(p, lista){
     '<h4>'+esc(p.titulo)+'</h4><div class="sub">'+esc(p.artista)+(p.genero?' · '+esc(p.genero):'')+'</div>' +
     '<button class="opc" data-ap-yt="1"><span class="em">▶️</span><span class="tx"><b>Escucharla entera</b>'+
       '<small>en YouTube, dentro de la app · no se baja</small></span></button>' +
-    '<button class="opc" data-ap-fav="1"><span class="em">'+(fav?'❤️':'♡')+'</span><span class="tx"><b>'+
+    '<button class="opc" data-ap-fav="1"><span class="em">'+corazon(fav, 24)+'</span><span class="tx"><b>'+
       (fav?'Quitar de favoritas':'Guardar en favoritas')+'</b></span></button>' +
     '<button class="opc" data-cerrar-hoja="1"><span class="em">✕</span><span class="tx"><b>Cerrar</b></span></button>');
 }
@@ -3298,7 +3641,7 @@ function filaVideoFav(v){
     '<span class="art" style="background-image:url(\'https://i.ytimg.com/vi/'+esc(v.vid)+'/mqdefault.jpg\'),'+tono(v.vid)+
       ';background-size:cover;background-position:center"></span>'+
     '<span class="r-x"><span class="r-t">'+esc(v.titulo||v.vid)+'</span><span class="r-s">'+esc(v.canal||'YouTube')+'</span></span>'+
-    '<span class="r-a on" data-fav-video="'+esc(v.vid)+'">❤️</span></div>';
+    '<span class="r-a on" data-fav-video="'+esc(v.vid)+'">'+corazon(true, 22)+'</span></div>';
 }
 var ytTituloActual = {vid:'', titulo:'', canal:''};
 function pintarYouTube(){
@@ -3308,7 +3651,7 @@ function pintarYouTube(){
   var marco = $('yt-marco'), mismo = !!(ytVerId && marco && C.contains(marco) && marco.dataset.vid === ytVerId);
   if(ytVerId){
     h += '<button class="btn '+(esFavVideo(ytVerId)?'suave':'solido')+'" data-fav-video="'+esc(ytVerId)+'">'+
-           (esFavVideo(ytVerId)?'❤️&nbsp; Guardado en Favoritas':'♡&nbsp; Guardar vídeo')+'</button>';
+           (esFavVideo(ytVerId)?corazon(true, 18)+'&nbsp; Guardado en Favoritas':corazon(false, 18)+'&nbsp; Guardar vídeo')+'</button>';
   }
   if(ytBuscando) h += '<div class="note">Buscando en YouTube…</div>';
   else if(ytResultados.length){
@@ -3321,7 +3664,7 @@ function pintarYouTube(){
           (v.miniatura ? '' : '▶') + '</span>' +
         '<span class="r-x"><span class="r-t">'+esc(v.titulo)+'</span>'+
         '<span class="r-s">'+esc(v.canal)+(v.seg?' · '+m+':'+(s<10?'0':'')+s:'')+'</span></span>'+
-        '<span class="r-a '+(esFavVideo(v.vid)?'on':'')+'" data-fav-video="'+esc(v.vid)+'">'+(esFavVideo(v.vid)?'❤️':'♡')+'</span></div>';
+        '<span class="r-a '+(esFavVideo(v.vid)?'on':'')+'" data-fav-video="'+esc(v.vid)+'">'+corazon(esFavVideo(v.vid), 22)+'</span></div>';
     }).join('');
   }else if(ytTexto){
     h += '<div class="vacio"><span class="em">📺</span>Sin resultados para «'+esc(ytTexto)+'».</div>';
@@ -3338,7 +3681,7 @@ function pintarYouTube(){
     }else if(!INI.cargando && !INI.fallo) cargarInicio();
   }
   if(VIDEOS.length){
-    h += '<div class="shelf-t">❤️ Tus vídeos favoritos</div>' + VIDEOS.map(filaVideoFav).join('');
+    h += '<div class="shelf-t">'+corazon(true, 16)+' Tus vídeos favoritos</div>' + VIDEOS.map(filaVideoFav).join('');
   }
   if(mismo){ $('yt-resto').innerHTML = h; return; }
   C.innerHTML = (ytVerId ? '<div id="yt-marco" data-vid="'+esc(ytVerId)+'" style="position:relative;padding-top:56.25%;border-radius:13px;overflow:hidden;background:#000;margin-bottom:10px">'+
@@ -3630,14 +3973,15 @@ function filaEmisora(e){
   var f = !!FAV_RADIO[e.nombre];
   var cal = (e.codec ? e.codec : '') + (e.kbps ? ' ' + e.kbps : '');
   var est = estrellas(e);
-  return '<div class="row desl'+(son?' sonando':'')+'" data-emisora="'+esc(e.nombre)+'">'+
+  var mal = !son && emisoraMal(e.nombre);
+  return '<div class="row desl'+(son?' sonando':'')+(mal?' muerta':'')+'" data-emisora="'+esc(e.nombre)+'">'+
     cuadroEmisora(e)+
     '<span class="r-x"><span class="r-t">'+esc(e.nombre)+'</span>'+
-      '<span class="r-s"><span class="badge">🔴</span><span class="enc">'+esc(e.genero)+'</span>'+
+      '<span class="r-s"><span class="badge">🔴</span><span class="enc">'+esc(mal ? 'No respondió la última vez' : e.genero)+'</span>'+
       (cal?'<span class="cal">'+esc(cal)+'</span>':'')+
       (est?'<span class="est">'+est+'</span>':'')+'</span></span>'+
-    (f ? '<span class="r-i">❤️</span>' : '')+
-    '<span class="swa"><span class="swb fav" data-favradio="'+esc(e.nombre)+'">'+(f?'❤️':'🤍')+'</span>'+
+    (f ? '<span class="r-i">'+corazon(true, 17)+'</span>' : '')+
+    '<span class="swa"><span class="swb fav" data-favradio="'+esc(e.nombre)+'">'+corazon(f, 26)+'</span>'+
     '<span class="swb del" data-quitar-emi="'+esc(e.nombre)+'">🗑</span></span></div>';
 }
 var pendEmi = null;
@@ -3739,6 +4083,13 @@ function barajar(l){
    era bueno, pero solo se oyen las primeras 10-15 del día y salían otra vez las de ayer. Ahora:
    1º se baraja; 2º las oídas en las últimas 36 h van al final (las más recientes, las últimas);
    3º si una canción está dos veces (mismo título y cantante, p. ej. re-etiquetada), suena solo una. */
+/* Corazón de favorito dibujado (v2.0): el emoji ❤️ se veía feo y distinto en cada sitio. */
+var PATH_COR = 'M12 20.5s-7.4-4.5-9.4-9.1C1.1 8 3.2 4.6 6.6 4.6c2 0 3.5 1.1 5.4 3.1 1.9-2 3.4-3.1 5.4-3.1 3.4 0 5.5 3.4 4 6.8-2 4.6-9.4 9.1-9.4 9.1z';
+function corazon(lleno, tam){
+  tam = tam || 22;
+  return '<svg class="cor" viewBox="0 0 24 24" width="'+tam+'" height="'+tam+'" aria-label="'+(lleno?'Favorita':'Añadir a favoritas')+'">'+
+    '<path d="'+PATH_COR+'" fill="'+(lleno?'#ff5fa6':'none')+'" stroke="'+(lleno?'#ff5fa6':'currentColor')+'" stroke-width="'+(lleno?'1.2':'1.9')+'" stroke-linejoin="round"/></svg>';
+}
 function barajarMusica(ids){
   var vistos = {}, frescas = [], oidas = [], ahora = Date.now();
   barajar(ids).forEach(function(id){
@@ -3942,7 +4293,7 @@ function pintarBiblio(){
     var hh = histo().slice(0, 14).map(function(x){ var o = {}; for(var k in x) o[k] = x[k]; o.tipo = 'hist'; return o; });
     if(!favC.length && !favE.length && !favA.length && !VIDEOS.length){
       C.innerHTML = '<div class="vacio"><span class="em">♥</span>Todavía no has marcado nada.<br>'+
-        'Toca el ♡ de una canción, una emisora<br>o un vídeo y aparecerá aquí.<br><br>'+
+        'Toca el corazón de una canción, una emisora<br>o un vídeo y aparecerá aquí.<br><br>'+
         '<span style="font-size:calc(12.5px * var(--esc))">Son tuyas: Elibel tiene las suyas.</span></div>' +
         (hh.length ? estante('🕐 Escuchado hace poco', 'bh', hh) : '') +
         '<button class="btn solido" data-ir-tab="musica">🎧&nbsp; Buscar un cantante</button>' +
@@ -3968,7 +4319,7 @@ function pintarBiblio(){
           '<span class="r-x"><span class="r-t">'+esc(p.titulo)+'</span>'+
           '<span class="r-s"><span class="enc">'+esc(p.artista)+' · '+esc(etiquetaFuente(p))+'</span>'+
           '<span class="cal">'+tiempo(p.dur)+'</span></span></span>'+
-          '<span class="r-a on" data-aufav-quitar="'+i+'">❤️</span></div>';
+          '<span class="r-a on" data-aufav-quitar="'+i+'">'+corazon(true, 22)+'</span></div>';
       }).join('');
     if(hh.length) h += estante('🕐 Escuchado hace poco', 'bh', hh);
     C.innerHTML = h;
@@ -4048,21 +4399,21 @@ async function pintarAjustes(){
   $('ajustes-cuerpo').innerHTML =
   '<div class="card perfil-card">'+
     '<div class="avatar-wrap">'+
-      '<span id="a-foto" class="av-toque" role="button" aria-label="Poner o cambiar la foto">'+ avatarDe(yo, 96) +
+      '<span id="a-foto" class="av-toque" role="button" aria-label="Poner o cambiar la foto">'+ avatarDe(yo, 64) +
         '<span class="av-cam">'+(fotoDe(yo) ? '✎' : '＋')+'</span></span>'+
       (fotoDe(yo) ? '<span id="a-quitarfoto" class="av-x" role="button" aria-label="Quitar la foto">✕</span>' : '')+
     '</div>'+
     '<div class="perfil-n" style="text-align:center;margin-top:12px">'+esc(p.n)+'</div>'+
   '</div>'+
 
-  '<div class="card"><h3>Tamaño de la letra</h3>'+
+  '<div class="card"><h3>🔠 Tamaño de la letra</h3>'+
     '<div class="tabs fijas" style="grid-template-columns:repeat(3,1fr);margin:4px 0 0">'+
       LETRAS.map(function(L){
         return '<button class="tab'+(((AJ.letra||'normal')===L[0])?' on':'')+'" data-letra="'+L[0]+'">'+L[2]+'</button>';
       }).join('')+
     '</div></div>'+
 
-  '<div class="card"><h3>Color</h3>'+
+  '<div class="card"><h3>🎨 Color</h3>'+
     '<div class="colores">'+
       TEMAS.map(function(T){
         return '<button class="col'+(((AJ.color||'neon')===T[0])?' on':'')+'" data-color="'+T[0]+'" '+
@@ -4071,7 +4422,7 @@ async function pintarAjustes(){
       }).join('')+
     '</div></div>'+
 
-  '<div class="card"><h3>Coche</h3>'+
+  '<div class="card"><h3>🚗 Coche</h3>'+
     '<button class="btn solido" id="a-coche" style="margin-top:0">🚗&nbsp; Entrar en modo coche</button>'+
     '<div class="kv"><span>Modo coche también en Inicio</span>'+
       '<span class="sw'+(AJ.cocheEnInicio?' on':'')+'" data-aj="cocheEnInicio"></span></div>'+
@@ -4079,7 +4430,15 @@ async function pintarAjustes(){
       '<span class="sw'+(AJ.pantalla?' on':'')+'" data-aj="pantalla"></span></div>'+
     '</div>'+
 
-  '<div class="card"><h3>Internet</h3>'+
+  '<div class="card"><h3>▶️ Al abrir la app</h3>'+
+    '<div class="tabs fijas" style="grid-template-columns:repeat(3,1fr);margin:4px 0 0">'+
+      [['seguir','Seguir'],['aleatorio','Aleatorio'],['nada','Nada']].map(function(o){
+        return '<button class="tab'+(((AJ.alAbrir||'seguir')===o[0])?' on':'')+'" data-alabrir="'+o[0]+'">'+o[1]+'</button>';
+      }).join('')+
+    '</div>'+
+    '<div class="kv"><span class="pista">«Seguir» deja lista la última canción o emisora, en el segundo donde iba. «Aleatorio» deja Toda mi música barajada nada más abrir. Si tu automatización de Atajos abre Mi Música al conectar CarPlay, solo tienes que darle al ▶ del volante.</span></div></div>'+
+
+  '<div class="card"><h3>📶 Internet y datos</h3>'+
     '<div class="kv"><span>Ocultar novedades de cantantes<br><span class="pista">Quita esa fila de Inicio</span></span>'+
       '<span class="sw'+(AJ.sinNovedades?' on':'')+'" data-aj="sinNovedades"></span></div>'+
     '<div class="kv"><span>Ahorro de datos<br><span class="pista">Inicio no se actualiza solo: lo pides tú con ↻</span></span>'+
@@ -4088,7 +4447,7 @@ async function pintarAjustes(){
     '<div class="kv"><span>Radio, últimos 7 días</span><span class="v">≈ '+mbTxt(sem)+'</span></div>'+
     '<div class="kv"><span class="pista">La radio es lo que más gasta: una hora son unos 30 a 60 MB. Tu música guardada no gasta nada. Lo demás de la app gasta muy poco.</span></div></div>'+
 
-  '<div class="card"><h3>Tus datos</h3>'+
+  '<div class="card"><h3>💾 Tu música y copias</h3>'+
     (ocupa ? '<div class="kv"><span>Ocupa en el teléfono</span><span class="v">'+ocupa+'</span></div>' : '')+
     '<button class="btn suave" id="a-anadir2" style="margin-top:0">➕&nbsp; Añadir mis MP3</button>'+
     '<a class="btn" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Cómo traer mi música del PC</a>'+
@@ -4099,12 +4458,30 @@ async function pintarAjustes(){
     '<div class="kv"><span class="pista">Haz la copia antes de borrar el icono: el iPhone se lleva los datos. No incluye los MP3.</span></div>'+
     '<input type="file" id="fcopia" accept="application/json,.json" class="oculto"></div>'+
 
-  '<div class="card"><h3>Sobre la app</h3>'+
+  '<div class="card"><h3>ℹ️ Sobre la app · v'+APP_VERSION+'</h3>'+
     '<button class="btn" id="a-actualizar" style="margin-bottom:14px">🔄&nbsp; Buscar actualización</button>'+
     '<div class="credito">Propiedad de la <b>Familia Díaz González</b><br>Creador: <b>Emmanuel Díaz</b><br>Versión '+APP_VERSION+'</div>'+
     '<div class="sign">Emmanuel Díaz</div>'+
     '<button class="btn" id="a-informe">📋&nbsp; Enviar informe (WhatsApp)</button>'+
     '<button class="btn" id="a-reparar">🧹&nbsp; Limpiar caché y SW (conserva la música)</button></div>';
+  plegarAjustes();
+}
+/* Cada tarjeta de Ajustes (menos la del perfil) se queda cerrada con solo su título; un toque la abre.
+   Lo abierto se recuerda mientras la app esté abierta. */
+var AJ_ABIERTAS = {};
+function plegarAjustes(){
+  document.querySelectorAll('#ajustes-cuerpo > .card').forEach(function(card){
+    var h3 = card.querySelector(':scope > h3');
+    if(!h3) return;
+    var cuerpo = document.createElement('div'); cuerpo.className = 'cuerpo';
+    while(h3.nextSibling) cuerpo.appendChild(h3.nextSibling);
+    card.appendChild(cuerpo);
+    card.classList.add('plegable');
+    var k = h3.textContent.trim();
+    if(AJ_ABIERTAS[k]) card.classList.add('abierta');
+    h3.setAttribute('role', 'button');
+    h3.addEventListener('click', function(){ AJ_ABIERTAS[k] = card.classList.toggle('abierta'); });
+  });
 }
 
 /* ═════════ Diagnóstico (la prueba del coche, dentro de la app) ══ */
@@ -4642,7 +5019,7 @@ document.addEventListener('click', async function(ev){
     ev.stopPropagation();
     var c = await leer('canciones', el.dataset.fav);
     if(c){ c.fav = !c.fav; await guardar('canciones', limpia(c)); await cargarDatos();
-           if(actual && actual.id === c.id){ actual.fav = c.fav; $('now-fav').textContent = c.fav?'❤️':'♡'; }
+           if(actual && actual.id === c.id){ actual.fav = c.fav; $('now-fav').innerHTML = corazon(c.fav, 26); }
            pintarVista(); }
     return;
   }
@@ -4662,7 +5039,7 @@ document.addEventListener('click', async function(ev){
     if(FAV_RADIO[n]){ await borrar('favradio', k); delete FAV_RADIO[n]; }
     else { await guardar('favradio', {k:k, duenyo:yo, nombre:n}); FAV_RADIO[n] = true; }
     if(actual && actual.tipo==='radio' && actual.titulo===n){
-      actual.fav = !!FAV_RADIO[n]; $('now-fav').textContent = actual.fav?'❤️':'♡';
+      actual.fav = !!FAV_RADIO[n]; $('now-fav').innerHTML = corazon(actual.fav, 26);
     }
     pintarVista(); return;
   }
@@ -4705,7 +5082,7 @@ document.addEventListener('click', async function(ev){
     var cHF = await leer('canciones', el.dataset.hojaFav);
     if(cHF){
       cHF.fav = !cHF.fav; await guardar('canciones', limpia(cHF)); await cargarDatos();
-      if(actual && actual.id === cHF.id){ actual.fav = cHF.fav; $('now-fav').textContent = cHF.fav?'❤️':'♡'; }
+      if(actual && actual.id === cHF.id){ actual.fav = cHF.fav; $('now-fav').innerHTML = corazon(cHF.fav, 26); }
       toast(cHF.fav ? 'Marcada como favorita.' : 'Quitada de favoritos.', 'bueno', 2000);
     }
     cerrarHoja(); pintarVista(); return;
@@ -4938,6 +5315,36 @@ document.addEventListener('click', async function(ev){
   }
   if(t.closest('#a-anadir2')){ guiaAnadir(); return; }
   if(t.closest('#a-exportar')){ await exportarCopia(); return; }
+  if(t.closest('#copia-compartir')){ compartirCopia(); return; }
+  if(t.closest('#copia-bajar')){ bajarCopia(); return; }
+  if(t.closest('#copia-luego')){ try{ localStorage.setItem('mm_copia_luego_' + yo, String(Date.now())); }catch(_){} pintarVista(); return; }
+  if((el = t.closest('[data-alabrir]'))){ AJ.alAbrir = el.dataset.alabrir; guardarAjustes(); pintarAjustes(); return; }
+  if(t.closest('#b-letra')){
+    LET.abierta = !LET.abierta;
+    $('b-letra').classList.toggle('on', LET.abierta); $('letra').classList.toggle('on', LET.abierta);
+    if(LET.abierta){ cargarLetra(); setTimeout(function(){ $('letra').scrollIntoView({block:'nearest', behavior:'smooth'}); }, 80); }
+    return;
+  }
+  if((el = t.closest('[data-ln]'))){
+    var lnI = +el.dataset.ln;
+    if(LET.lineas && LET.lineas[lnI]){ try{ audio.currentTime = LET.lineas[lnI].t; }catch(_){} LET.act = -2; seguirLetra(); }
+    return;
+  }
+  if((el = t.closest('[data-cola-quitar]'))){ cerrarHoja(); colaQuitar(+el.dataset.colaQuitar); toast('Quitada de la cola.', 'bueno', 1600); return; }
+  if((el = t.closest('[data-cola-subir]'))){ cerrarHoja(); colaSubir(+el.dataset.colaSubir); return; }
+  if(t.closest('[data-cola-mas]')){ colaVer += 15; pintarCola(); return; }
+  if((el = t.closest('[data-cola-tocar]'))){
+    var ci = +el.dataset.colaTocar, sc = buscarCancion(cola[ci]);
+    if(!sc) return;
+    var esSig = ci === (colaPos + 1) % cola.length;
+    abrirHoja('<h4>'+esc(sc.titulo)+'</h4><div class="sub">'+esc(sc.artista)+'</div>'+
+      '<button class="btn solido" data-cola-ya="'+ci+'">▶&nbsp; Ponerla ahora</button>'+
+      (esSig ? '' : '<button class="btn" data-cola-subir="'+ci+'">Que suene la siguiente</button>')+
+      '<button class="btn" data-cola-quitar="'+ci+'">Quitarla de la cola</button>'+
+      '<button class="btn" data-cerrar-hoja="1">Cancelar</button>');
+    return;
+  }
+  if((el = t.closest('[data-cola-ya]'))){ var cy = +el.dataset.colaYa; cerrarHoja(); if(cola[cy]){ viendoVideo = false; await tocarCancion(cola[cy], cola); } return; }
   if(t.closest('#a-importar')){ $('fcopia').click(); return; }
   if(t.closest('#a-diag')){ await diagnostico(); return; }
   if((el = t.closest('[data-color]'))){
@@ -4979,7 +5386,7 @@ document.addEventListener('click', async function(ev){
       if(FAV_RADIO[nn]){ await borrar('favradio', kk); delete FAV_RADIO[nn]; actual.fav = false; }
       else { await guardar('favradio', {k:kk, duenyo:yo, nombre:nn}); FAV_RADIO[nn] = true; actual.fav = true; }
     }
-    $('now-fav').textContent = actual.fav ? '❤️' : '♡';
+    $('now-fav').innerHTML = corazon(actual.fav, 26);
     pintarVista(); return;
   }
   if(t.closest('#mini')){ if(actual) $('now').classList.add('on'); return; }
@@ -5463,6 +5870,9 @@ async function entrar(p){
   recuperarCola();
   autoReparar();
   setTimeout(clasificarGeneros, 6000);
+  setTimeout(repararCaratulas, 8000);
+  comprobarEspacio();
+  setTimeout(alAbrirApp, 400);
   $('barra').classList.add('on');
   ir('inicio');
 }

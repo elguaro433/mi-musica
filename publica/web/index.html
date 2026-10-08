@@ -585,6 +585,8 @@ body.coche #coche-salir{display:block}
     <span class="art" id="m-art"></span>
     <span class="r-x"><span class="r-t" id="m-t"></span><span class="r-s" id="m-s"></span></span>
     <div class="m-botones">
+      <button class="ctrl" id="m-prev" aria-label="Anterior" title="Anterior"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M8.4 5H6v14h2.4zM20 5.6v12.8a.8.8 0 0 1-1.25.66l-8.85-5.4a.8.8 0 0 1 0-1.32l8.85-5.4a.8.8 0 0 1 1.25.66z"/></svg></button>
+      <button class="ctrl" id="m-stop" aria-label="Parar" title="Parar"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></button>
       <button class="pp" id="m-pp" aria-label="Reproducir o pausar" title="Reproducir o pausar"></button>
       <button class="ctrl" id="m-next" aria-label="Siguiente" title="Siguiente"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M15.6 5H18v14h-2.4zM4 5.6v12.8a.8.8 0 0 0 1.25.66l8.85-5.4a.8.8 0 0 0 0-1.32L5.25 6.94A.8.8 0 0 0 4 5.6z"/></svg></button>
     </div>
@@ -632,7 +634,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.0';
+var APP_VERSION = '2.1';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -2047,6 +2049,10 @@ async function alAbrirApp(){
   var modo = AJ.alAbrir || 'seguir';
   // Atajo de Siri («Oye Siri, pon Mi Música»): el enlace lleva ?accion=aleatorio y manda sobre el ajuste.
   if(/[?&]accion=aleatorio(&|$)/.test(location.search)) modo = 'aleatorio';
+  // «Oye Siri, pon en Mi Música …»: el Atajo pregunta qué quieres oír y abre la app con ?cancion=lo que dijiste.
+  var pide = '';
+  try{ pide = new URLSearchParams(location.search).get('cancion') || ''; }catch(_){}
+  if(pide && await ponerLoQuePides(pide)) return;
   try{
     if(modo === 'aleatorio'){
       var A = listasAuto().filter(function(l){ return l.id === 'auto_todo'; })[0];
@@ -2065,6 +2071,67 @@ async function alAbrirApp(){
       for(var i=0;i<L.length;i++) if(L[i].nombre === u.titulo){ tocarRadio(L[i], true); return; }
     }else if(u.id && buscarCancion(u.id)) await tocarCancion(u.id, null, {sinSonar:true, seg:u.seg || 0});
   }catch(err){ anotar('al abrir', err.message); }
+}
+/* Busca en TU música lo que dijiste a Siri: si es un cantante, suenan sus canciones barajadas;
+   si es una canción, esa y detrás el resto barajado. Sin tildes ni mayúsculas, y vale un trozo del nombre. */
+async function ponerLoQuePides(texto){
+  var q = normTxt(texto).replace(/^(pon|ponme|coloca|reproduce|toca)\s+/, '').replace(/\s+(en|de)\s+mi\s+musica$/, '').trim();
+  if(!q) return false;
+  // «pon la radio favorita», «pon la radio», «pon la emisora Tropicana»
+  var mr = /^(?:la\s+)?(?:radio|emisora)\b\s*(.*)$/.exec(q);
+  if(mr) return ponerRadioPedida(mr[1].replace(/^(?:de|la|el)\s+/, '').trim(), texto);
+  var vivas = CANCIONES.filter(function(c){ return !c.falta; });
+  var deArtista = vivas.filter(function(c){ return normTxt(c.artista).indexOf(q) >= 0; });
+  var porTitulo = vivas.filter(function(c){ return normTxt(c.titulo).indexOf(q) >= 0; });
+  if(!porTitulo.length){
+    var pal = q.split(' ').filter(function(w){ return w.length > 2; });
+    porTitulo = vivas.filter(function(c){ var t = normTxt(c.titulo + ' ' + c.artista); return pal.length && pal.every(function(w){ return t.indexOf(w) >= 0; }); });
+  }
+  var primera = null, ids;
+  if(porTitulo.length && (!deArtista.length || porTitulo.length <= deArtista.length)){
+    primera = porTitulo[0].id;
+    ids = [primera].concat(barajarMusica(vivas.map(function(c){ return c.id; })).filter(function(id){ return id !== primera; }));
+  }else if(deArtista.length){
+    ids = barajarMusica(deArtista.map(function(c){ return c.id; }));
+  }else{
+    toast('No encontré «' + esc(texto) + '» en tu música.', 'malo', 5000);
+    anotar('siri', 'no encontrado', texto);
+    return false;
+  }
+  aleatorio = false; pintarModos();
+  anotar('siri', 'pedido: ' + texto, buscarCancion(ids[0]).titulo);
+  await tocarCancion(ids[0], ids, {alAbrir:true});
+  return true;
+}
+/* La radio que pides a Siri: «favorita» (o nada) = tu favorita más escuchada; si no tienes favoritas,
+   la que más oyes; si no, la última. Con un nombre, la emisora que lo contenga (las tuyas y las de casa). */
+function ponerRadioPedida(nombre, texto){
+  var L = listaEmisoras(), cn = conteoRadio(), e = null;
+  function veces(x){ return (cn[x.url] && cn[x.url].n) || 0; }
+  function masOida(lista){ return lista.slice().sort(function(a, b){ return veces(b) - veces(a); })[0] || null; }
+  var generico = !nombre || /^(favorita|mi favorita|preferida|de siempre|que mas oigo)$/.test(nombre);
+  if(!generico){
+    var hay = L.filter(function(x){ return normTxt(x.nombre).indexOf(nombre) >= 0; });
+    if(!hay.length){
+      var pal = nombre.split(' ').filter(function(w){ return w.length > 2; });
+      hay = L.filter(function(x){ var t = normTxt(x.nombre + ' ' + x.genero); return pal.length && pal.every(function(w){ return t.indexOf(w) >= 0; }); });
+    }
+    e = masOida(hay);
+  }
+  if(!e){
+    if(!generico){ toast('No encontré la emisora «' + esc(texto) + '». Pongo tu favorita.', 'malo', 4500); }
+    e = masOida(L.filter(function(x){ return FAV_RADIO[x.nombre]; }));
+    if(!e){ var conVeces = L.filter(function(x){ return veces(x) > 0; }); e = masOida(conVeces); }
+    if(!e){
+      try{ var u = JSON.parse(localStorage.getItem('mm_ultimo_'+yo) || 'null'); if(u && u.tipo === 'radio') e = L.filter(function(x){ return x.nombre === u.titulo; })[0] || null; }catch(_){}
+    }
+  }
+  if(!e){ toast('Aún no tienes una radio favorita: toca el corazón de una emisora.', 'malo', 5000); return false; }
+  anotar('siri', 'radio pedida: ' + texto, e.nombre);
+  tocarRadio(e, true);        // preparada…
+  playPause();                // …y en marcha; si iOS pide un toque, el ▶ o el volante la arrancan
+  contarRadio(e);
+  return true;
 }
 async function retomar(){
   try{

@@ -630,7 +630,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '1.37.7';
+var APP_VERSION = '1.37.9';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -1542,6 +1542,9 @@ function cablearAudio(){
     // Si la pausa no la pediste tú, fue una llamada, el GPS o los
     // auriculares: intentamos volver solos.
     if(!pausaMia && !paradoPorMi && actual && !audio.ended && audio.currentTime > 0) trasInterrupcion();
+    // Informe 8/10/2026: con la pantalla apagada, al acabar una canción llegó el «pause» (ya terminada)
+    // y iOS durmió la página ANTES de mandar «ended»: la siguiente nunca arrancó. Se pasa ya desde aquí.
+    else if(audio.ended && actual && actual.tipo === 'cancion'){ linea('fin: llegó la pausa de final; paso sin esperar a ended'); alAcabarCancion(); }
   });
   audio.addEventListener('timeupdate', pintarProgreso);
   audio.addEventListener('loadedmetadata', function(){
@@ -1551,12 +1554,7 @@ function cablearAudio(){
       if(actual.id && !actual.remota) guardarDuracion(actual.id, audio.duration);
     }
   });
-  audio.addEventListener('ended', function(){
-    if(actual && actual.tipo==='cancion'){
-      if(repetir === 2){ audio.currentTime = 0; audio.play(); }   // repetir una
-      else { MZ.entra = true; siguiente(); }                       // la cola da la vuelta sola
-    }
-  });
+  audio.addEventListener('ended', function(){ alAcabarCancion(); });
   audio.addEventListener('error', function(){
     var c = audio.error ? audio.error.code : 0;
     anotar('audio', 'error código ' + c, actual ? actual.titulo : '');
@@ -1656,6 +1654,16 @@ function iniciarMezcla(){
     audio.addEventListener('timeupdate', mezclaVigila);
     audio.addEventListener('pause', function(){ if(MZ.puente && !audio.ended && (audio.duration - audio.currentTime) > 0.6) abortarPuente(); });
   }catch(err){ anotar('mezcla', err.message); AJ.mezcla = false; guardarAjustes(); }
+}
+/* Fin de canción: lo llaman «ended» y también la pausa de final (por si iOS duerme la página entre
+   las dos). Solo actúa una vez por final: la segunda llamada llega a los pocos ms y se ignora. */
+var tFinTratado = 0;
+function alAcabarCancion(){
+  if(!actual || actual.tipo !== 'cancion' || !audio.ended) return;
+  if(Date.now() - tFinTratado < 2000) return;
+  tFinTratado = Date.now();
+  if(repetir === 2){ audio.currentTime = 0; audio.play(); }   // repetir una
+  else { MZ.entra = true; siguiente(); }                       // la cola da la vuelta sola
 }
 function siguienteId(){
   if(aleatorio || cola.length < 2 && repetir === 0) return null;

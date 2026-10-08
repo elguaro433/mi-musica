@@ -8,6 +8,10 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
+## 🆕 Sesión del 8/10/2026 (v1.37.9) — LA MÚSICA SE QUEDABA AL ACABAR UNA CANCIÓN
+
+- **Informe de Emmanuel (v1.37.7, pantalla apagada):** 4 canciones pasaron solas bien (cada final = `pause` + `ended` a 2-3 ms) y en la 5ª llegó el `pause` del final (t=244) y luego un `statechange` de audioSession, pero **NUNCA `ended`**: iOS durmió la página entre los dos y la siguiente no arrancó (30 min parada hasta que abrió la app). No era otra app ni el vigilante. **Arreglo:** `alAcabarCancion()` (una vez por final, guarda de 2 s) se llama desde `ended` Y desde el `pause` si `audio.ended`. Probado en Chrome con un WAV de 1 s: un solo paso, el `ended` posterior se ignora. Las pausas de v1.37.6 («cada ~210 s») eran en realidad FINALES DE CANCIÓN normales. SIN CONFIRMAR en iPhone: buscar `fin: llegó la pausa de final` en la línea de tiempo. Ojo: el commit «v1.37.8» no subió `APP_VERSION` ni `sw.js` (seguía en 1.37.5): ahora ambos 1.37.9.
+
 ## 🆕 Sesión del 7/10/2026 (v1.37.6 → v1.37.7) — ARREGLO: VIGILANTE + CONTROLES DE RADIO
 
 - **v1.37.7:** Reportaje de Emmanuel: «radio da muchos problemas para pausarla, para pasarla» + cambio abierto de botones. **ARREGLOS:** (1) Mini reproductor: añadidos botones de **retroceder** (anterior), **parar** y **siguiente** en fila horizontal; estilos `.m-botones` y `.ctrl` más compactos (32×32 px) + `.pp` (36×36 px); (2) **Radio siempre con controles** (antes se ocultaba el botón siguiente en radio); (3) Event handlers: `#m-prev` → `anterior()`, `#m-stop` → `pausarYo()` (suelta el src, dice «Radio parada», no consume datos); función `pausarYo()` ya hacía eso bien pero no era evidente; (4) Exclusión de botones del deslize a «Ahora suena» (`#m-prev, #m-stop` añadidos a la guarda). SIN PROBAR en iPhone: verificar que se pueda cambiar de emisora y parar con los botones.

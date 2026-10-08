@@ -8,6 +8,10 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
+## 🆕 v2.4 (8/10/2026 noche) — iconos propios en vez de emojis, ventanas más finas
+
+- Él: «mejorar las ventanas, los emojis, todo». En vez de tocar ~150 sitios, `ICONOS` + `icono(nombre)` (SVG de trazo, estilo Lucide) y un `MutationObserver` (`cambiarEmojis`) que sustituye cada emoji conocido (mapa `ICONOS.M`, incluidos los de estilo de `ESTILOS`: 🎺🎸🎻🎛💜🌴…) por `<span class="ic ic-…">` en cuanto aparece. No toca banderas, `#letra`, inputs ni `<option>`. Para un emoji nuevo en la interfaz: añadirlo a `ICONOS.M` (si no, sale el emoji). Colores por contexto en CSS (`.card h3 .ic`, `.btn .ic`, `.art .ic`…); ⏳ gira. Hojas: suben con animación, asa más visible, iconos de `.opc` en cuadradito morado, «Cerrar» como texto centrado. `.btn` sin borde discontinuo. Plegables de Ajustes: icono + título a la izquierda. Probado en Chrome a 393 y 440: 0 emojis visibles, sin desbordes.
+
 ## 🆕 v2.3 (8/10/2026 noche) — gestos con el dedo «en todo»
 
 - Le gustó bajar «Sonando ahora» y pidió ponerlo en todo. `gestoBajar(o)` (genérico, touch events) se usa en `#now` y en la hoja `#hoja` (baja `#hoja-caja`, el velo se aclara). La barrita `#mini` deslizada hacia ARRIBA abre «Sonando ahora». Deslizar desde el borde izquierdo (<28 px) hacia la derecha = atrás (`volverAtras`/`hayAtras`: botones `data-cerrar-lista`, `data-gen-volver`, `data-cerrar-ia`, `data-cerrar-yt` o el vídeo de YouTube abierto). Todos ponen `window.__swipe` para que el final del gesto no sea un toque; ojo: un `.click()` propio tras un gesto debe poner antes `window.__swipe = 0` (si no, la guarda en captura lo traga). Probado en Chrome con toques simulados; SIN CONFIRMAR en iPhone. No hay deslizar entre pestañas (chocaría con deslizar filas a la izquierda).

@@ -425,7 +425,7 @@ a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box
   box-shadow:0 0 0 3px rgba(169,112,255,.35),0 2px 8px rgba(0,0,0,.5);transition:transform .15s}
 .seek[data-arr] i::after{transform:scale(1.45)}
 .seek.vivo i::after{display:none}
-#now-cerrar{display:grid;place-items:center;width:52px;height:52px;margin:-8px 0 -8px -10px;color:var(--text,#f6f2ff)}
+#now-cerrar{display:grid;place-items:center;width:56px;height:56px;margin:-10px 0 -10px -12px;background:none;border:0;padding:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;color:var(--text,#f6f2ff)}
 .times{flex:0 0 auto;display:flex;justify-content:space-between;font-size:calc(12.5px * var(--esc));font-variant-numeric:tabular-nums;color:var(--muted);margin:2px 2px 22px}
 .ctrls{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:4px;margin:0 2px 22px}
 .ctrls button{background:none;border:0;color:var(--text,#f6f2ff);cursor:pointer;padding:0;flex:0 0 auto;
@@ -599,7 +599,7 @@ body.coche #coche-salir{display:block}
 
   <!-- Sonando ahora -->
   <div id="now">
-    <div class="now-top"><span id="now-cerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></span><span style="letter-spacing:.14em;font-size:calc(11px * var(--esc));cursor:default">SONANDO AHORA</span><span style="display:flex;gap:16px;align-items:center"><span id="now-mas">⋯</span><span id="now-fav"><svg class="cor" viewBox="0 0 24 24" width="26" height="26"><path d="M12 20.5s-7.4-4.5-9.4-9.1C1.1 8 3.2 4.6 6.6 4.6c2 0 3.5 1.1 5.4 3.1 1.9-2 3.4-3.1 5.4-3.1 3.4 0 5.5 3.4 4 6.8-2 4.6-9.4 9.1-9.4 9.1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg></span></span></div>
+    <div class="now-top"><button type="button" id="now-cerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"><path d="M5 9l7 7 7-7"/></svg></button><span style="letter-spacing:.14em;font-size:calc(11px * var(--esc));cursor:default">SONANDO AHORA</span><span style="display:flex;gap:16px;align-items:center"><span id="now-mas">⋯</span><span id="now-fav"><svg class="cor" viewBox="0 0 24 24" width="26" height="26"><path d="M12 20.5s-7.4-4.5-9.4-9.1C1.1 8 3.2 4.6 6.6 4.6c2 0 3.5 1.1 5.4 3.1 1.9-2 3.4-3.1 5.4-3.1 3.4 0 5.5 3.4 4 6.8-2 4.6-9.4 9.1-9.4 9.1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg></span></span></div>
     <div class="art" id="n-art"></div>
     <h3 id="n-t">—</h3>
     <div id="n-s">—</div>
@@ -673,7 +673,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.1';
+var APP_VERSION = '2.2';
 
 /* ─── Guardián 10 · caja negra ───────────────────────────────────── */
 var CAJA = 'mm_errores';
@@ -5440,7 +5440,7 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#b-rep')){ ciclarRepetir(); return; }
   if(t.closest('#coche-salir')){ modoCoche(false); return; }
   if(t.closest('#b-coche') || t.closest('#a-coche')){ modoCoche(true); if(!actual) await retomar(); return; }
-  if(t.closest('#now-cerrar')){ $('now').classList.remove('on'); return; }
+  if(t.closest('#now-cerrar')){ cerrarAhora(); return; }
   if(t.closest('#now-fav')){
     if(!actual) return;
     if(actual.tipo === 'cancion'){
@@ -5507,6 +5507,58 @@ $('ficheros').addEventListener('change', function(e){
 document.addEventListener('change', function(e){
   if(e.target.id === 'fcopia' && e.target.files[0]){ importarCopia(e.target.files[0]); e.target.value=''; }
 });
+/* Cerrar «Sonando ahora» (v2.2). Antes solo con el «click» de la flecha, y en iOS ese click
+   a veces no llegaba (la letra se va desplazando sola y el toque se gasta en pararla): no se
+   podía cerrar. Ahora la flecha cierra al levantar el dedo, y la pantalla entera se baja
+   deslizando hacia abajo, como en Apple Music. */
+function cerrarAhora(animar){
+  var n = $('now');
+  if(!n.classList.contains('on')) return;
+  if(!animar){ n.classList.remove('on'); n.style.transform = ''; n.style.transition = ''; return; }
+  n.style.transition = 'transform .22s ease-out';
+  n.style.transform = 'translateY(100%)';
+  setTimeout(function(){ n.classList.remove('on'); n.style.transform = ''; n.style.transition = ''; }, 230);
+}
+$('now-cerrar').addEventListener('pointerup', function(e){
+  e.preventDefault();
+  if($('now').classList.contains('on')) window.__swipe = Date.now();   // que el toque no caiga en lo de debajo
+  cerrarAhora();
+});
+(function(){
+  var n = $('now'), y0 = 0, x0 = 0, t0 = 0, dy = 0, activo = false, bajando = false;
+  n.addEventListener('touchstart', function(e){
+    activo = false; bajando = false; dy = 0;
+    if(e.touches.length !== 1 || n.scrollTop > 2) return;              // si la pantalla está desplazada, primero sube
+    var t = e.target;
+    if(t.closest && (t.closest('#n-seek-caja') || (t.closest('#letra') && $('letra').scrollTop > 2))) return;
+    y0 = e.touches[0].clientY; x0 = e.touches[0].clientX; t0 = Date.now(); activo = true;
+  }, {passive:true});
+  n.addEventListener('touchmove', function(e){
+    if(!activo) return;
+    var ay = e.touches[0].clientY - y0, ax = e.touches[0].clientX - x0;
+    if(!bajando){
+      if(ay < 0 || Math.abs(ax) > Math.abs(ay)){ if(Math.abs(ay) > 8 || Math.abs(ax) > 8) activo = false; return; }
+      if(ay < 8) return;
+      bajando = true; n.style.transition = 'none';
+    }
+    e.preventDefault();
+    dy = Math.max(0, ay);
+    n.style.transform = 'translateY(' + dy + 'px)';
+  }, {passive:false});
+  function fin(){
+    if(!activo) return;
+    activo = false;
+    if(!bajando) return;
+    bajando = false;
+    var rapido = dy > 40 && dy / Math.max(1, Date.now() - t0) > 0.6;
+    if(dy > 120 || rapido){ cerrarAhora(true); return; }
+    n.style.transition = 'transform .2s ease-out'; n.style.transform = '';
+    setTimeout(function(){ n.style.transition = ''; }, 210);
+  }
+  n.addEventListener('touchend', fin);
+  n.addEventListener('touchcancel', fin);
+})();
+
 /* Barra de «Sonando ahora»: se toca o se arrastra con el dedo. */
 (function(){
   var caja = $('n-seek-caja'), arrastrando = false;

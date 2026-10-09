@@ -8,6 +8,10 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
+## 🆕 v2.5 (9/10/2026) — la radio no volvía: el detector de fantasmas mataba la conexión
+
+- Informe suyo (v2.4, Éxitos 99.9 FM, pantalla apagada ~28 min parada): la emisora dio un error suelto (código 4) y cada reconexión (t=0, `waiting`) la tomaba `revisarFantasma` por «fantasma» y la reenganchaba → `AbortError` → otra vez; al abrir la app, SU TOQUE para ir a Ajustes paró la radio que estaba reconectando. La emisora respondía bien (curl). Arreglo: `yaSono` (false en `loadstart`/`emptied`, true en `playing`): sin haber sonado esa fuente no hay fantasma posible. `vigilarConexion()`: radio 15 s «conectando» sin sonar y con la app a la vista → `programarReconexion()`. Probado en Chrome con la emisora real y con una IP que no contesta. SIN CONFIRMAR en iPhone: buscar `fantasma: no, aún está conectando` y `radio: 15 s conectando` en la línea de tiempo.
+
 ## 🆕 v2.4 (8/10/2026 noche) — iconos propios en vez de emojis, ventanas más finas
 
 - Él: «mejorar las ventanas, los emojis, todo». En vez de tocar ~150 sitios, `ICONOS` + `icono(nombre)` (SVG de trazo, estilo Lucide) y un `MutationObserver` (`cambiarEmojis`) que sustituye cada emoji conocido (mapa `ICONOS.M`, incluidos los de estilo de `ESTILOS`: 🎺🎸🎻🎛💜🌴…) por `<span class="ic ic-…">` en cuanto aparece. No toca banderas, `#letra`, inputs ni `<option>`. Para un emoji nuevo en la interfaz: añadirlo a `ICONOS.M` (si no, sale el emoji). Colores por contexto en CSS (`.card h3 .ic`, `.btn .ic`, `.art .ic`…); ⏳ gira. Hojas: suben con animación, asa más visible, iconos de `.opc` en cuadradito morado, «Cerrar» como texto centrado. `.btn` sin borde discontinuo. Plegables de Ajustes: icono + título a la izquierda. Probado en Chrome a 393 y 440: 0 emojis visibles, sin desbordes.

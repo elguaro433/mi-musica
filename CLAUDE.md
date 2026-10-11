@@ -144,7 +144,31 @@
   `com.familiadiazgonzalez.mimusica`, él decide el definitivo),
   `testflight.yml` (SIN PROBAR; secrets APPLE_TEAM_ID, ASC_KEY_ID,
   ASC_ISSUER_ID, ASC_KEY_P8 — **nunca por chat**).
-- Requisitos completos en `apple/REQUISITOS.md`. Solo español es válido.
+- **11/10/2026 — versión pública 1.0 «mejorada full»** (numeración propia:
+  `VERSION_PUBLICA` en el script y `publica/web/sw.js`). Lo que solo lleva la
+  pública vive en `publica/mejoras.js` y `publica/i18n.js`, que el script mete
+  al final del guion principal (sustituye funciones POR ASIGNACIÓN):
+  · mundial: país del teléfono (o elegido en una hoja con buscador, 211 regiones
+    con `Intl.DisplayNames`); éxitos de Apple sin `genre=12` (`publica/paises_apple.txt`:
+    tiendas con lista; si no, EE. UU.); Radio = «Las más escuchadas en <país>»
+    (Radio Browser) en vez de las 30 de casa (`EMISORAS = []`).
+  · sin YouTube (`abrirVideoId` es un aviso). Temporizador de dormir (luna en
+    «Sonando ahora», usa `pausarYo`). «Tu resumen» (top cantantes/canciones/emisoras).
+  · **inglés**: si el iPhone no está en español. Traductor de nodos de texto +
+    placeholder/aria-label (MutationObserver), tabla `publica/en.json`
+    (textos exactos + patrones). Texto nuevo en la app → añadirlo a `en.json`.
+    `localStorage.mm_idioma = 'en'|'es'` lo fuerza (para probar).
+  · Firma: «Creada por Emmanuel Díaz» (`publica/creador.txt`, la misma para
+    todas sus apps; él quiso salir como creador).
+  · `privacidad.html`, `terminos.html` (nuevo, remite al EULA estándar de Apple,
+    ley de Andorra) y `guia.html`: bilingües. Falta **[CORREO DE CONTACTO]**.
+  · Capturas 1320×2868 (6,9") en `apple/capturas/es` y `/en`.
+  · OJO: escanear las 676 tiendas de Apple seguidas da 403 un rato (bloqueo temporal).
+- Nombre: en la tienda «Mi Música» seguro que choca. Libres en búsqueda:
+  «Guaro Music», «Musiquita», «Mi Música Díaz» (guaro = de Barquisimeto, como
+  su usuario elguaro433). Solo App Store Connect confirma. Logo: pendiente
+  de que elija nombre.
+- Requisitos completos en `apple/REQUISITOS.md`.
 - Cuenta: 99 €/año la paga y verifica él. Su Apple ID está en región España pero
   vive en Andorra (AD500): hay que poner el Apple ID en Andorra (o uno nuevo)
   antes de inscribirse.

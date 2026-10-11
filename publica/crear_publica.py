@@ -15,6 +15,7 @@ import io, os, re, sys
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ORIGEN = os.path.join(RAIZ, 'index.html')
 DESTINO = os.path.join(RAIZ, 'publica', 'web', 'index.html')
+VERSION_PUBLICA = '1.0'          # la de la App Store: va por su cuenta
 
 s = io.open(ORIGEN, encoding='utf-8').read()          # traduce CRLF a \n
 
@@ -59,7 +60,7 @@ cambiar_re(r'    <button class="q-btn" data-p="emmanuel">.*?</button>\n    <butt
 # 4 · Créditos y firma
 cambiar('MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz', 'MI MÚSICA')
 cambiar_re(r"'<div class=\"credito\">Propiedad de la.*?</div>'\+\n    '<div class=\"sign\">Emmanuel Díaz</div>'\+",
-           "'<div class=\"credito\"><b>Mi Música</b><br>Versión '+APP_VERSION+'</div>'+\n"
+           "'<div class=\"credito\"><b>Mi Música</b><br>Versión '+APP_VERSION+'<br>__CREADOR__</div>'+\n"
            "    '<a class=\"btn\" href=\"privacidad.html\" target=\"_blank\" rel=\"noopener\">🔒&nbsp; Política de privacidad</a>'+")
 cambiar("'<button class=\"btn\" id=\"a-actualizar\" style=\"margin-bottom:14px\">🔄&nbsp; Buscar actualización</button>'+\n", '')
 cambiar('Enviar informe (WhatsApp)', 'Enviar informe de errores')
@@ -90,9 +91,41 @@ cambiar("async function escucharCompleta(p){\n", "async function escucharComplet
 cambiar("if(!standalone && guardado){", "if(false){")
 cambiar("async function buscarActualizacion(forzar){\n", "async function buscarActualizacion(forzar){\n  return false;       // la versión pública la actualiza la App Store\n")
 
+# 8 · Versión propia de la tienda (la privada va por su cuenta)
+cambiar_re(r"var APP_VERSION = '[\d.]+';", "var APP_VERSION = '" + VERSION_PUBLICA + "';")
+
+# 9 · Mundial: sin las emisoras de casa (Andorra, Barquisimeto…); Inicio y Radio según el país del teléfono
+cambiar_re(r"var EMISORAS = \[.*?\];\n", "var EMISORAS = [];      // versión pública: las emisoras salen del país del teléfono\n")
+cambiar("""  h += '<div class="tabs" style="margin-top:14px">' + PAISES_INI.map(function(p){
+    return '<button class="tab'+(p[0] === paisIni() ? ' on' : '')+'" data-pais="'+p[0]+'">'+p[1]+' '+p[2]+'</button>'; }).join('') + '</div>';""",
+        "  h += bloqueResumen() + selectorPais();")
+cambiar("    C.innerHTML = botones + bloqueMundo() + propias;",
+        "    C.innerHTML = botones + bloqueMundo() + bloquePaisRadio() + propias;")
+
+# 10 · Términos de uso junto a la privacidad
+cambiar("""'<a class="btn" href="privacidad.html" target="_blank" rel="noopener">🔒&nbsp; Política de privacidad</a>'+""",
+        """'<a class="btn" href="privacidad.html" target="_blank" rel="noopener">ℹ️&nbsp; Política de privacidad</a>'+
+    '<a class="btn" href="terminos.html" target="_blank" rel="noopener">📖&nbsp; Términos de uso</a>'+""")
+
 # Lo que queda con nombres propios son solo comentarios del código: se neutralizan también
 for viejo, nuevo in [('Elibel', 'un usuario'), ('Emmanuel', 'un usuario'), ('elibel', 'perfil2'), ('emmanuel', 'perfil1'), ('Dacia', 'coche')]:
     s = s.replace(viejo, nuevo)
+
+# 11 · Mejoras e idiomas de la versión pública (publica/i18n.js y publica/mejoras.js), al final del guion principal
+import json
+def leer(n):
+    return io.open(os.path.join(RAIZ, 'publica', n), encoding='utf-8').read()
+tr = json.loads(leer('en.json'))
+i18n = leer('i18n.js').replace('__EN__', json.dumps(tr['textos'], ensure_ascii=False, indent=0)) \
+                      .replace('__EN_RX__', json.dumps(tr['patrones'], ensure_ascii=False))
+mej = leer('mejoras.js').replace('__APPLE_CC__', leer('paises_apple.txt').strip())
+fin = s.rfind('\n</script>\n</body>')
+if fin < 0:
+    sys.exit('NO ENCAJA: final del guion principal')
+s = s[:fin] + '\n' + i18n + '\n' + mej + s[fin:]
+
+# 12 · Firma del creador, la misma en todas sus apps (publica/creador.txt)
+s = s.replace('__CREADOR__', leer('creador.txt').strip())
 
 os.makedirs(os.path.dirname(DESTINO), exist_ok=True)
 t = DESTINO + '.tmp'
@@ -104,7 +137,7 @@ os.replace(t, DESTINO)
 restos = []
 for palabra in ['Elibel', 'elibel', 'Díaz', 'Dacia', 'piped', 'fonts.googleapis', '050216', 'Emmanuel', 'emmanuel', '2004']:
     for n, linea in enumerate(s.split('\n'), 1):
-        if palabra in linea:
+        if palabra in linea and 'Creada por' not in linea:
             restos.append((palabra, n, linea.strip()[:100]))
 print('Escrito', DESTINO)
 print('Restos (conviene que sean solo comentarios):', len(restos))

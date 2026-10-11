@@ -677,7 +677,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.6';
+var APP_VERSION = '1.0';
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -849,7 +849,7 @@ function toast(msg, tipo, ms){
 }
 
 /* ─── emisoras de fábrica (probadas una a una) ───────────────────── */
-var EMISORAS = [{"ciudad": "Andorra", "nombre": "RNA - Radio Nacional d'Andorra", "genero": "Generalista", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-f-c0-7/restreamer/outgest/578e48f3-c654-4638-948a-be990c90807b/manifest.m3u8", "kbps": 0, "codec": "HLS", "logo": "https://www.rtva.ad/favicon/android-chrome-192x192.png"}, {"ciudad": "Andorra", "nombre": "Andorra Musica", "genero": "Musica", "url": "https://livesg.rtva.hiway.media/restreamer/rtva_client/gpu-g-c0-3/restreamer/outgest/e2b4dcb0-7ae3-4335-992a-23ba82e529b3/manifest.m3u8", "kbps": 0, "codec": "HLS", "logo": "https://www.rtva.ad/favicon/android-chrome-512x512.png"}, {"ciudad": "Andorra", "nombre": "Flaix FM Andorra", "genero": "Dance, reggaeton", "url": "https://streaming.giraweb.com/8020/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://upload.wikimedia.org/wikipedia/commons/6/65/Flaixfm_logo.jpg?utm_source=de.wikipedia.org&utm_campaign=parser&utm_content=thumbnail_unscaled"}, {"ciudad": "Andorra", "nombre": "Flaixbac Andorra", "genero": "Pop", "url": "https://streaming.giraweb.com/8010/stream/;.mp3", "kbps": 320, "codec": "MP3", "logo": "https://flaixandorra.com/continguts/multimedia/imatges/8p0oa06li8kckkwosw.png"}, {"ciudad": "Andorra", "nombre": "Radio Valira", "genero": "Variada", "url": "https://mars.streamerr.co/8022/stream", "kbps": 128, "codec": "MP3", "logo": "https://radiovalira.ad/wp-content/uploads/2022/04/cropped-faviconrv-192x192.png"}, {"ciudad": "Andorra", "nombre": "SER Andorra", "genero": "Generalista", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_ANDORRA.mp3", "kbps": 96, "codec": "MP3", "logo": "https://cadenaser00.epimg.net/favicon.png"}, {"ciudad": "Barquisimeto", "nombre": "Rumba 100.1 FM", "genero": "Latin pop, variada", "url": "https://cast10.plugstreaming.com:2020/stream/r1001/;", "kbps": 64, "codec": "HE-AAC", "logo": "https://plugmedia.co/play/wp-content/uploads/2021/02/Logo_Barquisimeto.png"}, {"ciudad": "Barquisimeto", "nombre": "Fama 98.1 FM", "genero": "Variada", "url": "https://server6.globalhostla.com:9356/stream", "kbps": 64, "codec": "AAC", "logo": "https://fama.fm/wp-content/uploads/2020/07/Logo-Header-Blanco.png"}, {"ciudad": "Caracas", "nombre": "Exitos 99.9 FM", "genero": "Exitos, pop", "url": "https://acp4.lorini.net:2070/stream", "kbps": 128, "codec": "MP3", "logo": "https://www.google.com/s2/favicons?domain=mundour.com&sz=128"}, {"ciudad": "Caracas", "nombre": "La Mega 107.3", "genero": "Pop, urbano", "url": "https://acp4.lorini.net:2050/stream", "kbps": 128, "codec": "MP3", "logo": "https://www.phonostar.de/images/auto_created/La_Mega_1073184x184.png"}, {"ciudad": "Caracas", "nombre": "Planeta 105.3 FM", "genero": "Romantica, pop espanol", "url": "https://cast10.plugstreaming.com:2020/stream/planetafm/;", "kbps": 96, "codec": "HE-AAC", "logo": "https://plugmedia.co/play/wp-content/uploads/2021/01/Logo-Planeta-Original-en-PNG.png"}, {"ciudad": "Caracas", "nombre": "Onda La Superestacion 107.9", "genero": "Pop", "url": "https://acp4.lorini.net:2060/stream", "kbps": 128, "codec": "MP3", "logo": "https://www.google.com/s2/favicons?domain=mundour.com&sz=128"}, {"ciudad": "Bogota", "nombre": "LOS40 Colombia", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_COLOMBIAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://cdn-profiles.tunein.com/p1306541/images/logod.png"}, {"ciudad": "Bogota", "nombre": "Tropicana Estereo 102.9", "genero": "Salsa, vallenato, tropical", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_SC", "kbps": 128, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/tropicana-bogota.png"}, {"ciudad": "Bogota", "nombre": "Candela Estereo 101.9", "genero": "Salsa, tropical, latino", "url": "https://26523.live.streamtheworld.com/CANDELAESTEREO_SC", "kbps": 96, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/candela.png"}, {"ciudad": "Bogota", "nombre": "Vibra Bogota 104.9", "genero": "Salsa, vallenato, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/VIBRA_SC", "kbps": 96, "codec": "MP3", "logo": "https://emisorascolombianas.online/logos/vibra-bogota.png"}, {"ciudad": "Bogota", "nombre": "Radioacktiva 97.9", "genero": "Rock", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_ACTIVAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://www.radioacktiva.com/wp-content/uploads/2024/12/LOGO-RADIOACKTIVA-WEB-286X84.png"}, {"ciudad": "Bogota", "nombre": "Olimpica Stereo 105.9", "genero": "Salsa, vallenato, crossover", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/OLP_BOGOTAAAC.aac", "kbps": 64, "codec": "HE-AAC", "logo": "https://olimpicastereo.com.co/icon?b8748d2f62517688"}, {"ciudad": "Bogota", "nombre": "Besame Bogota 89.9", "genero": "Romantica, baladas", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/BESAME_BOGOTAAAC.aac", "kbps": 56, "codec": "HE-AAC", "logo": "https://emisorascolombianas.online/logos/besame.png"}, {"ciudad": "Espana", "nombre": "LOS 40 Principales", "genero": "Top 40, pop", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Los40.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/iconos/v1.x/v1.0/touch-apple.png"}, {"ciudad": "Espana", "nombre": "LOS40 Dance", "genero": "Dance, electronica", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_DANCE.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/estaticos/recursosgraficos/v1/img/app/los40_192.png"}, {"ciudad": "Espana", "nombre": "LOS40 Urban", "genero": "Urbano, reggaeton", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_URBAN.mp3", "kbps": 128, "codec": "MP3", "logo": "https://los40es00.epimg.net/estaticos/recursosgraficos/v1/img/app/los40_192.png"}, {"ciudad": "Espana", "nombre": "Cadena Dial", "genero": "Pop en espanol", "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CADENADIAL.mp3", "kbps": 128, "codec": "MP3", "logo": "https://www.cadenadial.com/wp-content/uploads/2024/03/cropped-512x512_favicon_dial-180x180.png"}, {"ciudad": "Espana", "nombre": "KISS FM", "genero": "80s, 90s, 2000s", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbkissfm.kissfmradio.cires21.com/bbkissfm.mp3", "kbps": 56, "codec": "MP3", "logo": "https://www.kissfm.es/wp-content/uploads/2020/09/favicon_KISS.jpg"}, {"ciudad": "Espana", "nombre": "Cadena 100", "genero": "Pop", "url": "https://cadena100-cope.flumotion.com/chunks.m3u8", "kbps": 128, "codec": "HLS", "logo": "https://www.cadena100.es/estaticos/apple-touch-icon-192x192.png"}, {"ciudad": "Espana", "nombre": "Hit FM", "genero": "Exitos actuales", "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbhitfm.kissfmradio.cires21.com/bbhitfm.mp3", "kbps": 56, "codec": "MP3", "logo": "https://www.hitfm.es/wp-content/uploads/2019/06/cropped-favicon-192x192.png"}, {"ciudad": "Espana", "nombre": "Rock FM", "genero": "Rock clasico", "url": "https://rockfm-cope.flumotion.com/chunks.m3u8", "kbps": 320, "codec": "HLS", "logo": "https://www.rockfm.fm/estaticos/apple-touch-icon-120x120.png"}, {"ciudad": "Espana", "nombre": "Maxima FM", "genero": "Dance, electronica", "url": "https://en-directo.frequence-radio.com/amp/redirect.php?radio=maxima-fm", "kbps": 128, "codec": "MP3"}, {"ciudad": "Espana", "nombre": "Flaix FM", "genero": "Dance, reggaeton", "url": "https://stream.flaixfm.cat/icecast", "kbps": 125, "codec": "AAC", "logo": "https://flaixfm.cat/favicon.ico"}];
+var EMISORAS = [];      // versión pública: las emisoras salen del país del teléfono
 var CIUDADES = [['Andorra','🇦🇩','Andorra'],['Barquisimeto','🇻🇪','Barquisimeto'],
                 ['Caracas','🇻🇪','Caracas'],['Bogota','🇨🇴','Bogotá'],['Espana','🇪🇸','España']];
 function plural(n, uno, varios){ return n + ' ' + (n === 1 ? uno : varios); }
@@ -3606,8 +3606,7 @@ function pintarInicio(){
   }
 
   // De qué país quieres los éxitos
-  h += '<div class="tabs" style="margin-top:14px">' + PAISES_INI.map(function(p){
-    return '<button class="tab'+(p[0] === paisIni() ? ' on' : '')+'" data-pais="'+p[0]+'">'+p[1]+' '+p[2]+'</button>'; }).join('') + '</div>';
+  h += bloqueResumen() + selectorPais();
 
   if(INI.apple.length) h += estante('🔥 Éxitos ahora', 'ex', INI.apple.slice(0, 15));
   else if(INI.cargando) h += esqueleto('🔥 Éxitos ahora');
@@ -3821,7 +3820,7 @@ function pintarBuscar(){
     var propias = h ? '<div class="city">⭐ Tus emisoras guardadas</div>' + h : '';
     // Buscando: los resultados arriba. En reposo: tus emisoras, el botón de buscar,
     // y debajo de todo lo demás (radios de éxitos, estilos, países).
-    C.innerHTML = botones + bloqueMundo() + propias;
+    C.innerHTML = botones + bloqueMundo() + bloquePaisRadio() + propias;
   }
   else if(pestana === 'youtube') pintarYouTube();
   else {
@@ -4660,8 +4659,9 @@ async function pintarAjustes(){
     '<input type="file" id="fcopia" accept="application/json,.json" class="oculto"></div>'+
 
   '<div class="card"><h3>ℹ️ Sobre la app · v'+APP_VERSION+'</h3>'+
-        '<div class="credito"><b>Mi Música</b><br>Versión '+APP_VERSION+'</div>'+
-    '<a class="btn" href="privacidad.html" target="_blank" rel="noopener">🔒&nbsp; Política de privacidad</a>'+
+        '<div class="credito"><b>Mi Música</b><br>Versión '+APP_VERSION+'<br>Creada por <b>Emmanuel Díaz</b></div>'+
+    '<a class="btn" href="privacidad.html" target="_blank" rel="noopener">ℹ️&nbsp; Política de privacidad</a>'+
+    '<a class="btn" href="terminos.html" target="_blank" rel="noopener">📖&nbsp; Términos de uso</a>'+
     '<button class="btn" id="a-informe">📋&nbsp; Enviar informe de errores</button>'+
     '<button class="btn" id="a-reparar">🧹&nbsp; Limpiar caché y SW (conserva la música)</button></div>';
   plegarAjustes();
@@ -6366,6 +6366,555 @@ document.addEventListener('visibilitychange', function(){
 });
 
 arrancar();
+/* ═════ Idiomas (solo versión pública) ═════════════════════════════
+   La app está escrita en español. Con el iPhone en otro idioma se enseña en inglés:
+   cada texto que aparece en pantalla se busca en EN (texto exacto) y, si no está,
+   en EN_RX (textos con números o nombres dentro). Lo que no esté, sale en español.
+   Para añadir un idioma: otra tabla como EN y una línea en idiomaApp().            */
+function idiomaApp(){
+  var g = null;
+  try{ g = localStorage.getItem('mm_idioma'); }catch(_){}
+  if(g === 'es' || g === 'en') return g;
+  var l = String((navigator.languages && navigator.languages[0]) || navigator.language || 'es').toLowerCase();
+  return l.indexOf('es') === 0 ? 'es' : 'en';
+}
+var IDIOMA = idiomaApp();
+var EN = {
+"Inicio": "Home",
+"Buscar": "Search",
+"Radio": "Radio",
+"Biblioteca": "Library",
+"Ajustes": "Settings",
+"Buenos días": "Good morning",
+"Buenas tardes": "Good afternoon",
+"Buenas noches": "Good evening",
+"Abriendo tu música…": "Opening your music…",
+"Cerrar": "Close",
+"Cancelar": "Cancel",
+"Listo": "Done",
+"Luego": "Later",
+"Ahora no": "Not now",
+"Seguir": "Continue",
+"Nada": "Nothing",
+"Reintentar": "Try again",
+"Actualizar": "Refresh",
+"Resultados": "Results",
+"🔎 Resultados": "🔎 Results",
+"Buscando…": "Searching…",
+"Buscando música…": "Searching music…",
+"Buscando en Audius…": "Searching Audius…",
+"Buscando la letra…": "Looking for the lyrics…",
+"Buscando la canción entera…": "Looking for the full song…",
+"Probando…": "Testing…",
+"o": "or",
+"y": "and",
+"desde": "from",
+"Toca": "Tap",
+"en directo": "live",
+"EN VIVO": "LIVE",
+"SONANDO AHORA": "NOW PLAYING",
+"Anterior": "Previous",
+"Siguiente": "Next",
+"Parar": "Stop",
+"Reproducir o pausar": "Play or pause",
+"Aleatorio": "Shuffle",
+"Repetir": "Repeat",
+"Reproducir": "Play",
+"Letra": "Lyrics",
+"Letra sin sincronizar": "Lyrics (not synced)",
+"No hay letra para esta canción.": "No lyrics for this song.",
+"No se pudo traer la letra ahora mismo. Prueba en un rato.": "Couldn't get the lyrics right now. Try again later.",
+"A continuación": "Up next",
+"Ver más": "Show more",
+"Que suene la siguiente": "Play next",
+"Ponerla ahora": "Play it now",
+"Quitarla de la cola": "Remove from queue",
+"Quitarla": "Remove it",
+"Quitada de la cola.": "Removed from the queue.",
+"Toca ▶ para seguir": "Tap ▶ to continue",
+"En pausa · otra app está sonando": "Paused · another app is playing",
+"Radio parada. Toca ▶ para volver.": "Radio stopped. Tap ▶ to resume.",
+"Éxitos ahora": "Top hits now",
+"🔥 Éxitos ahora": "🔥 Top hits now",
+"Éxitos de hoy": "Today's hits",
+"🔥 Éxitos de hoy": "🔥 Today's hits",
+"Éxitos de hoy · toca para verlos": "Today's hits · tap to see them",
+"Lo que más suena en Audius": "Trending on Audius",
+"🎧 Lo que más suena en Audius": "🎧 Trending on Audius",
+"Completas y gratis · Audius": "Full songs, free · Audius",
+"🎧 Completas y gratis · Audius": "🎧 Full songs, free · Audius",
+"Completas y gratis · lo que suena en Audius": "Full songs, free · trending on Audius",
+"🎧 Completas y gratis · lo que suena en Audius": "🎧 Full songs, free · trending on Audius",
+"Lo que más suena ahora": "Trending now",
+"Lo último que has oído": "Recently played",
+"🕐 Lo último que has oído": "🕐 Recently played",
+"Escuchado hace poco": "Recently played",
+"Las que más oyes": "Your most played",
+"⭐ Las que más oyes": "⭐ Your most played",
+"Novedades": "New releases",
+"🆕 Novedades": "🆕 New releases",
+"Seguir a otro ›": "Follow another ›",
+"Ver todas ›": "See all ›",
+"Tu música": "Your music",
+"🎵 Tu música": "🎵 Your music",
+"Tus favoritas": "Your favorites",
+"Tus más escuchadas": "Your most played",
+"🔥 Tus más escuchadas": "🔥 Your most played",
+"Tus emisoras": "Your stations",
+"📻 Tus emisoras": "📻 Your stations",
+"Radio · un toque": "Radio · one tap",
+"📻 Radio · un toque": "📻 Radio · one tap",
+"Emisoras más escuchadas": "Most popular stations",
+"📻 Emisoras más escuchadas": "📻 Most popular stations",
+"Tus MP3 salen aquí cuando los añadas en": "Your MP3s show up here once you add them in",
+"Biblioteca → ➕ Añadir música": "Library → ➕ Add music",
+"Biblioteca →": "Library →",
+"No se pudo traer lo de hoy. ¿Tienes internet?": "Couldn't load today's music. Are you online?",
+"Inicio no se actualiza solo: lo pides tú con": "Home doesn't refresh by itself: tap",
+"Quita esa fila de Inicio": "Removes that row from Home",
+"Música": "Music",
+"🎧 Música": "🎧 Music",
+"Cantante, grupo o canción": "Artist, band or song",
+"Escribe un cantante o un grupo": "Type an artist or a band",
+"Buscar un cantante": "Search for an artist",
+"Buscar en mi música": "Search my music",
+"Buscar en tu música…": "Search your music…",
+"No se pudo buscar ahora mismo.": "Couldn't search right now.",
+"Nada con ese nombre.": "Nothing with that name.",
+"Nada con ese nombre en tu música.": "Nothing with that name in your music.",
+"Todavía no has añadido música.": "You haven't added any music yet.",
+"Clásicos: música antigua y libre": "Classics: old, free music",
+"Bolero, mambo, jazz… y pulsa buscar": "Bolero, mambo, jazz… and tap search",
+"Escribe y pulsa buscar…": "Type and tap search…",
+"Esta canción no está completa en Audius. Prueba con otra o con la radio.": "This song isn't available in full on Audius. Try another one or the radio.",
+"Guardar en favoritas": "Save to favorites",
+"Quitar de favoritas": "Remove from favorites",
+"Añadir a favoritas": "Add to favorites",
+"Marcada como favorita.": "Added to favorites.",
+"Quitada de favoritas.": "Removed from favorites.",
+"Quitada de favoritos.": "Removed from favorites.",
+"Quitado de tus favoritos.": "Removed from your favorites.",
+"Nombre, ciudad o país": "Name, city or country",
+"Buscar cualquier emisora del mundo": "Search any station in the world",
+"🌍 Emisoras de todo el mundo": "🌍 Stations from around the world",
+"⭐ Tus emisoras guardadas": "⭐ Your saved stations",
+"Tus emisoras guardadas": "Your saved stations",
+"➕ Tuyas": "➕ Yours",
+"Tuyas": "Yours",
+"No respondió la última vez": "Didn't respond last time",
+"Emisora quitada.": "Station removed.",
+"Emisoras restauradas.": "Stations restored.",
+"Desaparece de la lista de este teléfono. Si te arrepientes, la puedes volver a buscar en «Buscar cualquier emisora del mundo» o restaurar en Ajustes.": "It disappears from this phone's list. If you change your mind, find it again with “Search any station in the world” or restore it in Settings.",
+"No se pudo preguntar ahora mismo. Mira si tienes internet.": "Couldn't search right now. Check your internet connection.",
+"Radio hoy": "Radio today",
+"Radio, últimos 7 días": "Radio, last 7 days",
+"Mi música": "My music",
+"🎵 Mi música": "🎵 My music",
+"Favoritas": "Favorites",
+"Listas": "Playlists",
+"☰ Listas": "☰ Playlists",
+"Tus listas": "Your playlists",
+"☰ Tus listas": "☰ Your playlists",
+"Automáticas": "Automatic",
+"⚡ Automáticas": "⚡ Automatic",
+"Todas": "All",
+"Artistas": "Artists",
+"Álbumes": "Albums",
+"Géneros": "Genres",
+"Toda mi música": "All my music",
+"Lo más escuchado": "Most played",
+"Añadidas hace poco": "Recently added",
+"Tu biblioteca está vacía.": "Your library is empty.",
+"Añadir música": "Add music",
+"Añadir mis MP3": "Add my MP3s",
+"Añadir tu música": "Add your music",
+"Cómo añadir mi música": "How to add my music",
+"Ir a la radio": "Go to the radio",
+"y elige tus MP3": "and choose your MP3s",
+"Archivos": "Files",
+"iCloud Drive": "iCloud Drive",
+"Todavía no has marcado nada.": "You haven't marked anything yet.",
+"Todavía no tienes listas.": "You don't have any playlists yet.",
+"Crear una lista nueva": "Create a new playlist",
+"¿Cómo se llama la lista?": "What's the playlist called?",
+"Esta lista está vacía.": "This playlist is empty.",
+"Esa lista está vacía.": "That playlist is empty.",
+"➕ Añadir canciones": "➕ Add songs",
+"Añadir a una lista": "Add to a playlist",
+"Ya tienes toda tu música en esta lista.": "All your music is already in this playlist.",
+"Toca las que quieras: se van metiendo al momento.": "Tap the ones you want: they're added right away.",
+"ya está en esta lista": "already in this playlist",
+"Eliminar de la app": "Delete from the app",
+"Eliminar": "Delete",
+"Crear lista": "Create playlist",
+"Baladas": "Ballads",
+"Clásica": "Classical",
+"Hip-Hop y rap": "Hip-hop and rap",
+"Jazz y blues": "Jazz and blues",
+"R&B y soul": "R&B and soul",
+"Reggae": "Reggae",
+"Rock": "Rock",
+"Salsa y tropical": "Salsa and tropical",
+"Variada": "Mixed",
+"El iPhone te va a enseñar un menú. Sigue estos pasos:": "Your iPhone will show a menu. Follow these steps:",
+"Toca «Seleccionar archivos»": "Tap “Choose Files”",
+"la última opción del menú (no Fototeca)": "the last option in the menu (not Photo Library)",
+"Abajo, toca «Examinar»": "At the bottom, tap “Browse”",
+"En mi iPhone → la carpeta donde guardaste las canciones": "On My iPhone → the folder where you saved the songs",
+"Marca todas y toca «Abrir»": "Select them all and tap “Open”",
+"antes toca «Seleccionar», arriba a la derecha": "first tap “Select”, top right",
+"Entendido, abrir archivos": "Got it, open Files",
+"Ver la guía con más detalle": "See the detailed guide",
+"No volver a mostrar este aviso": "Don't show this again",
+"Añade de pocas en pocas": "Add a few at a time",
+"Al abrir la app": "When the app opens",
+"▶️ Al abrir la app": "▶️ When the app opens",
+"«Seguir» deja lista la última canción o emisora, en el segundo donde iba. «Aleatorio» deja Toda mi música barajada nada más abrir. Si tu automatización de Atajos abre Mi Música al conectar CarPlay, solo tienes que darle al": "“Continue” gets the last song or station ready, right where it was. “Shuffle” shuffles All my music as soon as it opens. If a Shortcuts automation opens Mi Música when CarPlay connects, just press",
+"del volante.": "on the steering wheel.",
+"Color": "Color",
+"🎨 Color": "🎨 Color",
+"Neón": "Neon",
+"Océano": "Ocean",
+"Selva": "Jungle",
+"Fuego": "Fire",
+"Hielo": "Ice",
+"Oro": "Gold",
+"Tamaño de la letra": "Text size",
+"🔠 Tamaño de la letra": "🔠 Text size",
+"Normal": "Normal",
+"Grande": "Large",
+"Muy grande": "Extra large",
+"Coche": "Car",
+"🚗 Coche": "🚗 Car",
+"Entrar en modo coche": "Enter car mode",
+"Salir del modo coche": "Exit car mode",
+"Modo coche también en Inicio": "Car mode also on Home",
+"Pantalla siempre encendida": "Keep screen on",
+"Internet y datos": "Internet and data",
+"📶 Internet y datos": "📶 Internet and data",
+"Ahorro de datos": "Data saver",
+"Ocultar novedades de cantantes": "Hide new releases from artists",
+"La radio es lo que más gasta: una hora son unos 30 a 60 MB. Tu música guardada no gasta nada. Lo demás de la app gasta muy poco.": "Radio uses the most data: about 30 to 60 MB per hour. Your saved music uses none. Everything else in the app uses very little.",
+"Tu música y copias": "Your music and backups",
+"💾 Tu música y copias": "💾 Your music and backups",
+"Ocupa en el teléfono": "Space used on this phone",
+"Guardar copia de mis datos": "Back up my data",
+"Guardar copia de seguridad": "Save a backup",
+"Restaurar una copia": "Restore a backup",
+"Hacer copia": "Make a backup",
+"Copia lista": "Backup ready",
+"💾 Copia lista": "💾 Backup ready",
+"Haz la copia antes de borrar el icono: el iPhone se lleva los datos. No incluye los MP3.": "Back up before deleting the app: your iPhone deletes its data. MP3s aren't included.",
+"No se pudo crear la copia.": "Couldn't create the backup.",
+"No se pudo leer la copia.": "Couldn't read the backup.",
+"Borrar toda mi música": "Delete all my music",
+"No hay música que borrar.": "There's no music to delete.",
+"Restaurar emisoras quitadas": "Restore removed stations",
+"Liberar espacio: borrar la música de la app": "Free up space: delete the app's music",
+"Limpiar caché y SW (conserva la música)": "Clear cache (keeps your music)",
+"Reparar (conserva la música)": "Repair (keeps your music)",
+"Poner o cambiar la foto": "Set or change photo",
+"Foto puesta.": "Photo set.",
+"Foto quitada.": "Photo removed.",
+"Son solo tuyas: se guardan en este iPhone.": "They're only yours: saved on this iPhone.",
+"Enviar informe de errores": "Send error report",
+"Política de privacidad": "Privacy policy",
+"Términos de uso": "Terms of use",
+"Creada por": "Created by",
+"Mi Música tuvo un problema": "Mi Música ran into a problem",
+"No pudo arrancar bien dos veces seguidas. Tu música": "It failed to start twice in a row. Your music",
+"no se ha borrado": "has not been deleted",
+": sigue guardada en el teléfono.": ": it's still saved on the phone.",
+"El iPhone cerró la app": "The iPhone closed the app",
+"Queda poco espacio": "Storage is running low",
+"Temporizador para dormir": "Sleep timer",
+"La música se parará sola pasado este tiempo.": "Music will stop by itself after this time.",
+"15 minutos": "15 minutes",
+"30 minutos": "30 minutes",
+"45 minutos": "45 minutes",
+"60 minutos": "60 minutes",
+"90 minutos": "90 minutes",
+"minutos": "minutes",
+"Quitar temporizador": "Cancel timer",
+"Temporizador quitado.": "Timer cancelled.",
+"Buenas noches: música apagada.": "Good night: music stopped.",
+"Se apagará en": "Stopping in",
+"Se apagará a las": "Will stop at",
+"Tu resumen": "Your recap",
+"canciones en tu biblioteca": "songs in your library",
+"reproducciones": "plays",
+"Tus cantantes": "Your artists",
+"Tus canciones": "Your songs",
+"¿De qué país?": "Which country?",
+"Los éxitos y las emisoras de Inicio y Radio serán de ese país.": "Hits and stations on Home and Radio will be from that country.",
+"Buscar país": "Search country",
+"Ningún país con ese nombre.": "No country with that name.",
+"Cambiar país": "Change country",
+"Las más escuchadas en": "Most popular in",
+"Los vídeos no están disponibles en esta versión.": "Videos aren't available in this version.",
+"Mi Música": "Mi Música",
+"¿Quién eres?": "Who are you?"
+};
+var EN_RX = [["^Prueba con (.+)$", "Try $1"], ["^Porque escuchas a (.+)$", "Because you listen to $1"], ["^Las más escuchadas en (.+)$", "Most popular in $1"], ["^Emisoras más escuchadas · (.+)$", "Most popular stations · $1"], ["^Sobre la app · v(.+)$", "About the app · v$1"], ["^Versión (.+)$", "Version $1"], ["^(.+) · Cambiar país$", "$1 · Change country"], ["^(\\d+) canciones$", "$1 songs"], ["^(\\d+) canciones · se mezcla sola$", "$1 songs · shuffles itself"], ["^A continuación · (\\d+)$", "Up next · $1"], ["^Ver más \\((\\d+)\\)$", "Show more ($1)"], ["^En tu música · (\\d+)$", "In your music · $1"], ["^Tus canciones · (\\d+)$", "Your songs · $1"], ["^Tus emisoras · (\\d+)$", "Your stations · $1"], ["^Buscando «(.+)»…$", "Searching “$1”…"], ["^Se apagará en (\\d+) min$", "Stopping in $1 min"], ["^Añadida a «(.+)»\\.?$", "Added to “$1”"], ["^¿Quitar «(.+)»\\?$", "Remove “$1”?"], ["^Clasificando tu música… (\\d+) de (\\d+)$", "Sorting your music… $1 of $2"]].map(function(p){ return [new RegExp(p[0]), p[1]]; });
+function T(s){
+  if(IDIOMA === 'es' || s == null) return s;
+  var k = String(s), r = EN[k];
+  if(r != null) return r;
+  var t = k.trim();
+  if(t !== k && EN[t] != null) return k.replace(t, EN[t]);
+  for(var i = 0; i < EN_RX.length; i++){
+    if(EN_RX[i][0].test(t)) return k.replace(t, t.replace(EN_RX[i][0], EN_RX[i][1]));
+  }
+  return k;
+}
+if(IDIOMA !== 'es'){
+  document.documentElement.lang = IDIOMA;
+  var NO_TRAD = {SCRIPT:1, STYLE:1, TEXTAREA:1};
+  var traducirNodo = function(n){
+    if(n.nodeType === 3){
+      var v = n.nodeValue;
+      if(v && /[A-Za-zÁÉÍÓÚÑáéíóúñ]/.test(v)){ var w = T(v); if(w !== v) n.nodeValue = w; }
+      return;
+    }
+    if(n.nodeType !== 1 || NO_TRAD[n.nodeName] || n.id === 'letra') return;
+    ['placeholder', 'aria-label', 'title'].forEach(function(a){
+      var v = n.getAttribute && n.getAttribute(a);
+      if(v){ var w = T(v); if(w !== v) n.setAttribute(a, w); }
+    });
+    // Lo que escribe el usuario o viene de fuera (títulos, cantantes, emisoras) no se toca
+    if(n.classList && (n.classList.contains('t') || n.classList.contains('s') || n.classList.contains('r-t') ||
+       n.id === 'n-t' || n.id === 'n-s' || n.id === 'm-t' || n.id === 'm-s')) return;
+    for(var c = n.firstChild; c; c = c.nextSibling) traducirNodo(c);
+  };
+  new MutationObserver(function(ms){
+    ms.forEach(function(m){
+      if(m.type === 'characterData') traducirNodo(m.target);
+      else if(m.type === 'attributes'){
+        var v = m.target.getAttribute(m.attributeName), w = v && T(v);
+        if(w && w !== v) m.target.setAttribute(m.attributeName, w);
+      }
+      else for(var i = 0; i < m.addedNodes.length; i++) traducirNodo(m.addedNodes[i]);
+    });
+  }).observe(document.documentElement, {childList:true, subtree:true, characterData:true,
+                                        attributes:true, attributeFilter:['placeholder', 'aria-label', 'title']});
+  document.addEventListener('DOMContentLoaded', function(){ traducirNodo(document.body); });
+  if(document.body) traducirNodo(document.body);
+  var _toast = toast;
+  toast = function(msg, tipo, ms){ return _toast(T(msg), tipo, ms); };
+  var _confirm = window.confirm, _alert = window.alert, _prompt = window.prompt;
+  window.confirm = function(m){ return _confirm.call(window, T(m)); };
+  window.alert = function(m){ return _alert.call(window, T(m)); };
+  window.prompt = function(m, d){ return _prompt.call(window, T(m), d); };
+}
+
+/* ═════ SOLO VERSIÓN PÚBLICA (App Store) ════════════════════════════
+   crear_publica.py mete este bloque al final del guion principal de la copia pública.
+   La app privada no lo lleva. Aquí se SUSTITUYEN funciones
+   de la app por asignación (nunca con «function x()», que pisaría la original
+   antes de poder guardarla).                                                      */
+
+/* ── 1 · Países de todo el mundo ───────────────────────────────── */
+// Tiendas de Apple con lista de éxitos (comprobadas una a una el 11/10/2026). Si el
+// país del teléfono no tiene, los éxitos salen de EE. UU.; la radio sí es la del país.
+var APPLE_CC = 'ae ag ai am ar at au az be bf bg bh bm bn bo br bs bw by bz ca ch cl co cr cv cy cz de dk dm do ec ee eg es fi fj fm fr gb gd gh gm gr gt gw hk hn hr hu id ie il in is it jo jp ke kg kh kn kr ky kz la lb lk lt lu lv ma md mn mo mt mu mx my mz na ng ni nl no np nz om pa pe pg ph pl pt py qa ro rs ru sa se sg si sk sv th tr tt tw tz ua ug us uy uz ve vn za zw'.split(' ');
+var REGIONES = ('ad ae af ag ai al am ao ar at au aw az ba bb bd be bf bg bh bi bj bm bn bo br bs bt bw by bz ' +
+  'ca cd cf cg ch ci cl cm cn co cr cu cv cw cy cz de dj dk dm do dz ec ee eg er es et fi fj fm fo fr ga gb gd ge ' +
+  'gh gi gl gm gn gp gq gr gt gu gw gy hk hn hr ht hu id ie il im in iq ir is it jm jo jp ke kg kh km kn kr kw ky ' +
+  'kz la lb lc li lk lr ls lt lu lv ly ma mc md me mg mk ml mm mn mo mq mr ms mt mu mv mw mx my mz na nc ne ng ni ' +
+  'nl no np nz om pa pe pf pg ph pk pl pr ps pt py qa re ro rs ru rw sa sb sc sd se sg si sk sl sm sn so sr ss sv ' +
+  'sy sz tc td tg th tj tm tn to tr tt tw tz ua ug us uy uz va vc ve vg vi vn vu ws xk ye za zm zw').split(' ');
+function banderaDe(cc){
+  cc = String(cc || '').toUpperCase();
+  if(!/^[A-Z]{2}$/.test(cc)) return '🌍';
+  return String.fromCodePoint(0x1F1E6 + cc.charCodeAt(0) - 65, 0x1F1E6 + cc.charCodeAt(1) - 65);
+}
+var NOMBRES_REGION = null;
+function nombreRegion(cc){
+  try{
+    if(!NOMBRES_REGION) NOMBRES_REGION = new Intl.DisplayNames([idiomaApp()], {type:'region'});
+    var n = NOMBRES_REGION.of(String(cc).toUpperCase());
+    return n && n !== String(cc).toUpperCase() ? n : String(cc).toUpperCase();
+  }catch(_){ return String(cc).toUpperCase(); }
+}
+function paisDelTelefono(){
+  var ls = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+  for(var i = 0; i < ls.length; i++){
+    var m = String(ls[i]).match(/[-_]([A-Za-z]{2})(?:$|[-_])/);
+    if(m && REGIONES.indexOf(m[1].toLowerCase()) >= 0) return m[1].toLowerCase();
+  }
+  return 'us';
+}
+paisIni = function(){
+  var g = null;
+  try{ g = localStorage.getItem('mm_pais_' + yo); }catch(_){}
+  return (g && REGIONES.indexOf(g) >= 0) ? g : paisDelTelefono();
+};
+PAISES_INI = REGIONES.map(function(cc){ return [cc, banderaDe(cc), nombreRegion(cc)]; })
+  .sort(function(a, b){ return a[2].localeCompare(b[2]); });
+RB_PAIS = {};
+REGIONES.forEach(function(cc){ RB_PAIS[cc] = cc.toUpperCase(); });
+function tiendaApple(cc){ return APPLE_CC.indexOf(cc) >= 0 ? cc : 'us'; }
+// Los éxitos generales del país (la privada pide solo los latinos: genre=12)
+exitosAppleDirecto = async function(cc){
+  var d = await traerConLimite('https://itunes.apple.com/' + tiendaApple(cc) + '/rss/topsongs/limit=25/json', 12000);
+  return [].concat((d.feed || {}).entry || []).map(pistaDeLista).filter(Boolean);
+};
+var _buscarAppleDirecto = buscarAppleDirecto;
+buscarAppleDirecto = function(texto, cc){ return _buscarAppleDirecto(texto, tiendaApple(cc || paisIni())); };
+
+function selectorPais(){
+  var cc = paisIni();
+  return '<div class="tabs" style="margin-top:14px"><button class="tab on" data-elegir-pais="1">' +
+    banderaDe(cc) + ' ' + esc(nombreRegion(cc)) + ' · ' + T('Cambiar país') + '</button></div>';
+}
+function hojaPaises(){
+  abrirHoja('<h4>' + T('¿De qué país?') + '</h4>' +
+    '<div class="sub">' + T('Los éxitos y las emisoras de Inicio y Radio serán de ese país.') + '</div>' +
+    '<input id="pais-q" class="campo" type="search" autocomplete="off" placeholder="' + T('Buscar país') + '" ' +
+    'style="width:100%;margin:6px 0 10px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);' +
+    'background:var(--card);color:var(--ink);font-size:16px">' +
+    '<div id="pais-lista">' + filasPaises('') + '</div>');
+}
+function filasPaises(q){
+  q = normTxt(q || '');
+  var actual = paisIni();
+  return PAISES_INI.filter(function(p){ return !q || normTxt(p[2]).indexOf(q) >= 0 || p[0] === q; })
+    .map(function(p){
+      return '<button class="opc" data-pais="' + p[0] + '"><span class="em">' + p[1] + '</span><span class="tx"><b>' +
+        esc(p[2]) + '</b></span>' + (p[0] === actual ? '<span class="tx" style="flex:0">✓</span>' : '') + '</button>';
+    }).join('') || '<div class="note">' + T('Ningún país con ese nombre.') + '</div>';
+}
+document.addEventListener('input', function(ev){
+  if(ev.target && ev.target.id === 'pais-q') $('pais-lista').innerHTML = filasPaises(ev.target.value);
+});
+
+// Radio Browser da el país en inglés; la app lo traduce al español. En inglés se deja como viene.
+if(IDIOMA !== 'es'){
+  nombrePais = function(n){
+    var t = String(n || '').trim().replace(/^The\s+/i, '');
+    if(/^united states/i.test(t)) return 'United States';
+    if(/^united kingdom/i.test(t)) return 'United Kingdom';
+    return t || 'Worldwide';
+  };
+}
+
+/* ── 2 · Radio: las más escuchadas del país del teléfono ───────── */
+var RADIO_PAIS = {cc:'', lista:[], cargando:false};
+function bloquePaisRadio(){
+  var cc = paisIni();
+  if(RADIO_PAIS.cc !== cc && !RADIO_PAIS.cargando){
+    RADIO_PAIS.cargando = true;
+    radiosTop(cc.toUpperCase()).then(function(l){ RADIO_PAIS.lista = l; }, function(){ RADIO_PAIS.lista = []; })
+      .then(function(){
+        RADIO_PAIS.cc = cc; RADIO_PAIS.cargando = false;
+        if(vistaActual === 'buscar' && pestana === 'radio') pintarBuscar();
+      });
+  }
+  var t = '📻 ' + T('Las más escuchadas en') + ' ' + esc(nombreRegion(cc));
+  if(RADIO_PAIS.cc === cc && RADIO_PAIS.lista.length) return estante(t, 'rp', RADIO_PAIS.lista) + selectorPais();
+  if(RADIO_PAIS.cargando) return esqueleto(t);
+  return selectorPais();
+}
+
+/* ── 3 · Sin YouTube en la versión pública ─────────────────────── */
+abrirVideoId = function(){ toast(T('Los vídeos no están disponibles en esta versión.'), null, 3500); };
+escucharCompleta = function(){ toast(T('Esta canción no está completa en Audius. Prueba con otra o con la radio.'), 'malo', 4500); };
+
+/* ── 4 · Temporizador para dormir (botón de la luna en «Sonando ahora») ── */
+var DORMIR = {fin:0, t:null, tic:null};
+function ponerDormirPublica(min){
+  clearTimeout(DORMIR.t); clearInterval(DORMIR.tic); DORMIR.fin = 0;
+  if(min > 0){
+    DORMIR.fin = Date.now() + min * 60000;
+    DORMIR.t = setTimeout(function(){
+      DORMIR.fin = 0; clearInterval(DORMIR.tic); pintarLuna();
+      if(actual && !audio.paused) pausarYo();          // nunca audio.pause() a pelo
+      toast('😴 ' + T('Buenas noches: música apagada.'), null, 5000);
+    }, min * 60000);
+    DORMIR.tic = setInterval(pintarLuna, 30000);
+    toast('😴 ' + T('Se apagará en') + ' ' + min + ' min', 'bueno');
+  }else toast(T('Temporizador quitado.'));
+  pintarLuna();
+}
+ponerDormir = ponerDormirPublica;
+function pintarLuna(){
+  var b = $('b-dormir'); if(!b) return;
+  var queda = DORMIR.fin ? Math.max(1, Math.round((DORMIR.fin - Date.now()) / 60000)) : 0;
+  b.classList.toggle('on', !!queda);
+  b.querySelector('i').textContent = queda ? queda + "'" : '';
+}
+function hojaDormir(){
+  var ops = [15, 30, 45, 60, 90].map(function(m){
+    return '<button class="opc" data-dormir="' + m + '"><span class="em">😴</span><span class="tx"><b>' + m + ' ' + T('minutos') + '</b></span></button>'; }).join('');
+  abrirHoja('<h4>' + T('Temporizador para dormir') + '</h4>' +
+    '<div class="sub">' + (DORMIR.fin ? T('Se apagará a las') + ' ' + new Date(DORMIR.fin).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+                                       : T('La música se parará sola pasado este tiempo.')) + '</div>' + ops +
+    (DORMIR.fin ? '<button class="opc" data-dormir="0"><span class="em">✕</span><span class="tx"><b>' + T('Quitar temporizador') + '</b></span></button>' : ''));
+}
+(function(){
+  var top = document.querySelector('#now .now-top'); if(!top) return;
+  var b = document.createElement('button');
+  b.type = 'button'; b.id = 'b-dormir'; b.setAttribute('aria-label', T('Temporizador para dormir'));
+  b.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><i></i>';
+  var ref = top.children[1] || null;
+  top.insertBefore(b, ref);
+  var css = document.createElement('style');
+  css.textContent = '#b-dormir{background:none;border:0;color:var(--muted);display:inline-flex;align-items:center;gap:3px;' +
+    'padding:8px;min-width:44px;min-height:44px;justify-content:center;font:600 calc(12px * var(--esc)) var(--font-b)}' +
+    '#b-dormir.on{color:var(--purple)}#b-dormir i{font-style:normal}';
+  document.head.appendChild(css);
+})();
+
+/* ── 5 · Tu resumen: lo que más escuchas ───────────────────────── */
+function datosResumen(){
+  var canc = CANCIONES.filter(function(c){ return c.veces; })
+    .sort(function(a, b){ return b.veces - a.veces; });
+  var total = canc.reduce(function(s, c){ return s + c.veces; }, 0);
+  var art = {};
+  canc.forEach(function(c){ var a = primerArtista(c.artista) || ''; if(a) art[a] = (art[a] || 0) + c.veces; });
+  var artistas = Object.keys(art).sort(function(a, b){ return art[b] - art[a]; }).slice(0, 5)
+    .map(function(a){ return [a, art[a]]; });
+  var cr = conteoRadio(), radios = Object.keys(cr).map(function(k){ return cr[k]; })
+    .filter(function(x){ return x && x.e; }).sort(function(a, b){ return b.n - a.n; }).slice(0, 3);
+  return {canc:canc.slice(0, 5), total:total, artistas:artistas, radios:radios, n:CANCIONES.length};
+}
+function bloqueResumen(){
+  var d = datosResumen();
+  if(!d.total && !d.radios.length) return '';
+  return '<div class="tabs" style="margin-top:14px"><button class="tab on" data-resumen="1">✨ ' + T('Tu resumen') + '</button></div>';
+}
+function hojaResumen(){
+  var d = datosResumen(), h = '<h4>✨ ' + T('Tu resumen') + '</h4><div class="sub">' +
+    d.n + ' ' + T('canciones en tu biblioteca') + ' · ' + d.total + ' ' + T('reproducciones') + '</div>';
+  function fila(i, t, s){
+    return '<div class="opc" style="cursor:default"><span class="em" style="font:700 18px var(--font-d);color:var(--purple)">' + i +
+      '</span><span class="tx"><b>' + esc(t) + '</b>' + (s ? '<br><span style="color:var(--muted)">' + esc(s) + '</span>' : '') + '</span></div>';
+  }
+  if(d.artistas.length) h += '<div class="city">🎤 ' + T('Tus cantantes') + '</div>' +
+    d.artistas.map(function(a, i){ return fila(i + 1, a[0], a[1] + ' ' + T('reproducciones')); }).join('');
+  if(d.canc.length) h += '<div class="city">🔥 ' + T('Tus canciones') + '</div>' +
+    d.canc.map(function(c, i){ return fila(i + 1, c.titulo, c.artista + ' · ' + c.veces + '×'); }).join('');
+  if(d.radios.length) h += '<div class="city">📻 ' + T('Tus emisoras') + '</div>' +
+    d.radios.map(function(x, i){ return fila(i + 1, x.e.nombre, x.n + '×'); }).join('');
+  abrirHoja(h + '<button class="opc" data-cerrar-hoja="1"><span class="tx"><b>' + T('Cerrar') + '</b></span></button>');
+}
+
+/* ── Toques de las mejoras (la app maneja los suyos aparte) ────── */
+document.addEventListener('click', function(ev){
+  var t = ev.target; if(!t || !t.closest || window.__swipe) return;
+  var el;
+  if(t.closest('[data-elegir-pais]')){ hojaPaises(); return; }
+  if(t.closest('#hoja [data-pais]')){
+    setTimeout(function(){ cerrarHoja(); RADIO_PAIS.cc = ''; NOMBRES_REGION = null;
+      if(vistaActual === 'buscar') pintarBuscar(); }, 0);
+    return;
+  }
+  if(t.closest('#b-dormir')){ hojaDormir(); return; }
+  if((el = t.closest('[data-dormir]'))){ cerrarHoja(); ponerDormirPublica(+el.dataset.dormir); return; }
+  if(t.closest('[data-resumen]')){ hojaResumen(); return; }
+});
+
 </script>
 </body>
 </html>

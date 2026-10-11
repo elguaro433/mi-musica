@@ -716,7 +716,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.5';
+var APP_VERSION = '2.6';
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -2436,11 +2436,11 @@ async function pintarAhora(cancion){
       // Antes llamaban a audio.pause() a pelo, así que la app no se enteraba
       // de que habías parado TÚ y la volvía a encender sola. Ahora pasan por
       // playPause()/pausarYo() como el botón de la pantalla.
-      navigator.mediaSession.setActionHandler('play', function(){ if(audio.paused) playPause(); });
-      navigator.mediaSession.setActionHandler('pause', function(){ pausarYo(); });
+      navigator.mediaSession.setActionHandler('play', function(){ linea('orden de iOS: ▶ (bloqueo, coche o auriculares)'); if(audio.paused) playPause(); });
+      navigator.mediaSession.setActionHandler('pause', function(){ linea('orden de iOS: pausa (bloqueo, coche, auriculares o se desconectó el coche)'); pausarYo(); });
       navigator.mediaSession.setActionHandler('nexttrack', siguiente);
       navigator.mediaSession.setActionHandler('previoustrack', anterior);
-      navigator.mediaSession.setActionHandler('stop', function(){ pausarYo(); });
+      navigator.mediaSession.setActionHandler('stop', function(){ linea('orden de iOS: parar'); pausarYo(); });
       if(actual.tipo === 'cancion'){
         navigator.mediaSession.setActionHandler('seekto', function(d){
           if(d.seekTime != null){ try{ audio.currentTime = d.seekTime; }catch(_){} }

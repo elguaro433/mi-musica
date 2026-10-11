@@ -677,7 +677,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.4';
+var APP_VERSION = '2.6';
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -1676,6 +1676,18 @@ function recrearAudio(){
 
 /* ═════════ Guardián 2 y 3 · radio que se reconecta sola ═════════ */
 var reintento = null, espera = 1000, fallosRadio = 0;
+var yaSono = false, plazoConexion = null;
+/* Una radio que se queda «Conectando…» 15 s sin sonar: siguiente reintento (solo con la app a la vista;
+   de fondo iOS no deja cargar fuentes nuevas y lo retoma el rescate al volver). */
+function vigilarConexion(){
+  clearTimeout(plazoConexion);
+  if(!actual || actual.tipo !== 'radio') return;
+  plazoConexion = setTimeout(function(){
+    if(yaSono || !actual || actual.tipo !== 'radio' || paradoPorMi || viendoVideo || audio.paused || document.hidden) return;
+    linea('radio: 15 s conectando sin sonar; pruebo otra vez');
+    programarReconexion();
+  }, 15000);
+}
 /* ¿Otra app (WhatsApp, una llamada…) tiene el sonido? Entonces la radio NO se reconecta:
    reenganchar el stream le quitaba el audio a la otra app y no la dejaba sonar. */
 function otraAppTieneElSonido(){
@@ -1743,7 +1755,13 @@ window.addEventListener('offline', function(){
 
 /* ═════════════════ REPRODUCTOR ══════════════════════════════════ */
 function cablearAudio(){
+  // Informe 9/10/2026: mientras la radio CONECTA (t=0, «waiting») el detector de fantasmas la tomaba
+  // por muerta y la reenganchaba, abortando la conexión (AbortError) una y otra vez; un toque la paraba.
+  // Ahora: hasta que esta fuente no suena de verdad no hay fantasma posible; la conexión tiene su propio plazo.
+  audio.addEventListener('loadstart', function(){ yaSono = false; vigilarConexion(); });
+  audio.addEventListener('emptied', function(){ yaSono = false; });
   audio.addEventListener('playing', function(){
+    yaSono = true; clearTimeout(plazoConexion);
     pintarBotones(true); if(actual && actual.tipo==='radio') radioBien();
     pintarEstado(null); vigilar();
   });
@@ -2377,11 +2395,11 @@ async function pintarAhora(cancion){
       // Antes llamaban a audio.pause() a pelo, así que la app no se enteraba
       // de que habías parado TÚ y la volvía a encender sola. Ahora pasan por
       // playPause()/pausarYo() como el botón de la pantalla.
-      navigator.mediaSession.setActionHandler('play', function(){ if(audio.paused) playPause(); });
-      navigator.mediaSession.setActionHandler('pause', function(){ pausarYo(); });
+      navigator.mediaSession.setActionHandler('play', function(){ linea('orden de iOS: ▶ (bloqueo, coche o auriculares)'); if(audio.paused) playPause(); });
+      navigator.mediaSession.setActionHandler('pause', function(){ linea('orden de iOS: pausa (bloqueo, coche, auriculares o se desconectó el coche)'); pausarYo(); });
       navigator.mediaSession.setActionHandler('nexttrack', siguiente);
       navigator.mediaSession.setActionHandler('previoustrack', anterior);
-      navigator.mediaSession.setActionHandler('stop', function(){ pausarYo(); });
+      navigator.mediaSession.setActionHandler('stop', function(){ linea('orden de iOS: parar'); pausarYo(); });
       if(actual.tipo === 'cancion'){
         navigator.mediaSession.setActionHandler('seekto', function(d){
           if(d.seekTime != null){ try{ audio.currentTime = d.seekTime; }catch(_){} }
@@ -5060,6 +5078,7 @@ function revisarFantasma(motivo){
     // Cambió de canción (tocaste otra, pasó a la siguiente) mientras medía: no es un fantasma.
     if(actual.id !== id0 || (audio.currentSrc || audio.src) !== src0 || audio.currentTime < t0 - 0.5){ intentosFantasma = 0; return; }
     if(audio.paused){ pintarBotones(false); return; }                  // el botón dice la verdad
+    if(!yaSono){ linea('fantasma: no, aún está conectando (' + motivo + ')'); return; }
     if(audio.currentTime > t0 + 0.05){ pintarBotones(true); intentosFantasma = 0; return; }  // suena bien
     anotar('sonido', 'fantasma (' + motivo + '): la app creía que sonaba y no avanza; lo reengancho', actual.titulo);
     linea('fantasma detectado (' + motivo + ')');

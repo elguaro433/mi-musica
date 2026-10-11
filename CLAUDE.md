@@ -182,3 +182,8 @@
 - Reordenar la cola a mano. Guía de comprar MP3 dentro de la app.
 - «Tu año en música», dedicar canción, temporizador de dormir con botón.
 - Seguir cantantes con página propia; lista «Por comprar».
+
+## Otros proyectos guardados aquí
+
+- `proyectos/banco-memoria/`: servidor propio en casa (cámaras, sensores, fotos,
+  nubes, música, IA local). Leer su `README.md`. Nombre del sistema por decidir.

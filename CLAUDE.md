@@ -8,6 +8,10 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz".
 
+## 🆕 v2.6 (11/10/2026) — informes de los dos móviles con la 2.5
+
+- Sin fallos nuevos. Emmanuel 10/10 07:54: pausa a t=18 sin «pausa por otra app» → vino de `pausarYo` (orden de iOS: volante/bloqueo/coche apagado), no es un fallo. 9/10 07:47 (Planeta, aún v2.4): iOS mató la página (`pagehide`) mientras la radio reconectaba en segundo plano. Elibel: todo normal (su pausa del 8/10 fue suya). Ninguno ha pasado aún por `fantasma: no, aún está conectando` ni `radio: 15 s conectando`. v2.6 solo apunta en la línea de tiempo `orden de iOS: ▶/pausa/parar` en los mandos de Media Session para saber quién para.
+
 ## 🆕 v2.5 (9/10/2026) — la radio no volvía: el detector de fantasmas mataba la conexión
 
 - Informe suyo (v2.4, Éxitos 99.9 FM, pantalla apagada ~28 min parada): la emisora dio un error suelto (código 4) y cada reconexión (t=0, `waiting`) la tomaba `revisarFantasma` por «fantasma» y la reenganchaba → `AbortError` → otra vez; al abrir la app, SU TOQUE para ir a Ajustes paró la radio que estaba reconectando. La emisora respondía bien (curl). Arreglo: `yaSono` (false en `loadstart`/`emptied`, true en `playing`): sin haber sonado esa fuente no hay fantasma posible. `vigilarConexion()`: radio 15 s «conectando» sin sonar y con la app a la vista → `programarReconexion()`. Probado en Chrome con la emisora real y con una IP que no contesta. SIN CONFIRMAR en iPhone: buscar `fantasma: no, aún está conectando` y `radio: 15 s conectando` en la línea de tiempo.

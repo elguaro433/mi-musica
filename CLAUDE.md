@@ -10,21 +10,23 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz". **Escribe por voz**: confirmar nombres dudosos.
 
-## Estado (11/10/2026, v2.6)
+## Estado (13/10/2026, v2.7)
 
 - Publicada, la usan él (iPhone 14 Pro, 393×852) y Elibel (iPhone 16 Pro Max,
   440×956), ambos iOS 18.7. Coche: Dacia con CarPlay. Escucha reggaetón,
   salsa, bachata.
 - Versión **X.Y**; subir SIEMPRE `APP_VERSION` (index.html) y `VERSION` (sw.js)
-  juntos. `buscarActualizacion` compara por desigualdad de texto.
+  juntos. `buscarActualizacion` solo actualiza si la publicada es MÁS nueva
+  (`esMasNueva`, v2.7: el 11/10 GitHub sirvió la 2.5 vieja y la 2.6 se recargó sola).
 - **11/10/2026: retoma la App Store** (estaba en pausa desde el 4/10). Ver
   «App Store» abajo.
 - Informes del 11/10 de los dos móviles con la 2.5: sin fallos nuevos. La 2.6
-  solo apunta `orden de iOS: ▶/pausa/parar` en la línea de tiempo.
+  apunta `orden de iOS: ▶/pausa/parar`; la 2.7 además `pausa mía (origen)` y si
+  la app se abrió, recargó o restauró (el 13/10 se abrió dos veces en 2 s).
+- Informe del 13/10 (él, 2.6): sin fallos; fin de canción por la pausa visto otra vez.
 
 ### SIN CONFIRMAR en iPhone (buscar en la línea de tiempo del informe)
 - v2.5 radio que reconecta: `fantasma: no, aún está conectando`, `radio: 15 s conectando`.
-- v1.37.10 fin de canción sin `ended`: `fin: llegó la pausa de final` (ya visto funcionando el 10/10).
 - v2.2/2.3 gestos con el dedo en iPhone real.
 - Atajo de Siri «Pon Mi Música» (¿`webapp://` abre la app instalada?).
 - Copias de volumen igualado (`OneDrive\Music\Canciones (volumen igualado)`): ¿las pasó?, ¿suenan mejor?

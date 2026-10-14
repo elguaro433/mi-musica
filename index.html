@@ -716,7 +716,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.6';
+var APP_VERSION = '2.7';
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -2190,7 +2190,7 @@ function playPause(){
     var p = audio.play();
     if(p && p.catch) p.catch(function(err){ anotar('playPause', err.message); });
   }else{
-    pausarYo();
+    pausarYo('botón ⏸ de la app');
   }
 }
 function siguiente(){
@@ -2437,10 +2437,10 @@ async function pintarAhora(cancion){
       // de que habías parado TÚ y la volvía a encender sola. Ahora pasan por
       // playPause()/pausarYo() como el botón de la pantalla.
       navigator.mediaSession.setActionHandler('play', function(){ linea('orden de iOS: ▶ (bloqueo, coche o auriculares)'); if(audio.paused) playPause(); });
-      navigator.mediaSession.setActionHandler('pause', function(){ linea('orden de iOS: pausa (bloqueo, coche, auriculares o se desconectó el coche)'); pausarYo(); });
+      navigator.mediaSession.setActionHandler('pause', function(){ linea('orden de iOS: pausa (bloqueo, coche, auriculares o se desconectó el coche)'); pausarYo('iOS'); });
       navigator.mediaSession.setActionHandler('nexttrack', siguiente);
       navigator.mediaSession.setActionHandler('previoustrack', anterior);
-      navigator.mediaSession.setActionHandler('stop', function(){ linea('orden de iOS: parar'); pausarYo(); });
+      navigator.mediaSession.setActionHandler('stop', function(){ linea('orden de iOS: parar'); pausarYo('iOS'); });
       if(actual.tipo === 'cancion'){
         navigator.mediaSession.setActionHandler('seekto', function(d){
           if(d.seekTime != null){ try{ audio.currentTime = d.seekTime; }catch(_){} }
@@ -4848,7 +4848,8 @@ function pintarModos(){
    iOS pausa el audio cuando entra una llamada o habla el navegador.
    Si la pausa NO la pediste tú, la app vuelve a darle al play sola. */
 var pausaMia = false, pausaAjena = 0;
-function pausarYo(){
+function pausarYo(origen){
+  linea('pausa mía' + (origen ? ' (' + origen + ')' : ''));     // para distinguir en el informe una pausa tuya de una de iOS
   pausaMia = true;
   paradoPorMi = true;              // mientras esto sea true, NADA la reenciende
   recuperarAlVolver = false;
@@ -4873,11 +4874,13 @@ function pausarYo(){
 var LINEA = [];
 function linea(t){
   var d = new Date(), h = ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2)+'.'+('00'+d.getMilliseconds()).slice(-3);
-  LINEA.push(h + ' ' + t); if(LINEA.length > 70) LINEA.shift();
+  LINEA.push(h + ' ' + t); if(LINEA.length > 160) LINEA.shift();     // 160: que quepa un día entero (con 70 se perdía la mañana)
   try{ localStorage.setItem('mm_linea', JSON.stringify(LINEA)); }catch(_){}
 }
 try{ LINEA = JSON.parse(localStorage.getItem('mm_linea') || '[]') || []; }catch(_){ LINEA = []; }
-linea('— app abierta v' + APP_VERSION + ' —');
+linea('— app abierta v' + APP_VERSION + ' —' + (function(){       // cómo se abrió: normal, recargada o vuelta atrás
+  try{ var n = performance.getEntriesByType('navigation')[0]; return n ? ' (' + ({navigate:'abierta', reload:'recargada', back_forward:'restaurada'}[n.type] || n.type) + ')' : ''; }catch(_){ return ''; }
+})());
 ['play','playing','pause','ended','error','stalled','suspend','waiting','emptied','abort'].forEach(function(n){
   audio.addEventListener(n, function(){ linea('audio:' + n + (n === 'error' && audio.error ? '(' + audio.error.code + ')' : '') + ' t=' + Math.round(audio.currentTime) + (audio.paused ? ' [pausado]' : '')); });
 });
@@ -5607,7 +5610,7 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#a-reparar')){ if(confirm('Limpiaré el caché y el Service Worker.\nLa app se recargará.\n\nTu música NO se borra.')) reparar(); return; }
 
   if(t.closest('#m-prev')){ ev.stopPropagation(); anterior(); return; }
-  if(t.closest('#m-stop')){ ev.stopPropagation(); pausarYo(); return; }
+  if(t.closest('#m-stop')){ ev.stopPropagation(); pausarYo('botón ⏹'); return; }
   if(t.closest('#m-pp') || t.closest('#b-pp')){ ev.stopPropagation(); playPause(); return; }
   if(t.closest('#m-next')){ ev.stopPropagation(); siguiente(); return; }
   if(t.closest('#b-next')){ siguiente(); return; }
@@ -6220,12 +6223,21 @@ async function buscarActualizacion(forzar){
     var r = await fetch('index.html?v=' + Date.now(), {cache: 'no-store'});
     var t = await r.text();
     var m = t.match(/APP_VERSION = '([\d.]+)'/);
-    if(!m || m[1] === APP_VERSION) return false;
+    // Solo si la publicada es MÁS nueva: el 11/10 GitHub sirvió un rato la 2.5 vieja y la 2.6
+    // se recargó sola con la pantalla apagada creyendo que había otra versión.
+    if(!m || !esMasNueva(m[1], APP_VERSION)) return false;
     anotar('actualizar', 'hay versión nueva ' + m[1] + ' (esta es ' + APP_VERSION + ')');
     actualizacionPendiente = true;
     aplicarActualizacion(m[1]);
     return true;
   }catch(_){ return false; }
+}
+function esMasNueva(a, b){
+  var x = a.split('.').map(Number), y = b.split('.').map(Number);
+  for(var i = 0; i < Math.max(x.length, y.length); i++){
+    if((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0);
+  }
+  return false;
 }
 function aplicarActualizacion(v){
   if(!actualizacionPendiente) return;

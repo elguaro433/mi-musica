@@ -4874,7 +4874,7 @@ function pausarYo(origen){
 var LINEA = [];
 function linea(t){
   var d = new Date(), h = ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2)+'.'+('00'+d.getMilliseconds()).slice(-3);
-  LINEA.push(h + ' ' + t); if(LINEA.length > 70) LINEA.shift();
+  LINEA.push(h + ' ' + t); if(LINEA.length > 160) LINEA.shift();     // 160: que quepa un día entero (con 70 se perdía la mañana)
   try{ localStorage.setItem('mm_linea', JSON.stringify(LINEA)); }catch(_){}
 }
 try{ LINEA = JSON.parse(localStorage.getItem('mm_linea') || '[]') || []; }catch(_){ LINEA = []; }

@@ -24,6 +24,9 @@
   apunta `orden de iOS: ▶/pausa/parar`; la 2.7 además `pausa mía (origen)` y si
   la app se abrió, recargó o restauró (el 13/10 se abrió dos veces en 2 s).
 - Informe del 13/10 (él, 2.6): sin fallos; fin de canción por la pausa visto otra vez.
+- Informe del 13/10 (Elibel, 2.6): mismo patrón que él, la app vuelve al frente y 1,4 s después
+  `audio:pause` sin `orden de iOS` (¿botón suyo?): la 2.7 lo aclara. La línea de tiempo guarda 160 líneas
+  (antes 70: se perdía la mañana; a las 06:47 hubo una pausa a 4 s de salir y un rescate sin ver por qué).
 
 ### SIN CONFIRMAR en iPhone (buscar en la línea de tiempo del informe)
 - v2.5 radio que reconecta: `fantasma: no, aún está conectando`, `radio: 15 s conectando`.

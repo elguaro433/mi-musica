@@ -455,7 +455,8 @@ a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box
   font-size:calc(15px * var(--esc));background:rgba(255,255,255,.05);cursor:pointer}
 .cola .vermas-cola{display:block;text-align:center;color:var(--purple);font-size:calc(13px * var(--esc));padding:10px 0 2px;cursor:pointer}
 /* letra de la canción (LRCLIB) */
-.now-extra{display:flex;justify-content:center;margin:14px 0 0;flex:0 0 auto}
+.now-extra{display:flex;justify-content:center;gap:10px;margin:14px 0 0;flex:0 0 auto}
+.comp-vista{display:block;width:46%;max-width:200px;margin:4px auto 14px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
 .pill{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);border-radius:999px;
   padding:9px 18px;font:inherit;font-size:calc(13px * var(--esc));font-weight:600;cursor:pointer}
 .pill.on{background:linear-gradient(135deg,#a970ff,#ff5fa6);border-color:transparent;color:#fff}
@@ -666,7 +667,7 @@ body.coche #coche-salir{display:block}
       <button id="b-next" aria-label="Siguiente"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M15.6 5H18v14h-2.4zM4 5.6v12.8a.8.8 0 0 0 1.25.66l8.85-5.4a.8.8 0 0 0 0-1.32L5.25 6.94A.8.8 0 0 0 4 5.6z"/></svg></button>
       <button class="sm" id="b-rep" aria-label="Repetir"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg></button>
     </div>
-    <div class="now-extra"><button class="pill" id="b-letra">🎤&nbsp; Letra</button></div>
+    <div class="now-extra"><button class="pill" id="b-letra">🎤&nbsp; Letra</button><button class="pill" id="b-compartir">📤&nbsp; Compartir</button></div>
     <div id="letra"></div>
     <div class="cola" id="cola"></div>
     <button id="coche-salir">✕&nbsp; Salir del modo coche</button>
@@ -726,7 +727,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.8';
+var APP_VERSION = '2.9';
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -2396,6 +2397,136 @@ function probarImagen(url){
     im.src = url;
   });
 }
+/* ═════════ Compartir lo que suena (WhatsApp, estado, Telegram, Instagram…) ═════════
+   Se dibuja una imagen vertical 1080×1920 (la medida de un estado o una historia) con la carátula,
+   el título y el cantante, y se abre el menú de compartir de iOS. iOS solo deja abrirlo justo tras
+   un toque: por eso el primer toque prepara la imagen y el segundo la comparte (como la copia). */
+var IMG_AHORA = '', COMPARTIR = null;
+function cargarImg(u){
+  return new Promise(function(ok){
+    if(!u){ ok(null); return; }
+    var im = new Image();
+    if(u.indexOf('blob:') !== 0 && u.indexOf('data:') !== 0) im.crossOrigin = 'anonymous';   // si la web no deja, no se usa (si no, el lienzo queda bloqueado)
+    im.onload = function(){ ok(im); }; im.onerror = function(){ ok(null); };
+    im.src = u;
+  });
+}
+function lineasTexto(x, t, ancho, max){
+  var pal = String(t || '').split(/\s+/), L = [], l = '';
+  pal.forEach(function(w){ var p = l ? l + ' ' + w : w; if(x.measureText(p).width > ancho && l){ L.push(l); l = w; } else l = p; });
+  if(l) L.push(l);
+  if(L.length > max){ L = L.slice(0, max); var u = L[max-1]; while(u && x.measureText(u + '…').width > ancho) u = u.slice(0, -1); L[max-1] = u + '…'; }
+  return L;
+}
+async function tarjetaCompartir(a, quien){
+  var W = 1080, H = 1920, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  var x = cv.getContext('2d'), esRadio = a.tipo === 'radio';
+  var col = (getComputedStyle($('now')).getPropertyValue('--nowc') || '').trim() || 'rgba(110,60,190,.75)';
+  x.fillStyle = '#0b0614'; x.fillRect(0, 0, W, H);
+  var g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, col); g.addColorStop(.62, 'rgba(11,6,20,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  var g2 = x.createRadialGradient(W*.85, H*.92, 10, W*.85, H*.92, 700); g2.addColorStop(0, 'rgba(255,95,166,.35)'); g2.addColorStop(1, 'rgba(255,95,166,0)');
+  x.fillStyle = g2; x.fillRect(0, 0, W, H);
+  // carátula
+  var L = 780, X = (W - L) / 2, Y = 380, R = 44, im = await cargarImg(IMG_AHORA);
+  // muchas emisoras no dejan copiar su logo: se pide a través de images.weserv.nl, que sí lo deja (solo al compartir)
+  if(!im && /^https:\/\//.test(IMG_AHORA)) im = await cargarImg('https://images.weserv.nl/?w=800&url=' + encodeURIComponent(IMG_AHORA.replace(/^https:\/\//, '')));
+  x.save(); x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = 70; x.shadowOffsetY = 24;
+  x.beginPath(); x.roundRect ? x.roundRect(X, Y, L, L, R) : x.rect(X, Y, L, L); x.fillStyle = '#2a1846'; x.fill(); x.restore();
+  x.save(); x.beginPath(); x.roundRect ? x.roundRect(X, Y, L, L, R) : x.rect(X, Y, L, L); x.clip();
+  var gc = x.createLinearGradient(X, Y, X + L, Y + L); gc.addColorStop(0, '#a970ff'); gc.addColorStop(1, '#ff5fa6'); x.fillStyle = gc; x.fillRect(X, Y, L, L);
+  if(im){
+    var iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height;
+    var k = esRadio ? Math.min(L*.8 / iw, L*.8 / ih) : Math.max(L / iw, L / ih);   // logo entero; carátula a sangre
+    if(esRadio){ x.fillStyle = '#ffffff'; x.fillRect(X, Y, L, L); }
+    x.drawImage(im, X + (L - iw*k) / 2, Y + (L - ih*k) / 2, iw*k, ih*k);
+  }else{
+    x.fillStyle = 'rgba(255,255,255,.92)'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.font = '800 ' + (esRadio ? 200 : 320) + 'px Sora, system-ui, sans-serif';
+    x.fillText(esRadio ? inicialesDe(a.titulo) : '♪', W / 2, Y + L / 2);
+  }
+  x.restore();
+  // textos
+  x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  var y = Y + L + 130;
+  x.fillStyle = '#ff8cc6'; x.font = '700 38px "DM Sans", system-ui, sans-serif';
+  if(x.letterSpacing !== undefined) x.letterSpacing = '8px';
+  x.fillText(esRadio ? 'ESCUCHANDO EN DIRECTO' : 'ESCUCHANDO AHORA', W / 2, y);
+  if(x.letterSpacing !== undefined) x.letterSpacing = '0px';
+  y += 105;
+  x.fillStyle = '#ffffff'; x.font = '800 78px Sora, system-ui, sans-serif';
+  lineasTexto(x, a.titulo, W - 160, 2).forEach(function(l){ x.fillText(l, W / 2, y); y += 92; });
+  if(quien){ x.fillStyle = 'rgba(255,255,255,.72)'; x.font = '500 50px "DM Sans", system-ui, sans-serif';
+    lineasTexto(x, quien, W - 160, 2).forEach(function(l){ x.fillText(l, W / 2, y + 6); y += 62; }); }
+  // firma de la app
+  var logo = await cargarImg('logo.png');
+  x.fillStyle = 'rgba(255,255,255,.8)'; x.font = '700 40px Sora, system-ui, sans-serif';
+  var tx = 'Mi Música', tw = x.measureText(tx).width, lw = logo ? 70 : 0, ix = (W - tw - lw - (logo ? 22 : 0)) / 2;
+  if(logo) x.drawImage(logo, ix, H - 190, lw, lw * (logo.height / logo.width));
+  x.textAlign = 'left'; x.fillText(tx, ix + lw + (logo ? 22 : 0), H - 140);
+  return await new Promise(function(ok){ cv.toBlob(function(b){ ok(b); }, 'image/png'); });
+}
+async function prepararCompartir(){
+  if(!actual) return;
+  var a = actual, esRadio = a.tipo === 'radio';
+  var quien = esRadio ? nombreCiudad(a.ciudad || '') : String(a.artista || '').trim();
+  if(quien === 'Artista desconocido') quien = '';
+  var texto = esRadio ? '📻 Estoy escuchando ' + a.titulo + (quien ? ' (' + quien + ')' : '') + ' en directo'
+                      : '🎧 Estoy escuchando «' + a.titulo + '»' + (quien ? ' de ' + quien : '');
+  var enlace = esRadio ? '' : 'https://www.youtube.com/results?search_query=' + encodeURIComponent((a.titulo + ' ' + quien).trim());
+  abrirHoja('<h4>📤 Compartir</h4><div class="sub">⏳ Preparando la imagen…</div>');
+  var fich = null, vista = '';
+  try{
+    var b = await tarjetaCompartir(a, quien);
+    if(b){
+      fich = new File([b], (a.titulo.replace(/[^\wÀ-ÿ ]+/g, '').trim() || 'cancion') + '.png', {type:'image/png'});
+      if(COMPARTIR && COMPARTIR.vista) URL.revokeObjectURL(COMPARTIR.vista);
+      vista = URL.createObjectURL(b);
+    }
+  }catch(err){ anotar('compartir', err.message); }
+  if(actual !== a) return;                                   // cambió de canción mientras se dibujaba
+  COMPARTIR = {fich:fich, texto:texto, enlace:enlace, vista:vista};
+  var conImg = !!(fich && navigator.canShare && navigator.canShare({files:[fich]}));
+  abrirHoja('<h4>📤 Compartir</h4>' +
+    (vista ? '<img class="comp-vista" src="' + vista + '" alt="">' : '') +
+    '<div class="sub">Se abre el menú del iPhone: elige <b>WhatsApp</b>, <b>Telegram</b> o <b>Instagram</b>. Para tu <b>estado</b> o una <b>historia</b>, usa «Con imagen».</div>' +
+    (conImg ? '<button class="btn solido" id="comp-img">📤&nbsp; Con imagen (estado, historia)</button>'
+            : (vista ? '<button class="btn solido" id="comp-bajar">⬇&nbsp; Guardar la imagen</button>' : '')) +
+    '<button class="btn" id="comp-txt">📋&nbsp; Solo el texto' + (enlace ? ' y el enlace' : '') + '</button>' +
+    '<button class="btn" data-cerrar-hoja="1">Cancelar</button>');
+}
+/* Vídeo de YouTube: se comparte su enlace (WhatsApp, Telegram e Instagram enseñan la miniatura solos).
+   Sin nada asíncrono antes de navigator.share: iOS solo lo abre justo tras el toque. */
+function compartirVideo(vid){
+  var tit = ytTituloActual.vid === vid ? ytTituloActual.titulo : '';
+  for(var i=0;i<ytResultados.length;i++) if(ytResultados[i].vid === vid) tit = tit || ytResultados[i].titulo;
+  var url = 'https://youtu.be/' + vid, texto = '🎬 Mira este vídeo' + (tit ? ': ' + tit : '');
+  if(!navigator.share){
+    try{ navigator.clipboard.writeText(texto + '\n' + url); toast('Enlace copiado: pégalo donde quieras.', 'bueno'); }catch(_){}
+    return;
+  }
+  navigator.share({title:tit || 'Vídeo de YouTube', text:texto, url:url}).then(function(){ linea('compartido vídeo ' + vid); }, function(e){
+    if(e && e.name === 'AbortError') return;
+    anotar('compartir', e && e.message); toast('No se pudo abrir el menú de compartir.', 'malo');
+  });
+}
+function compartirAhora(conImagen){
+  var C = COMPARTIR; if(!C) return;
+  var datos = conImagen ? {files:[C.fich]} : {text:C.texto + (C.enlace ? '\n' : ''), url:C.enlace || undefined};
+  if(!conImagen && !C.enlace) delete datos.url;
+  if(!navigator.share){
+    try{ navigator.clipboard.writeText(C.texto + (C.enlace ? '\n' + C.enlace : '')); toast('Texto copiado: pégalo donde quieras.', 'bueno'); }catch(_){}
+    cerrarHoja(); return;
+  }
+  navigator.share(datos).then(function(){ cerrarHoja(); linea('compartido ' + (conImagen ? 'con imagen' : 'texto')); }, function(e){
+    if(e && e.name === 'AbortError') return;                    // lo cerraste tú
+    anotar('compartir', e && e.message); toast('No se pudo abrir el menú de compartir.', 'malo');
+  });
+}
+function bajarImagenCompartir(){
+  var C = COMPARTIR; if(!C || !C.vista) return;
+  var el = document.createElement('a'); el.href = C.vista; el.download = C.fich ? C.fich.name : 'cancion.png';
+  document.body.appendChild(el); el.click(); el.remove(); cerrarHoja();
+}
 async function pintarAhora(cancion){
   if(!actual) return;
   var ver = ++pintaVer, yoActual = actual;
@@ -2415,7 +2546,8 @@ async function pintarAhora(cancion){
   }
   var imagen = elegida ? elegida.u : '', tieneImg = !!(elegida && elegida.blob);
   colorAhora(imagen);
-  $('b-letra').parentNode.style.display = (actual.tipo === 'radio') ? 'none' : '';
+  $('b-letra').style.display = (actual.tipo === 'radio') ? 'none' : '';
+  IMG_AHORA = imagen;
   if(LET.abierta) cargarLetra();
   ['n-art','m-art'].forEach(function(id){
     var el = $(id);
@@ -3969,7 +4101,8 @@ function pintarYouTube(){
   var marco = $('yt-marco'), mismo = !!(ytVerId && marco && C.contains(marco) && marco.dataset.vid === ytVerId);
   if(ytVerId){
     h += '<button class="btn '+(esFavVideo(ytVerId)?'suave':'solido')+'" data-fav-video="'+esc(ytVerId)+'">'+
-           (esFavVideo(ytVerId)?corazon(true, 18)+'&nbsp; Guardado en Favoritas':corazon(false, 18)+'&nbsp; Guardar vídeo')+'</button>';
+           (esFavVideo(ytVerId)?corazon(true, 18)+'&nbsp; Guardado en Favoritas':corazon(false, 18)+'&nbsp; Guardar vídeo')+'</button>'+
+         '<button class="btn" data-compartir-video="'+esc(ytVerId)+'">📤&nbsp; Compartir vídeo</button>';
   }
   if(ytBuscando) h += '<div class="note">Buscando en YouTube…</div>';
   else if(ytResultados.length){
@@ -5644,6 +5777,11 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#copia-bajar')){ bajarCopia(); return; }
   if(t.closest('#copia-luego')){ try{ localStorage.setItem('mm_copia_luego_' + yo, String(Date.now())); }catch(_){} pintarVista(); return; }
   if((el = t.closest('[data-alabrir]'))){ AJ.alAbrir = el.dataset.alabrir; guardarAjustes(); pintarAjustes(); return; }
+  if(t.closest('#b-compartir')){ prepararCompartir(); return; }
+  if((el = t.closest('[data-compartir-video]'))){ compartirVideo(el.dataset.compartirVideo); return; }
+  if(t.closest('#comp-img')){ compartirAhora(true); return; }
+  if(t.closest('#comp-txt')){ compartirAhora(false); return; }
+  if(t.closest('#comp-bajar')){ bajarImagenCompartir(); return; }
   if(t.closest('#b-letra')){
     LET.abierta = !LET.abierta;
     $('b-letra').classList.toggle('on', LET.abierta); $('letra').classList.toggle('on', LET.abierta);

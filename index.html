@@ -156,6 +156,16 @@ button{font-family:inherit;color:inherit}
 .chipauto{flex:0 0 auto;display:flex;align-items:center;gap:10px;min-height:56px;padding:10px 20px 10px 16px;border-radius:30px;
   background:var(--card);border:1px solid var(--line);color:var(--ink,#f6f2ff);font-size:calc(16px * var(--esc));font-weight:600;cursor:pointer}
 .chipauto:active{transform:scale(.96)}
+.rutina{display:flex;align-items:center;gap:14px;width:100%;margin:8px 0 4px;padding:12px 14px;border-radius:20px;text-align:left;color:var(--text);
+  background:linear-gradient(135deg,rgba(169,112,255,.26),rgba(255,95,166,.18));border:1px solid rgba(169,112,255,.55);font:inherit}
+.rutina:active{transform:scale(.98)}
+.rutina .art{width:56px;height:56px;flex:0 0 56px}
+.rutina .rx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rutina .rk{font-size:calc(11px * var(--esc));letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;color:var(--muted)}
+.rutina .rt{font-weight:700;font-size:calc(16px * var(--esc));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rutina .rp{flex:0 0 44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#a970ff,#ff5fa6);color:#fff}
+#b-dormir{background:none;border:0;color:var(--muted);display:inline-flex;align-items:center;gap:3px;padding:6px;min-width:40px;min-height:40px;justify-content:center;font:600 calc(12px * var(--esc)) var(--font-b)}
+#b-dormir.on{color:var(--purple)}#b-dormir i{font-style:normal}
 .chipauto.principal{background:linear-gradient(135deg,rgba(169,112,255,.28),rgba(255,95,166,.22));border-color:rgba(169,112,255,.6);
   box-shadow:0 4px 18px rgba(169,112,255,.25)}
 #mini{touch-action:pan-y;transition:transform .2s ease,opacity .2s}
@@ -642,7 +652,7 @@ body.coche #coche-salir{display:block}
 
   <!-- Sonando ahora -->
   <div id="now">
-    <div class="now-top"><button type="button" id="now-cerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"><path d="M5 9l7 7 7-7"/></svg></button><span style="letter-spacing:.14em;font-size:calc(11px * var(--esc));cursor:default">SONANDO AHORA</span><span style="display:flex;gap:16px;align-items:center"><span id="now-mas">⋯</span><span id="now-fav"><svg class="cor" viewBox="0 0 24 24" width="26" height="26"><path d="M12 20.5s-7.4-4.5-9.4-9.1C1.1 8 3.2 4.6 6.6 4.6c2 0 3.5 1.1 5.4 3.1 1.9-2 3.4-3.1 5.4-3.1 3.4 0 5.5 3.4 4 6.8-2 4.6-9.4 9.1-9.4 9.1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg></span></span></div>
+    <div class="now-top"><button type="button" id="now-cerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"><path d="M5 9l7 7 7-7"/></svg></button><span style="letter-spacing:.14em;font-size:calc(11px * var(--esc));cursor:default">SONANDO AHORA</span><span style="display:flex;gap:10px;align-items:center"><button type="button" id="b-dormir" aria-label="Temporizador para dormir"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><i></i></button><span id="now-mas">⋯</span><span id="now-fav"><svg class="cor" viewBox="0 0 24 24" width="26" height="26"><path d="M12 20.5s-7.4-4.5-9.4-9.1C1.1 8 3.2 4.6 6.6 4.6c2 0 3.5 1.1 5.4 3.1 1.9-2 3.4-3.1 5.4-3.1 3.4 0 5.5 3.4 4 6.8-2 4.6-9.4 9.1-9.4 9.1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg></span></span></div>
     <div class="art" id="n-art"></div>
     <h3 id="n-t">—</h3>
     <div id="n-s">—</div>
@@ -716,7 +726,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.6';
+var APP_VERSION = '2.7';
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -1802,7 +1812,7 @@ function cablearAudio(){
   audio.addEventListener('loadstart', function(){ yaSono = false; vigilarConexion(); });
   audio.addEventListener('emptied', function(){ yaSono = false; });
   audio.addEventListener('playing', function(){
-    yaSono = true; clearTimeout(plazoConexion);
+    yaSono = true; clearTimeout(plazoConexion); anotarRutina();
     pintarBotones(true); if(actual && actual.tipo==='radio') radioBien();
     pintarEstado(null); vigilar();
   });
@@ -1931,6 +1941,7 @@ function alAcabarCancion(){
   if(!actual || actual.tipo !== 'cancion' || !audio.ended) return;
   if(Date.now() - tFinTratado < 2000) return;
   tFinTratado = Date.now();
+  if(dormirCancion){ dormirCancion = false; pintarLuna(); pausarYo(); toast('😴 Buenas noches: música apagada.', null, 5000); return; }
   if(repetir === 2){ audio.currentTime = 0; audio.play(); }   // repetir una
   else { MZ.entra = true; siguiente(); }                       // la cola da la vuelta sola
 }
@@ -2270,6 +2281,8 @@ async function alAbrirApp(){
   var pide = '';
   try{ pide = new URLSearchParams(location.search).get('cancion') || ''; }catch(_){}
   if(pide && await ponerLoQuePides(pide)) return;
+  // Atajo del coche: ?accion=rutina pone lo que sueles oír a esta hora (si no hay, sigue el ajuste normal).
+  if(/[?&]accion=rutina(&|$)/.test(location.search) && await ponerLoDeSiempre(true)) return;
   try{
     if(modo === 'aleatorio'){
       var A = listasAuto().filter(function(l){ return l.id === 'auto_todo'; })[0];
@@ -3491,6 +3504,67 @@ function chipsAuto(){
     var ico = l.id === 'auto_todo' ? IC_MEZCLA : '<span style="font-size:22px;line-height:1">'+l.icono+'</span>';
     return '<button class="chipauto'+(i === 0 ? ' principal' : '')+'" data-auto="'+esc(l.id)+'">'+ico+'<span>'+esc(l.nombre)+'</span></button>'; }).join('') + '</div>';
 }
+/* Rutina: cada vez que algo empieza a sonar de verdad se apunta la hora (radio: la emisora; tu música:
+   «mezclada»). «Lo de siempre» propone lo que más días has puesto a esta hora (±75 min), mirando primero
+   solo días laborables o solo fin de semana. Hacen falta 3 días distintos en el último mes. */
+function rutina(){ try{ return JSON.parse(localStorage.getItem('mm_rutina_' + yo) || '[]') || []; }catch(_){ return []; } }
+function anotarRutina(){
+  if(!yo || !actual) return;
+  var k = actual.tipo === 'radio' ? 'r:' + actual.url : (actual.tipo === 'cancion' && !actual.remota ? 'm' : '');
+  if(!k) return;
+  var l = rutina(), ahora = Date.now();
+  for(var i = l.length - 1; i >= 0 && ahora - l[i].t < 45 * 60000; i--) if(l[i].k === k) return;   // ya apuntado en esta sesión
+  l.push({t:ahora, k:k});
+  l = l.filter(function(x){ return ahora - x.t < 35 * 864e5; }).slice(-500);
+  try{ localStorage.setItem('mm_rutina_' + yo, JSON.stringify(l)); }catch(_){}
+}
+function loDeSiempre(cuando){
+  var d = cuando || new Date(), min = d.getHours() * 60 + d.getMinutes(), finde = d.getDay() === 0 || d.getDay() === 6;
+  var l = rutina().filter(function(x){ return d - x.t < 30 * 864e5; });
+  function mejor(mismoTipoDia){
+    var dias = {};
+    l.forEach(function(x){
+      var f = new Date(x.t), m = f.getHours() * 60 + f.getMinutes(), dif = Math.abs(m - min);
+      if(Math.min(dif, 1440 - dif) > 75) return;
+      if(mismoTipoDia && ((f.getDay() === 0 || f.getDay() === 6) !== finde)) return;
+      (dias[x.k] = dias[x.k] || {})[f.toDateString()] = 1;
+    });
+    var k = null, n = 0;
+    Object.keys(dias).forEach(function(c){ var v = Object.keys(dias[c]).length; if(v > n){ n = v; k = c; } });
+    return n >= 3 ? k : null;
+  }
+  var k = mejor(true) || mejor(false);
+  if(!k) return null;
+  if(k === 'm') return CANCIONES.some(function(c){ return !c.falta; }) ? {k:'m', nombre:'Tu música mezclada'} : null;
+  var url = k.slice(2), c = conteoRadio()[url];
+  return c && c.e ? {k:k, nombre:c.e.nombre, e:c.e} : null;
+}
+function tarjetaRutina(){
+  var r = loDeSiempre();
+  if(!r) return '';
+  if(actual && !audio.paused && ((r.e && actual.tipo === 'radio' && actual.url === r.e.url) || (r.k === 'm' && actual.tipo === 'cancion'))) return '';
+  var h = new Date().getHours(), momento = h < 6 ? 'de noche' : h < 13 ? 'por la mañana' : h < 21 ? 'por la tarde' : 'de noche';
+  var art = r.e ? cuadroEmisora(r.e) : '<span class="art" style="display:flex;align-items:center;justify-content:center">' + IC_MEZCLA + '</span>';
+  return '<button class="rutina" data-rutina="1">' + art + '<span class="rx"><span class="rk">Lo de siempre · ' + momento + '</span>' +
+    '<span class="rt">' + esc(r.nombre) + '</span></span><span class="rp"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span></button>';
+}
+async function ponerLoDeSiempre(alAbrir){
+  var r = loDeSiempre();
+  if(!r) return false;
+  viendoVideo = false;
+  if(r.e){
+    if(alAbrir){ tocarRadio(r.e, true); playPause(); }   // si iOS no deja sonar sin un toque, queda lista para el ▶
+    else tocarRadio(r.e);
+  }else{
+    var A = listasAuto().filter(function(l){ return l.id === 'auto_todo'; })[0];
+    if(!A) return false;
+    var ids = barajarMusica(A.ids);
+    aleatorio = false; pintarModos();
+    await tocarCancion(ids[0], ids, alAbrir ? {alAbrir:true} : undefined);
+  }
+  linea('rutina: lo de siempre → ' + r.nombre + (alAbrir ? ' (al abrir)' : ''));
+  return true;
+}
 function radioRapida(){
   var c = conteoRadio(), lista = [], vistas = {};
   function poner(e){ if(e && e.url && !vistas[e.url]){ vistas[e.url] = 1; lista.push(e); } }
@@ -3628,6 +3702,7 @@ function pintarInicio(){
   var ult = null;
   try{ ult = JSON.parse(localStorage.getItem('mm_ultimo_'+yo)||'null'); }catch(_){}
   h += avisosInicio();
+  h += tarjetaRutina();
   if(AJ.cocheEnInicio)
     h += '<button class="btn" id="b-coche" style="margin-top:8px">🚗&nbsp; Modo coche</button>';
   h += chipsAuto();
@@ -5294,6 +5369,7 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#hoja') && !t.closest('#hoja .caja')){ cerrarHoja(); return; }
   if((el = t.closest('[data-cerrar-hoja]'))){ cerrarHoja(); return; }
   if((el = t.closest('[data-mas]'))){ ev.stopPropagation(); hojaCancion(el.dataset.mas); return; }
+  if(t.closest('#b-dormir')){ hojaDormir(); return; }
   if(t.closest('#now-mas')){
     if(actual && actual.tipo === 'cancion' && !actual.remota) hojaCancion(actual.id);
     else toast('Esto es para las canciones, no para la radio.');
@@ -5384,6 +5460,7 @@ document.addEventListener('click', async function(ev){
     if(!(vistaActual === 'buscar' && pestana === 'musica')){ ir('buscar'); ponerPestana('musica'); }
     $('q').value = nA; lanzarBusquedaMusica(nA); $('v-buscar').scrollTop = 0; return; }
   if((el = t.closest('[data-auto]'))){ await tocarAuto(el.dataset.auto); return; }
+  if(t.closest('[data-rutina]')){ await ponerLoDeSiempre(false); pintarVista(); return; }
   if(t.closest('[data-seguir-cantante]')){ seguirCantante(); return; }
   if((el = t.closest('[data-radio-rapida]'))){
     var cr = conteoRadio(), er = cr[el.dataset.radioRapida] && cr[el.dataset.radioRapida].e;
@@ -5519,7 +5596,7 @@ document.addEventListener('click', async function(ev){
   if((el = t.closest('[data-abrir-ia]'))){ await abrirArchive(+el.dataset.abrirIa); return; }
   if((el = t.closest('[data-cerrar-ia]'))){ iaAbierto = null; pintarDescubrir(); return; }
   if((el = t.closest('[data-bajar]'))){ await bajarDeArchive(+el.dataset.bajar); return; }
-  if((el = t.closest('[data-dormir]'))){ ponerDormir(parseInt(el.dataset.dormir,10)); return; }
+  if((el = t.closest('[data-dormir]'))){ cerrarHoja(); ponerDormir(parseInt(el.dataset.dormir,10)); return; }
   if((el = t.closest('[data-aj]'))){
     var k = el.dataset.aj;
     if(k === 'coche'){ modoCoche(!enCoche); }
@@ -5974,19 +6051,40 @@ function ponerPestana(t){
   pintarBuscar();
   $('v-buscar').scrollTop = 0;
 }
+/* Temporizador para dormir (luna en «Sonando ahora»): N minutos o «al acabar esta canción». */
+var dormirFin = 0, dormirCancion = false, dormirTic = null;
 function ponerDormir(min){
-  clearTimeout(dormir); dormir = null;
-  if(min > 0){
+  clearTimeout(dormir); clearInterval(dormirTic); dormir = null; dormirFin = 0; dormirCancion = false;
+  if(min === -1){
+    dormirCancion = true;
+    toast('😴 Se parará al acabar esta canción.', 'bueno');
+  }else if(min > 0){
+    dormirFin = Date.now() + min * 60000;
     dormir = setTimeout(function(){
-      audio.pause(); dormir = null;
-      toast('😴 Temporizador: música apagada.', null, 5000);
-      if(vistaActual==='ajustes') pintarAjustes();
-    }, min*60000);
-    toast('😴 Se apagará en ' + min + ' minutos.', 'bueno');
+      dormir = null; dormirFin = 0; clearInterval(dormirTic); pintarLuna();
+      if(actual && !audio.paused) pausarYo();
+      toast('😴 Buenas noches: música apagada.', null, 5000);
+    }, min * 60000);
+    dormirTic = setInterval(pintarLuna, 30000);
+    toast('😴 Se apagará en ' + min + ' min', 'bueno');
   }else toast('Temporizador quitado.');
-  if(vistaActual === 'ajustes'){
-    var d = $('dormir-estado'); if(d) d.textContent = dormir ? 'activo' : 'apagado';
-  }
+  pintarLuna();
+}
+function pintarLuna(){
+  var b = $('b-dormir'); if(!b) return;
+  var queda = dormirFin ? Math.max(1, Math.round((dormirFin - Date.now()) / 60000)) : 0;
+  b.classList.toggle('on', !!(queda || dormirCancion));
+  b.querySelector('i').textContent = queda ? queda + "'" : (dormirCancion ? '♪' : '');
+}
+function hojaDormir(){
+  var activo = dormirFin || dormirCancion;
+  var ops = (actual && actual.tipo === 'cancion' ? [-1] : []).concat([15, 30, 45, 60, 90]).map(function(m){
+    return '<button class="opc" data-dormir="' + m + '"><span class="em">😴</span><span class="tx"><b>' +
+      (m === -1 ? 'Al acabar esta canción' : m + ' minutos') + '</b></span></button>'; }).join('');
+  abrirHoja('<h4>Temporizador para dormir</h4><div class="sub">' +
+    (dormirFin ? 'Se apagará a las ' + new Date(dormirFin).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+               : dormirCancion ? 'Se parará al acabar esta canción.' : 'La música se parará sola pasado este tiempo.') + '</div>' + ops +
+    (activo ? '<button class="opc" data-dormir="0"><span class="em">✕</span><span class="tx"><b>Quitar temporizador</b></span></button>' : ''));
 }
 async function nuevaEmisora(){
   var url = prompt('Pega la dirección de la emisora (tiene que empezar por https://):');

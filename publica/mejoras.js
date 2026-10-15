@@ -111,51 +111,7 @@ function bloquePaisRadio(){
 abrirVideoId = function(){ toast(T('Los vídeos no están disponibles en esta versión.'), null, 3500); };
 escucharCompleta = function(){ toast(T('Esta canción no está completa en Audius. Prueba con otra o con la radio.'), 'malo', 4500); };
 
-/* ── 4 · Temporizador para dormir (botón de la luna en «Sonando ahora») ── */
-var DORMIR = {fin:0, t:null, tic:null};
-function ponerDormirPublica(min){
-  clearTimeout(DORMIR.t); clearInterval(DORMIR.tic); DORMIR.fin = 0;
-  if(min > 0){
-    DORMIR.fin = Date.now() + min * 60000;
-    DORMIR.t = setTimeout(function(){
-      DORMIR.fin = 0; clearInterval(DORMIR.tic); pintarLuna();
-      if(actual && !audio.paused) pausarYo();          // nunca audio.pause() a pelo
-      toast('😴 ' + T('Buenas noches: música apagada.'), null, 5000);
-    }, min * 60000);
-    DORMIR.tic = setInterval(pintarLuna, 30000);
-    toast('😴 ' + T('Se apagará en') + ' ' + min + ' min', 'bueno');
-  }else toast(T('Temporizador quitado.'));
-  pintarLuna();
-}
-ponerDormir = ponerDormirPublica;
-function pintarLuna(){
-  var b = $('b-dormir'); if(!b) return;
-  var queda = DORMIR.fin ? Math.max(1, Math.round((DORMIR.fin - Date.now()) / 60000)) : 0;
-  b.classList.toggle('on', !!queda);
-  b.querySelector('i').textContent = queda ? queda + "'" : '';
-}
-function hojaDormir(){
-  var ops = [15, 30, 45, 60, 90].map(function(m){
-    return '<button class="opc" data-dormir="' + m + '"><span class="em">😴</span><span class="tx"><b>' + m + ' ' + T('minutos') + '</b></span></button>'; }).join('');
-  abrirHoja('<h4>' + T('Temporizador para dormir') + '</h4>' +
-    '<div class="sub">' + (DORMIR.fin ? T('Se apagará a las') + ' ' + new Date(DORMIR.fin).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-                                       : T('La música se parará sola pasado este tiempo.')) + '</div>' + ops +
-    (DORMIR.fin ? '<button class="opc" data-dormir="0"><span class="em">✕</span><span class="tx"><b>' + T('Quitar temporizador') + '</b></span></button>' : ''));
-}
-(function(){
-  var top = document.querySelector('#now .now-top'); if(!top) return;
-  var b = document.createElement('button');
-  b.type = 'button'; b.id = 'b-dormir'; b.setAttribute('aria-label', T('Temporizador para dormir'));
-  b.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" ' +
-    'stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><i></i>';
-  var ref = top.children[1] || null;
-  top.insertBefore(b, ref);
-  var css = document.createElement('style');
-  css.textContent = '#b-dormir{background:none;border:0;color:var(--muted);display:inline-flex;align-items:center;gap:3px;' +
-    'padding:8px;min-width:44px;min-height:44px;justify-content:center;font:600 calc(12px * var(--esc)) var(--font-b)}' +
-    '#b-dormir.on{color:var(--purple)}#b-dormir i{font-style:normal}';
-  document.head.appendChild(css);
-})();
+/* ── 4 · Temporizador para dormir: ya viene en la app privada (luna en «Sonando ahora», v2.7). ── */
 
 /* ── 5 · Tu resumen: lo que más escuchas ───────────────────────── */
 function datosResumen(){
@@ -201,7 +157,5 @@ document.addEventListener('click', function(ev){
       if(vistaActual === 'buscar') pintarBuscar(); }, 0);
     return;
   }
-  if(t.closest('#b-dormir')){ hojaDormir(); return; }
-  if((el = t.closest('[data-dormir]'))){ cerrarHoja(); ponerDormirPublica(+el.dataset.dormir); return; }
   if(t.closest('[data-resumen]')){ hojaResumen(); return; }
 });

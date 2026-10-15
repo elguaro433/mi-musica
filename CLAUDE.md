@@ -10,7 +10,7 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz". **Escribe por voz**: confirmar nombres dudosos.
 
-## Estado (11/10/2026, v2.6)
+## Estado (15/10/2026, v2.7)
 
 - Publicada, la usan él (iPhone 14 Pro, 393×852) y Elibel (iPhone 16 Pro Max,
   440×956), ambos iOS 18.7. Coche: Dacia con CarPlay. Escucha reggaetón,
@@ -22,7 +22,19 @@
 - Informes del 11/10 de los dos móviles con la 2.5: sin fallos nuevos. La 2.6
   solo apunta `orden de iOS: ▶/pausa/parar` en la línea de tiempo.
 
+- **v2.7 (15/10) — rutina del día a día:** (1) «Lo de siempre» arriba en Inicio
+  (`tarjetaRutina`/`loDeSiempre`): cada `playing` apunta en `mm_rutina_<yo>`
+  la emisora (`r:<url>`) o tu música (`m`), una vez cada 45 min; propone lo que
+  más DÍAS distintos pusiste a esta hora (±75 min, primero mismo tipo de día
+  laborable/finde), mínimo 3 días en 30. Se esconde si ya suena eso.
+  (2) Temporizador para dormir en la privada: luna en «Sonando ahora»
+  (`hojaDormir`, `ponerDormir(-1)` = al acabar esta canción, usa `pausarYo`).
+  Quitado de `publica/mejoras.js` (ahora lo hereda). (3) `?accion=rutina` para
+  el Atajo de CarPlay (si no hay rutina aún, sigue el ajuste «Al abrir»).
+  Probado en Chrome a 393 y 440 con datos simulados.
+
 ### SIN CONFIRMAR en iPhone (buscar en la línea de tiempo del informe)
+- v2.7 «Lo de siempre» y `?accion=rutina`: `rutina: lo de siempre →`. Tarda ~3 días de uso en salir.
 - v2.5 radio que reconecta: `fantasma: no, aún está conectando`, `radio: 15 s conectando`.
 - v1.37.10 fin de canción sin `ended`: `fin: llegó la pausa de final` (ya visto funcionando el 10/10).
 - v2.2/2.3 gestos con el dedo en iPhone real.
@@ -129,6 +141,8 @@
 
 ## App Store (retomada el 11/10/2026)
 
+> Cuentas de Apple y Google (para todas sus apps): `..\..\Tiendas de apps\LEEME.md`.
+
 - **La app de su móvil y la de Elibel NO SE TOCAN.** La de la tienda es una
   copia aparte en `publica/web/`, que se GENERA con
   `python publica/crear_publica.py` (quita perfiles, créditos, YouTube/Piped,
@@ -169,9 +183,23 @@
   su usuario elguaro433). Solo App Store Connect confirma. Logo: pendiente
   de que elija nombre.
 - Requisitos completos en `apple/REQUISITOS.md`.
-- Cuenta: 99 €/año la paga y verifica él. Su Apple ID está en región España pero
-  vive en Andorra (AD500): hay que poner el Apple ID en Andorra (o uno nuevo)
-  antes de inscribirse.
+- Cuenta: 99 €/año la paga y verifica él. Vive en Andorra (AD500), pero **Andorra
+  NO tiene App Store** (no sale en support.apple.com/118205; itunes lookup country=ad
+  da 0): el Apple ID se queda en España (11/10/2026). App gratis → sin NIE ni
+  datos fiscales; en la UE declararse «no comerciante» (DSA) para no publicar
+  dirección/teléfono.
+- **11/10/2026 — inscripción BLOQUEADA** (Apple ID emmanueldiazsanchez@icloud.com,
+  Individual): la web da «error desconocido» tras aceptar el acuerdo, y la app
+  Apple Developer dice «not available for this Apple Account». El formulario fija
+  la región en España y exige que coincida con la residencia. Escrito a soporte
+  de Apple (caso **102993277547**). Aún no ha pagado nada. Esperar su respuesta.
+- Plan B mirado el 11/10: Google Play SÍ admite desarrolladores de Andorra (25 $ una vez,
+  DNI/pasaporte + tarjeta a su nombre; cuenta personal = prueba cerrada con 12
+  testers 14 días). `native/` solo tiene iOS: Android habría que montarlo (audio de fondo).
+  **YA TIENE cuenta de Play Console pagada**: «Emmanuel Díaz», cuenta personal, ID
+  4991395051998351480 (con otra cuenta de Google, no emmanuel050216). Le faltan
+  dos pasos obligatorios: verificar un móvil Android real (app Play Console) y el
+  teléfono de contacto (tras verificar identidad). No tiene móvil Android propio.
 - Pendiente de la pública: fuentes locales (Sora, DM Sans, Caveat), nombre único
   en la tienda, icono 1024 propio, capturas, ficha, probar en iPhone.
 - Lotería, Trading y BuySell365 (de `Proyectos\Familia`) probablemente NO
@@ -180,5 +208,5 @@
 ## Ideas propuestas y NO hechas
 
 - Reordenar la cola a mano. Guía de comprar MP3 dentro de la app.
-- «Tu año en música», dedicar canción, temporizador de dormir con botón.
+- «Tu año en música», dedicar canción.
 - Seguir cantantes con página propia; lista «Por comprar».

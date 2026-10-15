@@ -2410,8 +2410,8 @@ async function pintarAhora(cancion){
       // playPause()/pausarYo() como el botón de la pantalla.
       navigator.mediaSession.setActionHandler('play', function(){ linea('orden de iOS: ▶ (bloqueo, coche o auriculares)'); if(audio.paused) playPause(); });
       navigator.mediaSession.setActionHandler('pause', function(){ linea('orden de iOS: pausa (bloqueo, coche, auriculares o se desconectó el coche)'); pausarYo(); });
-      navigator.mediaSession.setActionHandler('nexttrack', siguiente);
-      navigator.mediaSession.setActionHandler('previoustrack', anterior);
+      navigator.mediaSession.setActionHandler('nexttrack', function(){ linea('orden de iOS: ⏭ siguiente'); siguiente(); });
+      navigator.mediaSession.setActionHandler('previoustrack', function(){ linea('orden de iOS: ⏮ anterior'); anterior(); });
       navigator.mediaSession.setActionHandler('stop', function(){ linea('orden de iOS: parar'); pausarYo(); });
       if(actual.tipo === 'cancion'){
         navigator.mediaSession.setActionHandler('seekto', function(d){
@@ -4881,6 +4881,7 @@ function pintarModos(){
    Si la pausa NO la pediste tú, la app vuelve a darle al play sola. */
 var pausaMia = false, pausaAjena = 0;
 function pausarYo(){
+  linea('pausa pedida (botón, temporizador o iOS)');
   pausaMia = true;
   paradoPorMi = true;              // mientras esto sea true, NADA la reenciende
   recuperarAlVolver = false;
@@ -4905,12 +4906,16 @@ function pausarYo(){
 var LINEA = [];
 function linea(t){
   var d = new Date(), h = ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2)+'.'+('00'+d.getMilliseconds()).slice(-3);
-  LINEA.push(h + ' ' + t); if(LINEA.length > 70) LINEA.shift();
+  LINEA.push(h + ' ' + t); if(LINEA.length > 250) LINEA.splice(0, LINEA.length - 250);
   try{ localStorage.setItem('mm_linea', JSON.stringify(LINEA)); }catch(_){}
 }
 try{ LINEA = JSON.parse(localStorage.getItem('mm_linea') || '[]') || []; }catch(_){ LINEA = []; }
-linea('— app abierta v' + APP_VERSION + ' —');
-['play','playing','pause','ended','error','stalled','suspend','waiting','emptied','abort'].forEach(function(n){
+(function(){
+  var tipo = '';
+  try{ var nv = performance.getEntriesByType('navigation')[0]; tipo = nv ? nv.type : ''; }catch(_){}
+  linea('— app abierta v' + APP_VERSION + ' —' + (tipo ? ' (' + tipo + ')' : '') + (document.wasDiscarded ? ' [iOS la había cerrado]' : '') + (document.hidden ? ' [en segundo plano]' : ''));
+})();
+['play','playing','pause','ended','error','stalled','waiting','emptied','abort'].forEach(function(n){
   audio.addEventListener(n, function(){ linea('audio:' + n + (n === 'error' && audio.error ? '(' + audio.error.code + ')' : '') + ' t=' + Math.round(audio.currentTime) + (audio.paused ? ' [pausado]' : '')); });
 });
 ['blur','focus','pagehide','pageshow'].forEach(function(n){
@@ -5057,7 +5062,6 @@ try{
   if(navigator.audioSession && navigator.audioSession.addEventListener){
     navigator.audioSession.addEventListener('statechange', function(){
       var st = navigator.audioSession.state;
-      anotar('sonido', 'iOS dice: ' + st, actual ? actual.titulo : '');      // para ver en el informe qué pasa de verdad
       // En iOS 18.7 el estado llega como «undefined», pero el AVISO sí llega: el primero es el
       // principio de la interrupción y los siguientes son el final (visto en el informe de un usuario).
       // Pasados unos segundos desde la pausa, un aviso nuevo = la otra app terminó → seguir.

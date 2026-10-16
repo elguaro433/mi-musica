@@ -727,7 +727,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.9';
+var APP_VERSION = '2.10';
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -5104,7 +5104,10 @@ document.addEventListener('visibilitychange', function(){ linea('visibilidad:' +
 try{
   if(navigator.audioSession){
     navigator.audioSession.type = 'playback';          // música: debe seguir en segundo plano
-    navigator.audioSession.addEventListener('statechange', function(){ linea('iOS audioSession:' + navigator.audioSession.state); });
+    navigator.audioSession.addEventListener('statechange', function(){
+      // En iOS 18.7 el estado llega siempre «undefined»: solo se apunta si hay algo sonando (si no, es ruido).
+      if(navigator.audioSession.state !== undefined || (actual && !audio.paused)) linea('iOS audioSession:' + navigator.audioSession.state);
+    });
     linea('audioSession.type=' + navigator.audioSession.type);
   }else linea('este iPhone no tiene audioSession');
 }catch(e){ linea('audioSession error ' + e.message); }
@@ -6410,7 +6413,7 @@ async function textoInforme(){
     '\nSesión de audio de iOS: '+ses+
     '\nMezcla: '+(AJ.mezcla ? 'activada' : 'apagada')+' · ahorro de datos: '+(AJ.ahorro ? 'sí' : 'no')+
     '\nSuena ahora: '+(actual ? actual.tipo+' · '+actual.titulo+(audio.paused ? ' (en pausa)' : '') : 'nada')+
-    '\n\nLÍNEA DE TIEMPO DEL SONIDO (lo último abajo):\n' + LINEA.slice(-45).join('\n') +
+    '\n\nLÍNEA DE TIEMPO DEL SONIDO (lo último abajo):\n' + LINEA.join('\n') +
     '\n\nMEDIDAS DE LA PANTALLA:\n' + medidasPantalla() +
     '\n\nÚLTIMOS AVISOS Y ERRORES:\n' + (e.length ? e.slice(0,30).map(function(x){
       return x.f+' · '+x.o+' · '+x.m+(x.n > 1 ? ' (×'+x.n+')' : ''); }).join('\n') : '(ninguno)');

@@ -10,7 +10,7 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz". **Escribe por voz**: confirmar nombres dudosos.
 
-## Estado (15/10/2026, v2.7)
+## Estado (16/10/2026, v2.10)
 
 - Publicada, la usan él (iPhone 14 Pro, 393×852) y Elibel (iPhone 16 Pro Max,
   440×956), ambos iOS 18.7. Coche: Dacia con CarPlay. Escucha reggaetón,
@@ -33,7 +33,32 @@
   el Atajo de CarPlay (si no hay rutina aún, sigue el ajuste «Al abrir»).
   Probado en Chrome a 393 y 440 con datos simulados.
 
+- **v2.8 (15/10) — informe más útil:** su informe de la 2.7 sin fallos (el paso
+  de canción con pantalla apagada va bien). Línea de tiempo de 70 → 250 líneas
+  (70 cubrían ~4 h y un fantasma de las 15:23 quedó sin detalle), fuera
+  `audio:suspend`, «iOS dice: undefined» ya no llena los avisos, se apuntan ⏭/⏮
+  de iOS y cada `pausarYo()`, y «app abierta» dice el tipo de carga
+  (navigate/reload) y si iOS la había cerrado o abrió en segundo plano (a las
+  16:19 la página se recargó sola en segundo plano con la música en pausa).
+
+- **v2.9 (15/10) — Compartir:** botón «Compartir» junto a «Letra» en «Sonando
+  ahora» (canciones, radio, Audius). 1er toque dibuja una imagen 1080×1920
+  (`tarjetaCompartir`: carátula, título, cantante, «Mi Música») y abre hoja;
+  2º toque `navigator.share({files})` (iOS exige el toque justo antes). «Solo el
+  texto y el enlace» (canción → búsqueda de YouTube; radio → solo texto). Logos
+  sin CORS → `images.weserv.nl` (añadido a la privacidad pública). En YouTube,
+  «Compartir vídeo» manda `https://youtu.be/<id>` directo. Él eligió: WhatsApp
+  (chat y estado), Telegram, Instagram = menú de compartir de iOS. NO se manda el
+  MP3 (es música comprada/de otros). Falta probar en iPhone.
+
+- **v2.10 (16/10) — arreglo del informe:** su informe de la 2.9 sin fallos (a
+  las 11:49 la radio se paró por orden de iOS, 19 min después de salir: coche/
+  auriculares; bien). Pero la 2.8 guardaba 250 líneas y el informe solo
+  imprimía `LINEA.slice(-45)`: ahora salen todas. `iOS audioSession:undefined`
+  solo se apunta si algo suena. Aún no había probado Compartir.
+
 ### SIN CONFIRMAR en iPhone (buscar en la línea de tiempo del informe)
+- v2.9 Compartir: `compartido con imagen/texto/vídeo`; ¿sale «Mi estado» en WhatsApp y la historia en Instagram?
 - v2.7 «Lo de siempre» y `?accion=rutina`: `rutina: lo de siempre →`. Tarda ~3 días de uso en salir.
 - v2.5 radio que reconecta: `fantasma: no, aún está conectando`, `radio: 15 s conectando`.
 - v1.37.10 fin de canción sin `ended`: `fin: llegó la pausa de final` (ya visto funcionando el 10/10).

@@ -10,7 +10,7 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz". **Escribe por voz**: confirmar nombres dudosos.
 
-## Estado (16/10/2026, v2.10)
+## Estado (23/10/2026, v2.11)
 
 - Publicada, la usan él (iPhone 14 Pro, 393×852) y Elibel (iPhone 16 Pro Max,
   440×956), ambos iOS 18.7. Coche: Dacia con CarPlay. Escucha reggaetón,
@@ -57,7 +57,19 @@
   imprimía `LINEA.slice(-45)`: ahora salen todas. `iOS audioSession:undefined`
   solo se apunta si algo suena. Aún no había probado Compartir.
 
+- **v2.11 (23/10) — radio en el coche, del informe del 22-23/10:** (1) la red se cortó con
+  la pantalla apagada e iOS dio el directo por terminado (`pause`+`ended`): nadie hacía nada,
+  35 min muda. Ahora `ended` de radio: delante → reconecta; de fondo → `play()` y si no, ▶ visible.
+  `playPause()` reconecta la radio si `audio.ended`/`networkState 3`. (2) `pause` de radio a los
+  pocos s de un `stalled`/`waiting` (`tAtasco` < 30 s) NO es otra app: se prueba `play()`; si
+  falla, se espera como siempre. (3) Al abrir, volvía sola y su toque en el ▶ (aún visible) la
+  paraba: un toque < 2 s tras una vuelta automática (`tAutoVuelta`) no la para. (4) `pausarYo()`
+  borra `interrumpida` y los temporizadores de rescate/reanudar (quedaba una de 40 min «pendiente»).
+  (5) Dos reconexiones de radio se pisaban al volver (AbortError): las vueltas automáticas
+  cancelan el `reintento` en cola y `programarReconexion` no cambia la fuente si hubo una hace < 3 s.
+
 ### SIN CONFIRMAR en iPhone (buscar en la línea de tiempo del informe)
+- v2.11 radio con cortes de red: `radio: el directo se cortó (ended)`, `radio: la pausa vino tras un corte de red`, `play() tras el corte aceptado/rechazado`, `toque justo cuando ya volvía sola`.
 - v2.9 Compartir: `compartido con imagen/texto/vídeo`; ¿sale «Mi estado» en WhatsApp y la historia en Instagram?
 - v2.7 «Lo de siempre» y `?accion=rutina`: `rutina: lo de siempre →`. Tarda ~3 días de uso en salir.
 - v2.5 radio que reconecta: `fantasma: no, aún está conectando`, `radio: 15 s conectando`.

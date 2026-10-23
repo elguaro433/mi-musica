@@ -727,7 +727,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.10';
+var APP_VERSION = '2.11';
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -1773,6 +1773,9 @@ function programarReconexion(){
   reintento = setTimeout(function(){
     if(!actual || actual.tipo !== 'radio') return;
     if(otraAppTieneElSonido()){ interrumpida = interrumpida || Date.now(); pintarEstado('En pausa · otra app está sonando'); return; }
+    // Informe 22/10 (10:20:59): este reintento cambió la fuente 0,04 s después de que «seguir» la pusiera,
+    // y las dos reconexiones se pisaron (AbortError). Si la app acaba de reengancharla, no se toca.
+    if(Date.now() - tAutoVuelta < 3000){ linea('radio: reintento omitido, ya se está reenganchando'); return; }
     fallosRadio++;
     anotar('radio', 'reintento ' + fallosRadio + ' de ' + actual.titulo);
     var u = actual.url;
@@ -1846,9 +1849,24 @@ function cablearAudio(){
   // instante, y eso CORTABA la emisora. Ahora solo se avisa: si de verdad
   // se cayó, salta 'error' o lo pilla el guardián nº 1.
   audio.addEventListener('stalled', function(){
-    if(actual && actual.tipo==='radio' && !paradoPorMi) pintarEstado('Cargando…');
+    if(actual && actual.tipo==='radio'){ tAtasco = Date.now(); if(!paradoPorMi) pintarEstado('Cargando…'); }
   });
-  audio.addEventListener('waiting', function(){ if(actual && actual.tipo==='radio') pintarEstado('Cargando…'); });
+  audio.addEventListener('waiting', function(){ if(actual && actual.tipo==='radio'){ tAtasco = Date.now(); pintarEstado('Cargando…'); } });
+  /* Informe 23/10/2026: yendo en el coche, la red falló y iOS dio el directo por TERMINADO (pause+ended)
+     con la pantalla apagada. Nadie hacía nada y la radio se quedó muda 35 min. Ahora: con la app
+     delante se reconecta; de fondo solo se puede probar play() (cambiar la fuente no lo deja iOS);
+     si no vale, queda el ▶ a mano y al volver a la app se reengancha sola. */
+  audio.addEventListener('ended', function(){
+    if(!actual || actual.tipo !== 'radio' || paradoPorMi || viendoVideo) return;
+    linea('radio: el directo se cortó (ended)' + (document.hidden ? ' [en segundo plano]' : ''));
+    if(!document.hidden){ espera = 500; fallosRadio = 0; programarReconexion(); return; }
+    tAutoVuelta = Date.now();
+    var p = audio.play();
+    if(p && p.then) p.then(function(){ linea('radio: play() tras el corte aceptado'); }, function(er){
+      linea('radio: play() tras el corte rechazado ' + (er && er.name) + '; dejo ▶ y reengancho al volver');
+      quedarEnPausaVisible();
+    });
+  });
 }
 cablearAudio();
 
@@ -2188,7 +2206,7 @@ function playPause(){
       if(vistaActual === 'buscar' && pestana === 'youtube') pintarYouTube();
     }
     // Si era radio y la habíamos soltado al pararla, hay que reconectar.
-    if(actual.tipo === 'radio' && !audio.src){
+    if(actual.tipo === 'radio' && (!audio.src || audio.ended || audio.networkState === 3)){
       fallosRadio = 0; espera = 1000;
       audio.src = actual.url;
       pintarEstado('Conectando…');
@@ -2202,6 +2220,9 @@ function playPause(){
     var p = audio.play();
     if(p && p.catch) p.catch(function(err){ anotar('playPause', err.message); });
   }else{
+    // Informe 22/10/2026: la app volvía sola al abrirla y, 0,1 s después, tu toque en el ▶ (que aún se veía)
+    // la PARABA; había que tocar otra vez. Un toque en los 2 s siguientes a una vuelta automática no la para.
+    if(Date.now() - tAutoVuelta < 2000){ linea('toque justo cuando ya volvía sola: la dejo sonando'); pintarBotones(true); return; }
     pausarYo();
   }
 }
@@ -5062,6 +5083,9 @@ function pausarYo(){
   paradoPorMi = true;              // mientras esto sea true, NADA la reenciende
   recuperarAlVolver = false;
   clearTimeout(reintento); clearTimeout(vigilante);
+  // Informe 23/10/2026: una interrupción de 40 min antes seguía «pendiente» y, al volver a darle al ▶,
+  // la maquinaria de reanudar se despertaba sola. Si la paras tú (o iOS), se olvida todo lo pendiente.
+  interrumpida = 0; clearTimeout(window.__tRescate); clearTimeout(window.__tReanuda);
   audio.pause();
   // La radio en directo no se "pausa": se suelta. Si no, sigue tirando de
   // datos y cualquier aviso de la red la despertaba sola, que era el fallo
@@ -5146,7 +5170,8 @@ function seguirTrasSalir(){
   interrumpida = 0; intentosSalida = 0;
   (function intentar(){
     if(!actual || !audio.paused || pausaMia || paradoPorMi || viendoVideo) return;
-    if(actual.tipo === 'radio' && intentosSalida === 0){ try{ audio.src = actual.url; }catch(_){} }
+    if(actual.tipo === 'radio' && intentosSalida === 0){ clearTimeout(reintento); try{ audio.src = actual.url; }catch(_){} }
+    tAutoVuelta = Date.now();
     var p = audio.play();
     if(p && p.catch) p.catch(function(er){
       linea('play() rechazado: ' + (er && er.name) + ' · ' + String((er && er.message) || '').slice(0, 60));
@@ -5164,9 +5189,22 @@ function marcarSalida(){
 window.addEventListener('blur', marcarSalida);
 window.addEventListener('pagehide', marcarSalida);
 document.addEventListener('visibilitychange', function(){ if(document.hidden) marcarSalida(); });
+var tAtasco = 0, tAutoVuelta = 0;
 function trasInterrupcion(){
   if(!actual || pausaMia || paradoPorMi || viendoVideo || audio.ended) return;
   if(Date.now() - tSalida < 3500){ setTimeout(seguirTrasSalir, 300); return; }
+  // Informe 22-23/10/2026: la radio se atascó (red) y a los segundos llegó un «pause». No era otra app:
+  // se esperaba un aviso de iOS que nunca llegaba y se quedaba muda. Si hubo atasco en los últimos 30 s,
+  // se prueba play() (no se cambia la fuente: de fondo iOS no lo deja). Si no vale, se espera como siempre.
+  if(actual.tipo === 'radio' && Date.now() - tAtasco < 30000 && !otraAppTieneElSonido()){
+    linea('radio: la pausa vino tras un corte de red (no es otra app); intento play()');
+    tAtasco = 0; tAutoVuelta = Date.now();
+    var pr = audio.play();
+    if(pr && pr.then){ pr.then(function(){ linea('radio: play() tras el corte aceptado'); }, function(er){
+      linea('radio: play() tras el corte rechazado ' + (er && er.name) + '; espero como si fuera otra app');
+      trasInterrupcion();
+    }); return; }
+  }
   pausaAjena = Date.now();
   interrumpida = Date.now();
   MZ.huboInterrupcion = true;
@@ -5190,7 +5228,8 @@ function programarRescate(n){
     if(Date.now() - t0 > RESCATE_MS[n] + 5000){ linea('rescate: la página estuvo dormida; dejo ▶'); quedarEnPausaVisible(); return; }
     linea('rescate nº ' + (n + 1) + ': sigue en pausa sin aviso de fin; intento play()');
     anotar('sonido', 'rescate: pausa sin aviso de fin, intento seguir', actual.titulo);
-    if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }
+    if(actual.tipo === 'radio'){ clearTimeout(reintento); try{ audio.src = actual.url; }catch(_){} }
+    tAutoVuelta = Date.now();
     var p = audio.play();
     if(p && p.then) p.then(function(){ linea('rescate: play() aceptado'); });
     if(p && p.catch) p.catch(function(er){
@@ -5223,11 +5262,13 @@ function reanudarTrasInterrupcion(){
   interrumpida = 0; pintarEstado(null);
   anotar('sonido', 'el sonido vuelve a estar libre: sigo con ' + actual.titulo);
   try{ if(MZ.listo) MZ.ctx.resume(); }catch(_){}
-  if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }       // en directo: se reengancha al directo
+  tAutoVuelta = Date.now();
+  if(actual.tipo === 'radio'){ clearTimeout(reintento); try{ audio.src = actual.url; }catch(_){} }       // en directo: se reengancha al directo
   var intentos = 0;
   (function volver(){
     if(!actual || !audio.paused || pausaMia || paradoPorMi){ linea('seguir: cancelado (ya suena o lo paré yo)'); return; }
     linea('seguir: intento de play() nº ' + (intentos + 1) + (document.hidden ? ' [en segundo plano]' : ''));
+    tAutoVuelta = Date.now();
     var p = audio.play();
     if(p && p.then) p.then(function(){ linea('seguir: play() aceptado'); });
     if(p && p.catch) p.catch(function(er){

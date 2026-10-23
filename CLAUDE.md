@@ -65,6 +65,8 @@
   falla, se espera como siempre. (3) Al abrir, volvía sola y su toque en el ▶ (aún visible) la
   paraba: un toque < 2 s tras una vuelta automática (`tAutoVuelta`) no la para. (4) `pausarYo()`
   borra `interrumpida` y los temporizadores de rescate/reanudar (quedaba una de 40 min «pendiente»).
+  (5) Dos reconexiones de radio se pisaban al volver (AbortError): las vueltas automáticas
+  cancelan el `reintento` en cola y `programarReconexion` no cambia la fuente si hubo una hace < 3 s.
 
 ### SIN CONFIRMAR en iPhone (buscar en la línea de tiempo del informe)
 - v2.11 radio con cortes de red: `radio: el directo se cortó (ended)`, `radio: la pausa vino tras un corte de red`, `play() tras el corte aceptado/rechazado`, `toque justo cuando ya volvía sola`.

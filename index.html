@@ -1773,6 +1773,9 @@ function programarReconexion(){
   reintento = setTimeout(function(){
     if(!actual || actual.tipo !== 'radio') return;
     if(otraAppTieneElSonido()){ interrumpida = interrumpida || Date.now(); pintarEstado('En pausa · otra app está sonando'); return; }
+    // Informe 22/10 (10:20:59): este reintento cambió la fuente 0,04 s después de que «seguir» la pusiera,
+    // y las dos reconexiones se pisaron (AbortError). Si la app acaba de reengancharla, no se toca.
+    if(Date.now() - tAutoVuelta < 3000){ linea('radio: reintento omitido, ya se está reenganchando'); return; }
     fallosRadio++;
     anotar('radio', 'reintento ' + fallosRadio + ' de ' + actual.titulo);
     var u = actual.url;
@@ -5167,7 +5170,7 @@ function seguirTrasSalir(){
   interrumpida = 0; intentosSalida = 0;
   (function intentar(){
     if(!actual || !audio.paused || pausaMia || paradoPorMi || viendoVideo) return;
-    if(actual.tipo === 'radio' && intentosSalida === 0){ try{ audio.src = actual.url; }catch(_){} }
+    if(actual.tipo === 'radio' && intentosSalida === 0){ clearTimeout(reintento); try{ audio.src = actual.url; }catch(_){} }
     tAutoVuelta = Date.now();
     var p = audio.play();
     if(p && p.catch) p.catch(function(er){
@@ -5225,7 +5228,7 @@ function programarRescate(n){
     if(Date.now() - t0 > RESCATE_MS[n] + 5000){ linea('rescate: la página estuvo dormida; dejo ▶'); quedarEnPausaVisible(); return; }
     linea('rescate nº ' + (n + 1) + ': sigue en pausa sin aviso de fin; intento play()');
     anotar('sonido', 'rescate: pausa sin aviso de fin, intento seguir', actual.titulo);
-    if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }
+    if(actual.tipo === 'radio'){ clearTimeout(reintento); try{ audio.src = actual.url; }catch(_){} }
     tAutoVuelta = Date.now();
     var p = audio.play();
     if(p && p.then) p.then(function(){ linea('rescate: play() aceptado'); });
@@ -5259,7 +5262,8 @@ function reanudarTrasInterrupcion(){
   interrumpida = 0; pintarEstado(null);
   anotar('sonido', 'el sonido vuelve a estar libre: sigo con ' + actual.titulo);
   try{ if(MZ.listo) MZ.ctx.resume(); }catch(_){}
-  if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }       // en directo: se reengancha al directo
+  tAutoVuelta = Date.now();
+  if(actual.tipo === 'radio'){ clearTimeout(reintento); try{ audio.src = actual.url; }catch(_){} }       // en directo: se reengancha al directo
   var intentos = 0;
   (function volver(){
     if(!actual || !audio.paused || pausaMia || paradoPorMi){ linea('seguir: cancelado (ya suena o lo paré yo)'); return; }

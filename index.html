@@ -727,7 +727,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.11';
+var APP_VERSION = '2.12';
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -2119,7 +2119,8 @@ async function tocarCancion(id, listaIds, opc){
   else colaPos = cola.indexOf(id);
 
   try{
-    var a = (sigPre && sigPre.id === c.id) ? sigPre.a : await leer('audios', c.hash);
+    var dePre = !!(sigPre && sigPre.id === c.id);
+    var a = dePre ? sigPre.a : await leer('audios', c.hash);
     sigPre = null;
     if(!a || !a.blob){
       c.falta = true; await guardar('canciones', limpia(c));
@@ -2146,7 +2147,27 @@ async function tocarCancion(id, listaIds, opc){
       return;
     }
     mezclaEntrada(c);
-    audio.addEventListener('playing', function ok(){ audio.removeEventListener('playing', ok); saltosSeguidos = 0; });
+    var arrancoYa = false;
+    audio.addEventListener('playing', function ok(){ audio.removeEventListener('playing', ok); saltosSeguidos = 0; arrancoYa = true; cancionAtascada = null; });
+    // Plazo de arranque: el vigilante solo mira cuando ya sonó, así que una canción que nunca arranca
+    // se quedaba muda para siempre. Se apunta todo (para el informe) y se prueba lo que iOS deja.
+    (function(idArr, deFondo, bytes){
+      reintentarSiDespierto(function(){
+        if(arrancoYa || !actual || actual.id !== idArr || paradoPorMi || viendoVideo) return;
+        linea('canción: 7 s sin arrancar · rs=' + audio.readyState + ' ns=' + audio.networkState + (audio.error ? ' err=' + audio.error.code : '') +
+              ' · ' + Math.round((bytes || 0) / 1024) + ' KB' + (dePre ? ' · precargada' : '') + (deFondo ? ' · empezó de fondo' : '') + (document.hidden ? ' [en segundo plano]' : ''));
+        var p2 = audio.play();
+        if(p2 && p2.then) p2.then(function(){ linea('canción: play() de nuevo aceptado'); }, function(er){ linea('canción: play() de nuevo rechazado ' + (er && er.name)); });
+        if(document.hidden) cancionAtascada = idArr;                 // al volver a la app se vuelve a leer del teléfono
+        else setTimeout(function(){
+          if(arrancoYa || !actual || actual.id !== idArr || paradoPorMi) return;
+          if(yaReleida === idArr){ linea('canción: tampoco arranca releída; dejo ▶'); pintarBotones(false); return; }
+          yaReleida = idArr;
+          linea('canción: sigue sin arrancar; la vuelvo a leer del teléfono');
+          tocarCancion(idArr);
+        }, 5000);
+      }, 7000);
+    })(c.id, document.hidden, a.bytes || (a.blob && a.blob.size));
     var p = audio.play();
     if(p && p.catch) p.catch(function(err){
       anotar('play', err.message, c.titulo);
@@ -5189,7 +5210,15 @@ function marcarSalida(){
 window.addEventListener('blur', marcarSalida);
 window.addEventListener('pagehide', marcarSalida);
 document.addEventListener('visibilitychange', function(){ if(document.hidden) marcarSalida(); });
-var tAtasco = 0, tAutoVuelta = 0;
+var tAtasco = 0, tAutoVuelta = 0, cancionAtascada = null, yaReleida = null;   // una sola relectura por canción
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden || !cancionAtascada || !actual || actual.id !== cancionAtascada || paradoPorMi) return;
+  var id = cancionAtascada; cancionAtascada = null;
+  if(yaReleida === id) return;
+  yaReleida = id;
+  linea('canción: estaba atascada al volver; la vuelvo a leer del teléfono');
+  tocarCancion(id);
+});
 function trasInterrupcion(){
   if(!actual || pausaMia || paradoPorMi || viendoVideo || audio.ended) return;
   if(Date.now() - tSalida < 3500){ setTimeout(seguirTrasSalir, 300); return; }
@@ -5351,18 +5380,27 @@ function reengancharAudio(){
   // reactivar la sesión de audio de iOS (el atasco es de la sesión, no del archivo)
   try{ if(navigator.audioSession){ navigator.audioSession.type = 'auto'; navigator.audioSession.type = 'playback'; } }catch(_){}
   setTimeout(function(){ pausaMia = false; }, 1500);
+  // Informe 24/10 (09:07:13): un reintento de la radio cambió la fuente 1 s después de este reenganche,
+  // las dos conexiones se pisaron (AbortError) y la radio quedó en pausa 6 s. Se cancela y se marca.
+  if(actual.tipo === 'radio'){ clearTimeout(reintento); tAutoVuelta = Date.now(); }
   setTimeout(function(){
     if(!actual || paradoPorMi || viendoVideo) return;
     // solo con la app a la vista se permite recargar la fuente (nivel 1 en adelante)
     if(!oculta && (nivel >= 1 || actual.tipo === 'radio' || audio.error || audio.readyState === 0)){
       var src = actual.tipo === 'radio' ? actual.url : audio.src;
-      try{ audio.load(); audio.src = src; }catch(_){}
+      // load() y luego src son DOS cargas seguidas; en la radio basta con poner la fuente.
+      try{ if(actual.tipo !== 'radio') audio.load(); audio.src = src; }catch(_){}
       if(actual.tipo === 'cancion' && t > 1) audio.addEventListener('loadedmetadata', function(){ try{ audio.currentTime = t; }catch(_){} }, {once:true});
     }else if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }
     var p = audio.play();
     if(p && p.then) p.then(function(){ linea('fantasma: play() aceptado'); volverAPonerFicha(); });
     if(p && p.catch) p.catch(function(er){
       linea('fantasma: play() rechazado: ' + (er && er.name));
+      // Radio con la app delante: en vez de quedarse en ▶, se reconecta por el camino normal.
+      if(actual && actual.tipo === 'radio' && !document.hidden && !paradoPorMi){
+        linea('fantasma: la radio se reconecta por el camino normal');
+        tAutoVuelta = 0; espera = 500; fallosRadio = 0; programarReconexion(); return;
+      }
       pausaLimpia();
     });
   }, 450);

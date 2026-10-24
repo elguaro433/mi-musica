@@ -10,7 +10,7 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz". **Escribe por voz**: confirmar nombres dudosos.
 
-## Estado (24/10/2026, v2.12)
+## Estado (24/10/2026, v2.13)
 
 - Publicada, la usan él (iPhone 14 Pro, 393×852) y Elibel (iPhone 16 Pro Max,
   440×956), ambos iOS 18.7. Coche: Dacia con CarPlay. Escucha reggaetón,
@@ -78,6 +78,12 @@
   err KB precargada/de fondo` y prueba `play()`; delante → +5 s la relee del teléfono; de fondo → la relee al
   volver (`cancionAtascada`). Una sola relectura por canción (`yaReleida`).
 
+- **v2.13 (24/10) — apps de los niños:** Emiliano y Emmanuel Alejandro, **cada uno con su tablet Lenovo
+  Android**, con YouTube (lo eligió él). Perfiles `emiliano` y `alejandro` en `PERSONAS` (nombre del
+  segundo: «Emmanuel Alejandro»), enlaces `emiliano.html` / `alejandro.html` (`?p=…`), `manifest-<perfil>.json`
+  con `id` propio (en Android cada uno es una app). En Android: aviso de instalar desde el menú ⋮ de Chrome
+  (en vez del de Safari) y `accept="audio/*,…"` en «Añadir música». En el iPhone no cambia nada.
+
 ### SIN CONFIRMAR en iPhone (buscar en la línea de tiempo del informe)
 - v2.12: `canción: 7 s sin arrancar` (¿qué rs/ns/err da en el iPhone?), `fantasma: la radio se reconecta por el camino normal`.
 - v2.11 radio con cortes de red (el `ended` de fondo ya CONFIRMADO el 24/10): `radio: el directo se cortó (ended)`, `radio: la pausa vino tras un corte de red`, `play() tras el corte aceptado/rechazado`, `toque justo cuando ya volvía sola`.
@@ -107,7 +113,8 @@
 
 - Color neón oscuro morado/rosa. NO dorado.
 - Barra de 4: Inicio · Buscar · Radio · Biblioteca. Buscar = Música · YouTube.
-- Un enlace por persona, perfil bloqueado (`mm_bloqueado`). Sin PIN ni login.
+- Un enlace por persona, perfil bloqueado (`mm_bloqueado`). Sin PIN ni login. Personas: emmanuel, elibel,
+  emiliano y alejandro (Emmanuel Alejandro); los niños en sus tablets Android.
 - Emisoras del teléfono (las ven los dos); ❤️ de cada uno.
 - **NO:** bajar audio de YouTube a MP3 (ni webs «YouTube to MP3»), vistas
   previas de 30 s, sugerir Apple Music/Spotify como «solución», Sideloadly o

@@ -10,7 +10,7 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz". **Escribe por voz**: confirmar nombres dudosos.
 
-## Estado (23/10/2026, v2.11)
+## Estado (24/10/2026, v2.12)
 
 - Publicada, la usan él (iPhone 14 Pro, 393×852) y Elibel (iPhone 16 Pro Max,
   440×956), ambos iOS 18.7. Coche: Dacia con CarPlay. Escucha reggaetón,
@@ -68,10 +68,21 @@
   (5) Dos reconexiones de radio se pisaban al volver (AbortError): las vueltas automáticas
   cancelan el `reintento` en cola y `programarReconexion` no cambia la fuente si hubo una hace < 3 s.
 
+- **v2.12 (24/10) — informe del 24/10 con la 2.11:** CONFIRMADO en iPhone: `radio: el directo se cortó (ended)
+  [en segundo plano]` → `play() tras el corte aceptado` (10:01) y «Lo de siempre» al abrir (07:48 y 10:12).
+  (1) 09:07:13: el reenganche del fantasma (`reengancharAudio`) y un reintento de radio se pisaron (AbortError,
+  6 s en pausa): el reenganche de radio cancela `reintento`, marca `tAutoVuelta` y no hace `load()` + `src`
+  (dos cargas); si su `play()` falla con la app delante, reconecta por `programarReconexion` en vez de
+  `pausaLimpia`. (2) 12:19:52: una canción nunca llegó a `playing` (38 min «conectando»; el vigilante solo
+  mira lo que ya sonó). Plazo de arranque en `tocarCancion`: a 7 s apunta `canción: 7 s sin arrancar · rs ns
+  err KB precargada/de fondo` y prueba `play()`; delante → +5 s la relee del teléfono; de fondo → la relee al
+  volver (`cancionAtascada`). Una sola relectura por canción (`yaReleida`).
+
 ### SIN CONFIRMAR en iPhone (buscar en la línea de tiempo del informe)
-- v2.11 radio con cortes de red: `radio: el directo se cortó (ended)`, `radio: la pausa vino tras un corte de red`, `play() tras el corte aceptado/rechazado`, `toque justo cuando ya volvía sola`.
+- v2.12: `canción: 7 s sin arrancar` (¿qué rs/ns/err da en el iPhone?), `fantasma: la radio se reconecta por el camino normal`.
+- v2.11 radio con cortes de red (el `ended` de fondo ya CONFIRMADO el 24/10): `radio: el directo se cortó (ended)`, `radio: la pausa vino tras un corte de red`, `play() tras el corte aceptado/rechazado`, `toque justo cuando ya volvía sola`.
 - v2.9 Compartir: `compartido con imagen/texto/vídeo`; ¿sale «Mi estado» en WhatsApp y la historia en Instagram?
-- v2.7 «Lo de siempre» y `?accion=rutina`: `rutina: lo de siempre →`. Tarda ~3 días de uso en salir.
+- v2.7 `?accion=rutina` (el Atajo). «Lo de siempre» al abrir ya CONFIRMADO el 24/10.
 - v2.5 radio que reconecta: `fantasma: no, aún está conectando`, `radio: 15 s conectando`.
 - v1.37.10 fin de canción sin `ended`: `fin: llegó la pausa de final` (ya visto funcionando el 10/10).
 - v2.2/2.3 gestos con el dedo en iPhone real.

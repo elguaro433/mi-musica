@@ -10,21 +10,21 @@
    Esto va aquí arriba para que el nombre y el icono de «Añadir a inicio» sean los de esa persona. */
 (function(){
   var q = '';
-  try{ var m = String(location.search).match(/[?&]p=(emmanuel|elibel)(?![a-z])/i); if(m) q = m[1].toLowerCase(); }catch(_){}
+  try{ var m = String(location.search).match(/[?&]p=(emmanuel|elibel|emiliano|alejandro)(?![a-z])/i); if(m) q = m[1].toLowerCase(); }catch(_){}
   var quien = q;
   try{
     if(q) localStorage.setItem('mm_bloqueado', q);
     else quien = localStorage.getItem('mm_bloqueado') || localStorage.getItem('mm_perfil') || 'emmanuel';
   }catch(_){ quien = quien || 'emmanuel'; }
-  window.__QUIEN = (quien === 'elibel') ? 'elibel' : 'emmanuel';
-  if(window.__QUIEN === 'elibel') document.write('<link rel="manifest" href="manifest-elibel.json">');
-  else document.write('<link rel="manifest" href="manifest.json">');
+  // 24/10/2026: también los niños, cada uno en su tablet Android (Emiliano y Emmanuel Alejandro).
+  window.__QUIEN = ['elibel', 'emiliano', 'alejandro'].indexOf(quien) >= 0 ? quien : 'emmanuel';
+  document.write('<link rel="manifest" href="' + (window.__QUIEN === 'emmanuel' ? 'manifest.json' : 'manifest-' + window.__QUIEN + '.json') + '">');
 })();
 </script>
 <meta name="theme-color" content="#0b0913">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<script>document.write('<meta name="apple-mobile-web-app-title" content="' + (window.__QUIEN === 'elibel' ? 'Elibel' : 'Emmanuel') + '">');</script>
+<script>document.write('<meta name="apple-mobile-web-app-title" content="' + ({elibel:'Elibel', emiliano:'Emiliano', alejandro:'Emmanuel A.'}[window.__QUIEN] || 'Emmanuel') + '">');</script>
 <link rel="apple-touch-icon" href="icon-180.png">
 <!-- Pantallas de arranque: sin fogonazo blanco al abrir desde el icono.
      iOS elige la del aparato exacto segun ancho, alto y densidad. -->
@@ -642,6 +642,8 @@ body.coche #coche-salir{display:block}
     <div id="bib-cuerpo"></div>
     <button class="btn" id="b-anadir">➕&nbsp; Añadir música</button>
     <input type="file" id="ficheros" accept=".mp3,.m4a,.aac,.wav,.flac,.ogg" multiple class="oculto">
+    <script>/* Android (tablets de los niños): con «audio/*» el selector enseña la música de la tablet. En el iPhone no se toca. */
+      try{ if(/Android/i.test(navigator.userAgent)) document.getElementById('ficheros').accept = 'audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg'; }catch(_){}</script>
     <input type="file" id="ffoto" accept="image/*" class="oculto">
   </div>
 
@@ -727,7 +729,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.12';
+var APP_VERSION = '2.13';
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -951,7 +953,10 @@ function esHLS(u){ return String(u).indexOf('.m3u8') >= 0; }
 
 var PERSONAS = {
   emmanuel:{n:'Emmanuel Díaz', corto:'Emmanuel', sexo:'m', g:'linear-gradient(135deg,#a970ff,#7b4ddb)', c:'#a970ff'},
-  elibel:  {n:'Elibel González', corto:'Elibel', sexo:'f', g:'linear-gradient(135deg,#ff5fa6,#ff8fc4)', c:'#ff5fa6'}
+  elibel:  {n:'Elibel González', corto:'Elibel', sexo:'f', g:'linear-gradient(135deg,#ff5fa6,#ff8fc4)', c:'#ff5fa6'},
+  // Los niños, cada uno en su tablet (24/10/2026)
+  emiliano:  {n:'Emiliano Díaz González', corto:'Emiliano', sexo:'m', g:'linear-gradient(135deg,#38bdf8,#2563eb)', c:'#38bdf8'},
+  alejandro: {n:'Emmanuel Alejandro Díaz González', corto:'Emmanuel Alejandro', sexo:'m', g:'linear-gradient(135deg,#34d399,#059669)', c:'#34d399'}
 };
 /* Cada tema trae la paleta ENTERA, no tres acentos sueltos:
    [clave, nombre, principal, segundo, acento,
@@ -1604,7 +1609,7 @@ async function ficherosArchive(id){
 }
 
 /* ═════════════════ ESTADO ═══════════════════════════════════════ */
-var yo = null;                 // 'emmanuel' | 'elibel'
+var yo = null;                 // 'emmanuel' | 'elibel' | 'emiliano' | 'alejandro'
 var CANCIONES = [];            // las del dueño actual
 var LISTAS = [];
 var EMIS_CASA = [];            // emisoras añadidas a mano
@@ -6639,7 +6644,7 @@ function ponerEscala(cual){
    nombre debajo y su música, sin tener que elegir cada vez. */
 function perfilPedido(){
   try{
-    var m = String(location.search || '').match(/[?&]p=(emmanuel|elibel)\b/i);
+    var m = String(location.search || '').match(/[?&]p=(emmanuel|elibel|emiliano|alejandro)\b/i);
     return m ? m[1].toLowerCase() : '';
   }catch(_){ return ''; }
 }
@@ -6683,7 +6688,7 @@ async function arrancar(){
     }
 
     // Cada app es de una sola persona (ver cabecera): no hay «quién eres» ni «cambiar de persona».
-    var guardado = (window.__QUIEN === 'elibel') ? 'elibel' : 'emmanuel';
+    var guardado = PERSONAS[window.__QUIEN] ? window.__QUIEN : 'emmanuel';
 
     $('carga').classList.add('oculto');
 
@@ -6701,7 +6706,11 @@ async function arrancar(){
     var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     if(!standalone && guardado){
       setTimeout(function(){
-        toast('⚠️ Ábrela desde el <b>icono de la pantalla de inicio</b>.<br>En Safari, iOS borra tu música a los 7 días.', 'malo', 9000);
+        // Las tablets de los niños son Android (24/10/2026): allí se instala desde el menú de Chrome.
+        if(/Android/i.test(navigator.userAgent))
+          toast('📲 Instálala en la tablet: menú <b>⋮</b> de Chrome → <b>«Añadir a pantalla de inicio»</b> (o «Instalar aplicación»). Luego ábrela siempre desde ese icono.', 'bueno', 12000);
+        else
+          toast('⚠️ Ábrela desde el <b>icono de la pantalla de inicio</b>.<br>En Safari, iOS borra tu música a los 7 días.', 'malo', 9000);
       }, 2200);
     }
   }catch(err){

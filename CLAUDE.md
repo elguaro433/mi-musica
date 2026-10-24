@@ -243,16 +243,15 @@
   da 0): el Apple ID se queda en España (11/10/2026). App gratis → sin NIE ni
   datos fiscales; en la UE declararse «no comerciante» (DSA) para no publicar
   dirección/teléfono.
-- **11/10/2026 — inscripción BLOQUEADA** (Apple ID emmanueldiazsanchez@icloud.com,
+- **11/10/2026 — inscripción BLOQUEADA** (su Apple ID,
   Individual): la web da «error desconocido» tras aceptar el acuerdo, y la app
   Apple Developer dice «not available for this Apple Account». El formulario fija
   la región en España y exige que coincida con la residencia. Escrito a soporte
-  de Apple (caso **102993277547**). Aún no ha pagado nada. Esperar su respuesta.
+  de Apple (nº de caso en Firestore `appdata/notas-claude`, campo `mimusica_tienda`). Aún no ha pagado nada. Esperar su respuesta.
 - Plan B mirado el 11/10: Google Play SÍ admite desarrolladores de Andorra (25 $ una vez,
   DNI/pasaporte + tarjeta a su nombre; cuenta personal = prueba cerrada con 12
   testers 14 días). `native/` solo tiene iOS: Android habría que montarlo (audio de fondo).
-  **YA TIENE cuenta de Play Console pagada**: «Emmanuel Díaz», cuenta personal, ID
-  4991395051998351480 (con otra cuenta de Google, no emmanuel050216). Le faltan
+  **YA TIENE cuenta de Play Console pagada**: «Emmanuel Díaz», cuenta personal, ID en `appdata/notas-claude` (con otra cuenta de Google, no la de siempre). Le faltan
   dos pasos obligatorios: verificar un móvil Android real (app Play Console) y el
   teléfono de contacto (tras verificar identidad). No tiene móvil Android propio.
 - Pendiente de la pública: fuentes locales (Sora, DM Sans, Caveat), nombre único

@@ -66,6 +66,17 @@ cambiar_re(r"'<div class=\"credito\">Propiedad de la.*?</div>'\+\n    '<div clas
            "    '<a class=\"btn\" href=\"privacidad.html\" target=\"_blank\" rel=\"noopener\">🔒&nbsp; Política de privacidad</a>'+")
 cambiar("'<button class=\"btn\" id=\"a-actualizar\" style=\"margin-bottom:14px\">🔄&nbsp; Buscar actualización</button>'+\n", '')
 cambiar('Enviar informe (WhatsApp)', 'Enviar informe de errores')
+# El informe va al correo de soporte (no a un WhatsApp): se copia entero y se abre el correo con el principio
+SOPORTE = 'mimusiquita.app@gmail.com'
+cambiar("async function copiarInforme(){\n",
+        "async function informePorCorreo(){\n"
+        "  var txt = await textoInforme();\n"
+        "  try{ await navigator.clipboard.writeText(txt); }catch(_){}\n"
+        "  var cuerpo = 'Cuéntanos qué pasó:\\n\\n\\n--- Informe (está copiado entero: si aquí sale cortado, pégalo) ---\\n' + txt.slice(0, 1500);\n"
+        "  location.href = 'mailto:" + SOPORTE + "?subject=' + encodeURIComponent('Mi Musiquita · informe v' + APP_VERSION) + '&body=' + encodeURIComponent(cuerpo);\n"
+        "  toast('Se abre tu correo para escribirnos. El informe completo está copiado.', 'bueno', 6000);\n"
+        "}\n"
+        "async function copiarInforme(){\n  return informePorCorreo();\n")
 
 s = s.replace('Cómo traer mi música del PC', 'Cómo añadir mi música')
 

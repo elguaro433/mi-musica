@@ -381,6 +381,18 @@ a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box
 #barra button.on .i svg{stroke-width:2.4}
 #barra button.on{color:var(--purple)}
 
+/* ---------- los niños en su tablet (v2.14) ----------
+   Emiliano y un usuario Alejandro usan tablets Lenovo de 10" (unos 1000x560 en horizontal):
+   portadas y botones grandes para dedos pequeños. En los iPhone no cambia nada. */
+@media (min-width:700px){
+  html.nino{--barra:calc(78px + var(--sabn))}
+  html.nino .hscroll{gap:18px}
+  html.nino .tile{width:176px}
+  html.nino .tile .art{width:176px;height:176px;border-radius:18px}
+  html.nino #barra button{font-size:calc(13px * min(var(--esc), 1.3))}
+  html.nino #barra button .i svg{width:36px;height:36px}
+}
+
 /* ---------- sonando ahora ---------- */
 #now{position:fixed;inset:0;background:radial-gradient(130% 75% at 50% 0%,var(--nowc,transparent),transparent 72%),var(--bg2);z-index:70;display:none;flex-direction:column;
   padding:calc(var(--sat) + 14px) calc(26px + var(--sar)) calc(var(--sab) + 22px) calc(26px + var(--sal));
@@ -603,6 +615,8 @@ body.coche #coche-salir{display:block}
     <div id="bib-cuerpo"></div>
     <button class="btn" id="b-anadir">➕&nbsp; Añadir música</button>
     <input type="file" id="ficheros" accept=".mp3,.m4a,.aac,.wav,.flac,.ogg" multiple class="oculto">
+    <script>/* Android (tablets de los niños): con «audio/*» el selector enseña la música de la tablet. En el iPhone no se toca. */
+      try{ if(/Android/i.test(navigator.userAgent)) document.getElementById('ficheros').accept = 'audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg'; }catch(_){}</script>
     <input type="file" id="ffoto" accept="image/*" class="oculto">
   </div>
 
@@ -689,6 +703,7 @@ body.coche #coche-salir{display:block}
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
 var APP_VERSION = '1.0';
+var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -1563,7 +1578,7 @@ async function ficherosArchive(id){
 }
 
 /* ═════════════════ ESTADO ═══════════════════════════════════════ */
-var yo = null;                 // 'perfil1' | 'perfil2'
+var yo = null;                 // 'perfil1' | 'perfil2' | 'emiliano' | 'alejandro'
 var CANCIONES = [];            // las del dueño actual
 var LISTAS = [];
 var EMIS_CASA = [];            // emisoras añadidas a mano
@@ -1732,6 +1747,9 @@ function programarReconexion(){
   reintento = setTimeout(function(){
     if(!actual || actual.tipo !== 'radio') return;
     if(otraAppTieneElSonido()){ interrumpida = interrumpida || Date.now(); pintarEstado('En pausa · otra app está sonando'); return; }
+    // Informe 22/10 (10:20:59): este reintento cambió la fuente 0,04 s después de que «seguir» la pusiera,
+    // y las dos reconexiones se pisaron (AbortError). Si la app acaba de reengancharla, no se toca.
+    if(Date.now() - tAutoVuelta < 3000){ linea('radio: reintento omitido, ya se está reenganchando'); return; }
     fallosRadio++;
     anotar('radio', 'reintento ' + fallosRadio + ' de ' + actual.titulo);
     var u = actual.url;
@@ -1805,9 +1823,24 @@ function cablearAudio(){
   // instante, y eso CORTABA la emisora. Ahora solo se avisa: si de verdad
   // se cayó, salta 'error' o lo pilla el guardián nº 1.
   audio.addEventListener('stalled', function(){
-    if(actual && actual.tipo==='radio' && !paradoPorMi) pintarEstado('Cargando…');
+    if(actual && actual.tipo==='radio'){ tAtasco = Date.now(); if(!paradoPorMi) pintarEstado('Cargando…'); }
   });
-  audio.addEventListener('waiting', function(){ if(actual && actual.tipo==='radio') pintarEstado('Cargando…'); });
+  audio.addEventListener('waiting', function(){ if(actual && actual.tipo==='radio'){ tAtasco = Date.now(); pintarEstado('Cargando…'); } });
+  /* Informe 23/10/2026: yendo en el coche, la red falló y iOS dio el directo por TERMINADO (pause+ended)
+     con la pantalla apagada. Nadie hacía nada y la radio se quedó muda 35 min. Ahora: con la app
+     delante se reconecta; de fondo solo se puede probar play() (cambiar la fuente no lo deja iOS);
+     si no vale, queda el ▶ a mano y al volver a la app se reengancha sola. */
+  audio.addEventListener('ended', function(){
+    if(!actual || actual.tipo !== 'radio' || paradoPorMi || viendoVideo) return;
+    linea('radio: el directo se cortó (ended)' + (document.hidden ? ' [en segundo plano]' : ''));
+    if(!document.hidden){ espera = 500; fallosRadio = 0; programarReconexion(); return; }
+    tAutoVuelta = Date.now();
+    var p = audio.play();
+    if(p && p.then) p.then(function(){ linea('radio: play() tras el corte aceptado'); }, function(er){
+      linea('radio: play() tras el corte rechazado ' + (er && er.name) + '; dejo ▶ y reengancho al volver');
+      quedarEnPausaVisible();
+    });
+  });
 }
 cablearAudio();
 
@@ -2060,7 +2093,8 @@ async function tocarCancion(id, listaIds, opc){
   else colaPos = cola.indexOf(id);
 
   try{
-    var a = (sigPre && sigPre.id === c.id) ? sigPre.a : await leer('audios', c.hash);
+    var dePre = !!(sigPre && sigPre.id === c.id);
+    var a = dePre ? sigPre.a : await leer('audios', c.hash);
     sigPre = null;
     if(!a || !a.blob){
       c.falta = true; await guardar('canciones', limpia(c));
@@ -2087,7 +2121,27 @@ async function tocarCancion(id, listaIds, opc){
       return;
     }
     mezclaEntrada(c);
-    audio.addEventListener('playing', function ok(){ audio.removeEventListener('playing', ok); saltosSeguidos = 0; });
+    var arrancoYa = false;
+    audio.addEventListener('playing', function ok(){ audio.removeEventListener('playing', ok); saltosSeguidos = 0; arrancoYa = true; cancionAtascada = null; });
+    // Plazo de arranque: el vigilante solo mira cuando ya sonó, así que una canción que nunca arranca
+    // se quedaba muda para siempre. Se apunta todo (para el informe) y se prueba lo que iOS deja.
+    (function(idArr, deFondo, bytes){
+      reintentarSiDespierto(function(){
+        if(arrancoYa || !actual || actual.id !== idArr || paradoPorMi || viendoVideo) return;
+        linea('canción: 7 s sin arrancar · rs=' + audio.readyState + ' ns=' + audio.networkState + (audio.error ? ' err=' + audio.error.code : '') +
+              ' · ' + Math.round((bytes || 0) / 1024) + ' KB' + (dePre ? ' · precargada' : '') + (deFondo ? ' · empezó de fondo' : '') + (document.hidden ? ' [en segundo plano]' : ''));
+        var p2 = audio.play();
+        if(p2 && p2.then) p2.then(function(){ linea('canción: play() de nuevo aceptado'); }, function(er){ linea('canción: play() de nuevo rechazado ' + (er && er.name)); });
+        if(document.hidden) cancionAtascada = idArr;                 // al volver a la app se vuelve a leer del teléfono
+        else setTimeout(function(){
+          if(arrancoYa || !actual || actual.id !== idArr || paradoPorMi) return;
+          if(yaReleida === idArr){ linea('canción: tampoco arranca releída; dejo ▶'); pintarBotones(false); return; }
+          yaReleida = idArr;
+          linea('canción: sigue sin arrancar; la vuelvo a leer del teléfono');
+          tocarCancion(idArr);
+        }, 5000);
+      }, 7000);
+    })(c.id, document.hidden, a.bytes || (a.blob && a.blob.size));
     var p = audio.play();
     if(p && p.catch) p.catch(function(err){
       anotar('play', err.message, c.titulo);
@@ -2147,7 +2201,7 @@ function playPause(){
       if(vistaActual === 'buscar' && pestana === 'youtube') pintarYouTube();
     }
     // Si era radio y la habíamos soltado al pararla, hay que reconectar.
-    if(actual.tipo === 'radio' && !audio.src){
+    if(actual.tipo === 'radio' && (!audio.src || audio.ended || audio.networkState === 3)){
       fallosRadio = 0; espera = 1000;
       audio.src = actual.url;
       pintarEstado('Conectando…');
@@ -2161,6 +2215,9 @@ function playPause(){
     var p = audio.play();
     if(p && p.catch) p.catch(function(err){ anotar('playPause', err.message); });
   }else{
+    // Informe 22/10/2026: la app volvía sola al abrirla y, 0,1 s después, tu toque en el ▶ (que aún se veía)
+    // la PARABA; había que tocar otra vez. Un toque en los 2 s siguientes a una vuelta automática no la para.
+    if(Date.now() - tAutoVuelta < 2000){ linea('toque justo cuando ya volvía sola: la dejo sonando'); pintarBotones(true); return; }
     pausarYo();
   }
 }
@@ -4687,7 +4744,7 @@ function pintarBiblio(){
     ((filtro === 'listas' && listaAbierta) || filtro === 'favoritos') ? 'none' : '';
   if(!CANCIONES.length && grupoBib(filtro) === 'canciones'){
     C.innerHTML = '<div class="vacio"><span class="em">➕</span>Tu biblioteca está vacía.<br>'+
-      'Toca <b>Añadir música</b> y elige tus MP3<br>desde <b>Archivos</b> o <b>iCloud Drive</b>.<br><br>'+
+      'Toca <b>Añadir música</b> y elige tus MP3<br>' + (ES_ANDROID ? 'desde la <b>música de la tablet</b>' : 'desde <b>Archivos</b> o <b>iCloud Drive</b>') + '.<br><br>'+
       '</div>'+
       '<a class="btn solido" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Cómo añadir mi música</a>'+
       '<button class="btn" data-ir-tab="musica">🎧&nbsp; Buscar un cantante</button>'+
@@ -4817,7 +4874,7 @@ async function pintarAjustes(){
   '<div class="card"><h3>🔠 Tamaño de la letra</h3>'+
     '<div class="tabs fijas" style="grid-template-columns:repeat(3,1fr);margin:4px 0 0">'+
       LETRAS.map(function(L){
-        return '<button class="tab'+(((AJ.letra||'normal')===L[0])?' on':'')+'" data-letra="'+L[0]+'">'+L[2]+'</button>';
+        return '<button class="tab'+(((AJ.letra||letraDefecto())===L[0])?' on':'')+'" data-letra="'+L[0]+'">'+L[2]+'</button>';
       }).join('')+
     '</div></div>'+
 
@@ -5019,6 +5076,9 @@ function pausarYo(){
   paradoPorMi = true;              // mientras esto sea true, NADA la reenciende
   recuperarAlVolver = false;
   clearTimeout(reintento); clearTimeout(vigilante);
+  // Informe 23/10/2026: una interrupción de 40 min antes seguía «pendiente» y, al volver a darle al ▶,
+  // la maquinaria de reanudar se despertaba sola. Si la paras tú (o iOS), se olvida todo lo pendiente.
+  interrumpida = 0; clearTimeout(window.__tRescate); clearTimeout(window.__tReanuda);
   audio.pause();
   // La radio en directo no se "pausa": se suelta. Si no, sigue tirando de
   // datos y cualquier aviso de la red la despertaba sola, que era el fallo
@@ -5061,7 +5121,10 @@ document.addEventListener('visibilitychange', function(){ linea('visibilidad:' +
 try{
   if(navigator.audioSession){
     navigator.audioSession.type = 'playback';          // música: debe seguir en segundo plano
-    navigator.audioSession.addEventListener('statechange', function(){ linea('iOS audioSession:' + navigator.audioSession.state); });
+    navigator.audioSession.addEventListener('statechange', function(){
+      // En iOS 18.7 el estado llega siempre «undefined»: solo se apunta si hay algo sonando (si no, es ruido).
+      if(navigator.audioSession.state !== undefined || (actual && !audio.paused)) linea('iOS audioSession:' + navigator.audioSession.state);
+    });
     linea('audioSession.type=' + navigator.audioSession.type);
   }else linea('este iPhone no tiene audioSession');
 }catch(e){ linea('audioSession error ' + e.message); }
@@ -5100,7 +5163,8 @@ function seguirTrasSalir(){
   interrumpida = 0; intentosSalida = 0;
   (function intentar(){
     if(!actual || !audio.paused || pausaMia || paradoPorMi || viendoVideo) return;
-    if(actual.tipo === 'radio' && intentosSalida === 0){ try{ audio.src = actual.url; }catch(_){} }
+    if(actual.tipo === 'radio' && intentosSalida === 0){ clearTimeout(reintento); try{ audio.src = actual.url; }catch(_){} }
+    tAutoVuelta = Date.now();
     var p = audio.play();
     if(p && p.catch) p.catch(function(er){
       linea('play() rechazado: ' + (er && er.name) + ' · ' + String((er && er.message) || '').slice(0, 60));
@@ -5118,9 +5182,30 @@ function marcarSalida(){
 window.addEventListener('blur', marcarSalida);
 window.addEventListener('pagehide', marcarSalida);
 document.addEventListener('visibilitychange', function(){ if(document.hidden) marcarSalida(); });
+var tAtasco = 0, tAutoVuelta = 0, cancionAtascada = null, yaReleida = null;   // una sola relectura por canción
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden || !cancionAtascada || !actual || actual.id !== cancionAtascada || paradoPorMi) return;
+  var id = cancionAtascada; cancionAtascada = null;
+  if(yaReleida === id) return;
+  yaReleida = id;
+  linea('canción: estaba atascada al volver; la vuelvo a leer del teléfono');
+  tocarCancion(id);
+});
 function trasInterrupcion(){
   if(!actual || pausaMia || paradoPorMi || viendoVideo || audio.ended) return;
   if(Date.now() - tSalida < 3500){ setTimeout(seguirTrasSalir, 300); return; }
+  // Informe 22-23/10/2026: la radio se atascó (red) y a los segundos llegó un «pause». No era otra app:
+  // se esperaba un aviso de iOS que nunca llegaba y se quedaba muda. Si hubo atasco en los últimos 30 s,
+  // se prueba play() (no se cambia la fuente: de fondo iOS no lo deja). Si no vale, se espera como siempre.
+  if(actual.tipo === 'radio' && Date.now() - tAtasco < 30000 && !otraAppTieneElSonido()){
+    linea('radio: la pausa vino tras un corte de red (no es otra app); intento play()');
+    tAtasco = 0; tAutoVuelta = Date.now();
+    var pr = audio.play();
+    if(pr && pr.then){ pr.then(function(){ linea('radio: play() tras el corte aceptado'); }, function(er){
+      linea('radio: play() tras el corte rechazado ' + (er && er.name) + '; espero como si fuera otra app');
+      trasInterrupcion();
+    }); return; }
+  }
   pausaAjena = Date.now();
   interrumpida = Date.now();
   MZ.huboInterrupcion = true;
@@ -5144,7 +5229,8 @@ function programarRescate(n){
     if(Date.now() - t0 > RESCATE_MS[n] + 5000){ linea('rescate: la página estuvo dormida; dejo ▶'); quedarEnPausaVisible(); return; }
     linea('rescate nº ' + (n + 1) + ': sigue en pausa sin aviso de fin; intento play()');
     anotar('sonido', 'rescate: pausa sin aviso de fin, intento seguir', actual.titulo);
-    if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }
+    if(actual.tipo === 'radio'){ clearTimeout(reintento); try{ audio.src = actual.url; }catch(_){} }
+    tAutoVuelta = Date.now();
     var p = audio.play();
     if(p && p.then) p.then(function(){ linea('rescate: play() aceptado'); });
     if(p && p.catch) p.catch(function(er){
@@ -5177,11 +5263,13 @@ function reanudarTrasInterrupcion(){
   interrumpida = 0; pintarEstado(null);
   anotar('sonido', 'el sonido vuelve a estar libre: sigo con ' + actual.titulo);
   try{ if(MZ.listo) MZ.ctx.resume(); }catch(_){}
-  if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }       // en directo: se reengancha al directo
+  tAutoVuelta = Date.now();
+  if(actual.tipo === 'radio'){ clearTimeout(reintento); try{ audio.src = actual.url; }catch(_){} }       // en directo: se reengancha al directo
   var intentos = 0;
   (function volver(){
     if(!actual || !audio.paused || pausaMia || paradoPorMi){ linea('seguir: cancelado (ya suena o lo paré yo)'); return; }
     linea('seguir: intento de play() nº ' + (intentos + 1) + (document.hidden ? ' [en segundo plano]' : ''));
+    tAutoVuelta = Date.now();
     var p = audio.play();
     if(p && p.then) p.then(function(){ linea('seguir: play() aceptado'); });
     if(p && p.catch) p.catch(function(er){
@@ -5264,18 +5352,27 @@ function reengancharAudio(){
   // reactivar la sesión de audio de iOS (el atasco es de la sesión, no del archivo)
   try{ if(navigator.audioSession){ navigator.audioSession.type = 'auto'; navigator.audioSession.type = 'playback'; } }catch(_){}
   setTimeout(function(){ pausaMia = false; }, 1500);
+  // Informe 24/10 (09:07:13): un reintento de la radio cambió la fuente 1 s después de este reenganche,
+  // las dos conexiones se pisaron (AbortError) y la radio quedó en pausa 6 s. Se cancela y se marca.
+  if(actual.tipo === 'radio'){ clearTimeout(reintento); tAutoVuelta = Date.now(); }
   setTimeout(function(){
     if(!actual || paradoPorMi || viendoVideo) return;
     // solo con la app a la vista se permite recargar la fuente (nivel 1 en adelante)
     if(!oculta && (nivel >= 1 || actual.tipo === 'radio' || audio.error || audio.readyState === 0)){
       var src = actual.tipo === 'radio' ? actual.url : audio.src;
-      try{ audio.load(); audio.src = src; }catch(_){}
+      // load() y luego src son DOS cargas seguidas; en la radio basta con poner la fuente.
+      try{ if(actual.tipo !== 'radio') audio.load(); audio.src = src; }catch(_){}
       if(actual.tipo === 'cancion' && t > 1) audio.addEventListener('loadedmetadata', function(){ try{ audio.currentTime = t; }catch(_){} }, {once:true});
     }else if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }
     var p = audio.play();
     if(p && p.then) p.then(function(){ linea('fantasma: play() aceptado'); volverAPonerFicha(); });
     if(p && p.catch) p.catch(function(er){
       linea('fantasma: play() rechazado: ' + (er && er.name));
+      // Radio con la app delante: en vez de quedarse en ▶, se reconecta por el camino normal.
+      if(actual && actual.tipo === 'radio' && !document.hidden && !paradoPorMi){
+        linea('fantasma: la radio se reconecta por el camino normal');
+        tAutoVuelta = 0; espera = 500; fallosRadio = 0; programarReconexion(); return;
+      }
       pausaLimpia();
     });
   }, 450);
@@ -6367,7 +6464,7 @@ async function textoInforme(){
     '\nSesión de audio de iOS: '+ses+
     '\nMezcla: '+(AJ.mezcla ? 'activada' : 'apagada')+' · ahorro de datos: '+(AJ.ahorro ? 'sí' : 'no')+
     '\nSuena ahora: '+(actual ? actual.tipo+' · '+actual.titulo+(audio.paused ? ' (en pausa)' : '') : 'nada')+
-    '\n\nLÍNEA DE TIEMPO DEL SONIDO (lo último abajo):\n' + LINEA.slice(-45).join('\n') +
+    '\n\nLÍNEA DE TIEMPO DEL SONIDO (lo último abajo):\n' + LINEA.join('\n') +
     '\n\nMEDIDAS DE LA PANTALLA:\n' + medidasPantalla() +
     '\n\nÚLTIMOS AVISOS Y ERRORES:\n' + (e.length ? e.slice(0,30).map(function(x){
       return x.f+' · '+x.o+' · '+x.m+(x.n > 1 ? ' (×'+x.n+')' : ''); }).join('\n') : '(ninguno)');
@@ -6503,7 +6600,10 @@ function cargarAjustes(){
 var LETRAS = [['normal', 1.12, 'Normal'],
               ['grande', 1.26, 'Grande'],
               ['enorme', 1.42, 'Muy grande']];
+/* Los niños (v2.14) empiezan en «Muy grande»; cada uno lo puede cambiar en Ajustes. */
+function letraDefecto(){ return document.documentElement.classList.contains('nino') ? 'enorme' : 'normal'; }
 function ponerEscala(cual){
+  cual = cual || letraDefecto();
   var e = 1.12;
   for(var i=0;i<LETRAS.length;i++) if(LETRAS[i][0] === cual) e = LETRAS[i][1];
   try{ document.documentElement.style.setProperty('--esc', e); }catch(_){}
@@ -6577,7 +6677,11 @@ async function arrancar(){
     var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     if(false){
       setTimeout(function(){
-        toast('⚠️ Ábrela desde el <b>icono de la pantalla de inicio</b>.<br>En Safari, iOS borra tu música a los 7 días.', 'malo', 9000);
+        // Las tablets de los niños son Android (24/10/2026): allí se instala desde el menú de Chrome.
+        if(/Android/i.test(navigator.userAgent))
+          toast('📲 Instálala en la tablet: menú <b>⋮</b> de Chrome → <b>«Añadir a pantalla de inicio»</b> (o «Instalar aplicación»). Luego ábrela siempre desde ese icono.', 'bueno', 12000);
+        else
+          toast('⚠️ Ábrela desde el <b>icono de la pantalla de inicio</b>.<br>En Safari, iOS borra tu música a los 7 días.', 'malo', 9000);
       }, 2200);
     }
   }catch(err){

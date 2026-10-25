@@ -67,7 +67,7 @@ cambiar_re(r"'<div class=\"credito\">Propiedad de la.*?</div>'\+\n    '<div clas
 cambiar("'<button class=\"btn\" id=\"a-actualizar\" style=\"margin-bottom:14px\">🔄&nbsp; Buscar actualización</button>'+\n", '')
 cambiar('Enviar informe (WhatsApp)', 'Enviar informe de errores')
 # El informe va al correo de soporte (no a un WhatsApp): se copia entero y se abre el correo con el principio
-SOPORTE = 'mimusiquita.app@gmail.com'
+SOPORTE = 'emmanueldiaz.apps@gmail.com'
 cambiar("async function copiarInforme(){\n",
         "async function informePorCorreo(){\n"
         "  var txt = await textoInforme();\n"

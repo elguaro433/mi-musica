@@ -107,9 +107,52 @@ function bloquePaisRadio(){
   return selectorPais();
 }
 
-/* ── 3 · Sin YouTube en la versión pública ─────────────────────── */
-abrirVideoId = function(){ toast(T('Los vídeos no están disponibles en esta versión.'), null, 3500); };
-escucharCompleta = function(){ toast(T('Esta canción no está completa en Audius. Prueba con otra o con la radio.'), 'malo', 4500); };
+/* ── 3 · Solo tu música y la radio (decisión del 25/10/2026) ──────────
+   Sin YouTube, sin éxitos de Apple/Deezer, sin Audius ni Clásicos: la app no busca música en
+   internet. Inicio = tu música + radio del país; Buscar = buscar en tu música. */
+abrirVideoId = function(){};
+escucharCompleta = function(){};
+reproducirCompleta = function(){};
+cargarArtistas = function(){ return Promise.resolve(); };
+cargarNovedades = function(){};
+AJ.sinNovedades = true;
+hidratarIni = function(){
+  var cc = paisIni();
+  if(INI.yo !== yo){ INI.yo = yo; INI.t = 0; }
+  INI.apple = []; INI.au = []; INI.art = {};
+  if(INI.cc === cc) return;
+  INI.cc = cc; INI.t = 0; INI.rb = [];
+  try{ var c = JSON.parse(localStorage.getItem('mm_ini_' + cc) || 'null'); if(c && c.rb){ INI.rb = c.rb; INI.t = c.t || 0; } }catch(_){}
+};
+cargarInicio = async function(forzar){
+  if(INI.cargando) return;
+  var cc = paisIni();
+  INI.apple = []; INI.au = []; INI.art = {};
+  if(INI.cc !== cc){
+    INI.cc = cc; INI.t = 0; INI.rb = [];
+    try{ var c = JSON.parse(localStorage.getItem('mm_ini_' + cc) || 'null'); if(c && c.rb){ INI.rb = c.rb; INI.t = c.t || 0; } }catch(_){}
+    if(INI.rb.length) repintarInicio();
+  }
+  if(!forzar && INI.t && (AJ.ahorro || (Date.now() - INI.t) < 4 * 3600 * 1000)) return;
+  INI.cargando = true; INI.fallo = false; repintarInicio();
+  try{
+    INI.rb = await radiosTop(RB_PAIS[cc]);
+    INI.t = Date.now();
+    try{ localStorage.setItem('mm_ini_' + cc, JSON.stringify({t:INI.t, rb:INI.rb})); }catch(_){}
+  }catch(err){ anotar('inicio', err.message); INI.fallo = true; }
+  INI.cargando = false;
+  repintarInicio();
+};
+/* Buscar = tu música (la radio tiene su botón abajo). Cualquier camino a la búsqueda de internet acaba aquí. */
+var ponerPestanaOriginal = ponerPestana;
+ponerPestana = function(t){ ponerPestanaOriginal(t === 'radio' ? 'radio' : 'mimusica'); };
+lanzarBusquedaMusica = function(){ pintarBuscar(); };
+pestana = 'mimusica';
+(function(){
+  var st = document.createElement('style');
+  st.textContent = '#tabs-b{display:none !important}';
+  document.head.appendChild(st);
+})();
 
 /* ── 4 · Temporizador para dormir: ya viene en la app privada (luna en «Sonando ahora», v2.7). ── */
 

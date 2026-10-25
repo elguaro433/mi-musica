@@ -14,7 +14,9 @@ import io, os, re, sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ORIGEN = os.path.join(RAIZ, 'index.html')
-DESTINO = os.path.join(RAIZ, 'publica', 'web', 'index.html')
+# Desde el 25/10/2026 la app pública vive en Proyectos\Apps Android\mi-musica (las de la familia no se tocan)
+DESTINO = os.path.join(RAIZ, '..', '..', 'Apps Android', 'mi-musica', 'web', 'index.html')
+NOMBRE = 'Mi Musiquita'         # nombre en la tienda (libre en Google Play el 25/10/2026)
 VERSION_PUBLICA = '1.0'          # la de la App Store: va por su cuenta
 
 s = io.open(ORIGEN, encoding='utf-8').read()          # traduce CRLF a \n
@@ -39,8 +41,8 @@ def cambiar_re(patron, nuevo, flags=re.S):
 # 1 · Cabecera: sin perfiles por enlace, un solo manifiesto genérico
 cambiar_re(r'<script>\n/\* Cada persona tiene SU enlace.*?\}\)\(\);\n</script>',
            '<script>window.__QUIEN = \'yo\'; document.write(\'<link rel="manifest" href="manifest.json">\');</script>')
-cambiar('''<script>document.write('<meta name="apple-mobile-web-app-title" content="' + (window.__QUIEN === 'elibel' ? 'Elibel' : 'Emmanuel') + '">');</script>''',
-        '<meta name="apple-mobile-web-app-title" content="Mi Música">')
+cambiar_re(r'''<script>document\.write\('<meta name="apple-mobile-web-app-title" content="' \+ .*?\);</script>''',
+           '<meta name="apple-mobile-web-app-title" content="Mi Música">')
 cambiar('content="Tu música, tuya de verdad. Sin internet, en el coche y con tu nombre."',
         'content="Tu música, tuya de verdad. Sin internet y en el coche."')
 
@@ -75,8 +77,8 @@ cambiar("esc(saludoHora() + ', ' + PERSONAS[yo].corto)", "esc(saludoHora())")
 cambiar("canciones de ' + PERSONAS[yo].corto + ' de este teléfono.'", "canciones de este teléfono.'")
 cambiar("Son tuyas: Elibel tiene las suyas.", "Son solo tuyas: se guardan en este iPhone.")
 cambiar("if(!yo) yo = localStorage.getItem('mm_perfil') || 'emmanuel';", "if(!yo) yo = 'yo';")
-cambiar("var guardado = (window.__QUIEN === 'elibel') ? 'elibel' : 'emmanuel';", "var guardado = 'yo';")
-cambiar("(emmanuel|elibel)\\b/i);\n    return m ? m[1].toLowerCase() : '';", "(nunca-existe)\\b/i);\n    return m ? m[1].toLowerCase() : '';")
+cambiar("var guardado = PERSONAS[window.__QUIEN] ? window.__QUIEN : 'emmanuel';", "var guardado = 'yo';")
+cambiar("(emmanuel|elibel|emiliano|alejandro)\\b/i);\n    return m ? m[1].toLowerCase() : '';", "(nunca-existe)\\b/i);\n    return m ? m[1].toLowerCase() : '';")
 
 # 6 · Sin YouTube no oficial (Piped) ni pestaña de YouTube
 cambiar_re(r"var PIPED = \[.*?\];", "var PIPED = [];       // versión pública: sin buscador no oficial de YouTube")
@@ -108,7 +110,7 @@ cambiar("""'<a class="btn" href="privacidad.html" target="_blank" rel="noopener"
     '<a class="btn" href="terminos.html" target="_blank" rel="noopener">📖&nbsp; Términos de uso</a>'+""")
 
 # Lo que queda con nombres propios son solo comentarios del código: se neutralizan también
-for viejo, nuevo in [('Elibel', 'un usuario'), ('Emmanuel', 'un usuario'), ('elibel', 'perfil2'), ('emmanuel', 'perfil1'), ('Dacia', 'coche')]:
+for viejo, nuevo in [('Emiliano y Emmanuel Alejandro', 'los niños'), ("'emiliano' | 'alejandro'", "'nino1' | 'nino2'"), ('Elibel', 'un usuario'), ('Emmanuel', 'un usuario'), ('elibel', 'perfil2'), ('emmanuel', 'perfil1'), ('Dacia', 'coche')]:
     s = s.replace(viejo, nuevo)
 
 # 11 · Mejoras e idiomas de la versión pública (publica/i18n.js y publica/mejoras.js), al final del guion principal
@@ -123,6 +125,9 @@ fin = s.rfind('\n</script>\n</body>')
 if fin < 0:
     sys.exit('NO ENCAJA: final del guion principal')
 s = s[:fin] + '\n' + i18n + '\n' + mej + s[fin:]
+
+# 11b · El nombre de la tienda en todo lo visible (los textos en inglés se traducen solos con en.json)
+s = s.replace('Mi Música', NOMBRE).replace('MI MÚSICA', NOMBRE.upper())
 
 # 12 · Firma del creador, la misma en todas sus apps (publica/creador.txt)
 s = s.replace('__CREADOR__', leer('creador.txt').strip())

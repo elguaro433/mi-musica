@@ -18,6 +18,8 @@
   }catch(_){ quien = quien || 'emmanuel'; }
   // 24/10/2026: también los niños, cada uno en su tablet Android (Emiliano y Emmanuel Alejandro).
   window.__QUIEN = ['elibel', 'emiliano', 'alejandro'].indexOf(quien) >= 0 ? quien : 'emmanuel';
+  // v2.14: los niños (tablet) llevan su propio aspecto: portadas y botones grandes (html.nino en el CSS)
+  if(window.__QUIEN === 'emiliano' || window.__QUIEN === 'alejandro') document.documentElement.classList.add('nino');
   document.write('<link rel="manifest" href="' + (window.__QUIEN === 'emmanuel' ? 'manifest.json' : 'manifest-' + window.__QUIEN + '.json') + '">');
 })();
 </script>
@@ -411,6 +413,18 @@ a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box
 #barra button.on .i svg{stroke-width:2.4}
 #barra button.on{color:var(--purple)}
 
+/* ---------- los niños en su tablet (v2.14) ----------
+   Emiliano y Emmanuel Alejandro usan tablets Lenovo de 10" (unos 1000x560 en horizontal):
+   portadas y botones grandes para dedos pequeños. En los iPhone no cambia nada. */
+@media (min-width:700px){
+  html.nino{--barra:calc(78px + var(--sabn))}
+  html.nino .hscroll{gap:18px}
+  html.nino .tile{width:176px}
+  html.nino .tile .art{width:176px;height:176px;border-radius:18px}
+  html.nino #barra button{font-size:calc(13px * min(var(--esc), 1.3))}
+  html.nino #barra button .i svg{width:36px;height:36px}
+}
+
 /* ---------- sonando ahora ---------- */
 #now{position:fixed;inset:0;background:radial-gradient(130% 75% at 50% 0%,var(--nowc,transparent),transparent 72%),var(--bg2);z-index:70;display:none;flex-direction:column;
   padding:calc(var(--sat) + 14px) calc(26px + var(--sar)) calc(var(--sab) + 22px) calc(26px + var(--sal));
@@ -729,7 +743,8 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.13';
+var APP_VERSION = '2.14';
+var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
    Él: «mejorar las ventanas, los emojis, todo». Los emojis de colores (🚗 🎨 🔠 📻…) no
@@ -4777,7 +4792,7 @@ function pintarBiblio(){
     ((filtro === 'listas' && listaAbierta) || filtro === 'favoritos') ? 'none' : '';
   if(!CANCIONES.length && grupoBib(filtro) === 'canciones'){
     C.innerHTML = '<div class="vacio"><span class="em">➕</span>Tu biblioteca está vacía.<br>'+
-      'Toca <b>Añadir música</b> y elige tus MP3<br>desde <b>Archivos</b> o <b>iCloud Drive</b>.<br><br>'+
+      'Toca <b>Añadir música</b> y elige tus MP3<br>' + (ES_ANDROID ? 'desde la <b>música de la tablet</b>' : 'desde <b>Archivos</b> o <b>iCloud Drive</b>') + '.<br><br>'+
       '</div>'+
       '<a class="btn solido" href="guia.html" target="_blank" rel="noopener">📖&nbsp; Cómo traer mi música del PC</a>'+
       '<button class="btn" data-ir-tab="musica">🎧&nbsp; Buscar un cantante</button>'+
@@ -4907,7 +4922,7 @@ async function pintarAjustes(){
   '<div class="card"><h3>🔠 Tamaño de la letra</h3>'+
     '<div class="tabs fijas" style="grid-template-columns:repeat(3,1fr);margin:4px 0 0">'+
       LETRAS.map(function(L){
-        return '<button class="tab'+(((AJ.letra||'normal')===L[0])?' on':'')+'" data-letra="'+L[0]+'">'+L[2]+'</button>';
+        return '<button class="tab'+(((AJ.letra||letraDefecto())===L[0])?' on':'')+'" data-letra="'+L[0]+'">'+L[2]+'</button>';
       }).join('')+
     '</div></div>'+
 
@@ -6632,7 +6647,10 @@ function cargarAjustes(){
 var LETRAS = [['normal', 1.12, 'Normal'],
               ['grande', 1.26, 'Grande'],
               ['enorme', 1.42, 'Muy grande']];
+/* Los niños (v2.14) empiezan en «Muy grande»; cada uno lo puede cambiar en Ajustes. */
+function letraDefecto(){ return document.documentElement.classList.contains('nino') ? 'enorme' : 'normal'; }
 function ponerEscala(cual){
+  cual = cual || letraDefecto();
   var e = 1.12;
   for(var i=0;i<LETRAS.length;i++) if(LETRAS[i][0] === cual) e = LETRAS[i][1];
   try{ document.documentElement.style.setProperty('--esc', e); }catch(_){}

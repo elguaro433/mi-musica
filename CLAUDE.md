@@ -10,7 +10,7 @@
 > crédito "Familia Díaz González · Creador: Emmanuel Díaz" y firma
 > "Emmanuel Díaz". **Escribe por voz**: confirmar nombres dudosos.
 
-## Estado (24/10/2026, v2.13)
+## Estado (25/10/2026, v2.14)
 
 - Publicada, la usan él (iPhone 14 Pro, 393×852) y Elibel (iPhone 16 Pro Max,
   440×956), ambos iOS 18.7. Coche: Dacia con CarPlay. Escucha reggaetón,
@@ -83,6 +83,11 @@
   segundo: «Emmanuel Alejandro»), enlaces `emiliano.html` / `alejandro.html` (`?p=…`), `manifest-<perfil>.json`
   con `id` propio (en Android cada uno es una app). En Android: aviso de instalar desde el menú ⋮ de Chrome
   (en vez del de Safari) y `accept="audio/*,…"` en «Añadir música». En el iPhone no cambia nada.
+- **v2.14 (25/10) — aspecto para los niños:** tablet = Lenovo Tab M10 Plus 3.ª gen (TB125FU, 10,6", unos
+  1000×560 CSS en horizontal). `html.nino` (perfiles emiliano/alejandro): letra «Muy grande» por defecto
+  (`letraDefecto()`, se cambia en Ajustes) y, desde 700 px de ancho, portadas de 176 px y barra de abajo más
+  alta con iconos de 36 px. `ES_ANDROID`: «la música de la tablet» en vez de «Archivos o iCloud Drive».
+  Probado en Chrome a 1000×560 (niño) y 393 (Emmanuel sin cambios).
 
 ### SIN CONFIRMAR en iPhone (buscar en la línea de tiempo del informe)
 - v2.12: `canción: 7 s sin arrancar` (¿qué rs/ns/err da en el iPhone?), `fantasma: la radio se reconecta por el camino normal`.

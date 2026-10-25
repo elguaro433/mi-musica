@@ -79,6 +79,7 @@ cambiar("async function copiarInforme(){\n",
         "async function copiarInforme(){\n  return informePorCorreo();\n")
 
 s = s.replace('Cómo traer mi música del PC', 'Cómo añadir mi música')
+s = s.replace('la <b>música de la tablet</b>', 'la <b>música de tu móvil</b>')   # en la privada, Android = tablets de los niños
 
 # 5 · Una sola persona anónima
 cambiar_re(r"var PERSONAS = \{.*?\n\};",

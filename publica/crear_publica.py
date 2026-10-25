@@ -73,7 +73,7 @@ cambiar("async function copiarInforme(){\n",
         "  var txt = await textoInforme();\n"
         "  try{ await navigator.clipboard.writeText(txt); }catch(_){}\n"
         "  var cuerpo = 'Cuéntanos qué pasó:\\n\\n\\n--- Informe (está copiado entero: si aquí sale cortado, pégalo) ---\\n' + txt.slice(0, 1500);\n"
-        "  location.href = 'mailto:" + SOPORTE + "?subject=' + encodeURIComponent('Mi Musiquita · informe v' + APP_VERSION) + '&body=' + encodeURIComponent(cuerpo);\n"
+        "  location.href = 'mailto:__SOPORTE__?subject=' + encodeURIComponent('Mi Musiquita · informe v' + APP_VERSION) + '&body=' + encodeURIComponent(cuerpo);\n"
         "  toast('Se abre tu correo para escribirnos. El informe completo está copiado.', 'bueno', 6000);\n"
         "}\n"
         "async function copiarInforme(){\n  return informePorCorreo();\n")
@@ -142,6 +142,7 @@ s = s.replace('Mi Música', NOMBRE).replace('MI MÚSICA', NOMBRE.upper())
 
 # 12 · Firma del creador, la misma en todas sus apps (publica/creador.txt)
 s = s.replace('__CREADOR__', leer('creador.txt').strip())
+s = s.replace('__SOPORTE__', SOPORTE)   # al final: la limpieza de nombres de arriba lo estropearía
 
 os.makedirs(os.path.dirname(DESTINO), exist_ok=True)
 t = DESTINO + '.tmp'

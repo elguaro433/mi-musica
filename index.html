@@ -647,8 +647,8 @@ body.coche #coche-salir{display:block}
         placeholder="Buscar en mi música" autocomplete="off" autocorrect="off" autocapitalize="off"></div>
       <div class="seg">
         <button class="sg on" data-b="canciones">Todas</button>
-        <button class="sg" data-b="artistas">Artistas</button>
-        <button class="sg" data-b="albumes">Álbumes</button>
+        <button class="sg" data-b="artistas">Cantantes</button>
+        <button class="sg" data-b="mezclas">Mezclas</button>
         <button class="sg" data-b="generos">Géneros</button>
       </div>
       <div id="bib-selbar"></div>
@@ -683,7 +683,7 @@ body.coche #coche-salir{display:block}
       <button id="b-next" aria-label="Siguiente"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M15.6 5H18v14h-2.4zM4 5.6v12.8a.8.8 0 0 0 1.25.66l8.85-5.4a.8.8 0 0 0 0-1.32L5.25 6.94A.8.8 0 0 0 4 5.6z"/></svg></button>
       <button class="sm" id="b-rep" aria-label="Repetir"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg></button>
     </div>
-    <div class="now-extra"><button class="pill" id="b-letra">🎤&nbsp; Letra</button><button class="pill" id="b-compartir">📤&nbsp; Compartir</button></div>
+    <div class="now-extra"><button class="pill" id="b-letra">🎤&nbsp; Letra</button><button class="pill" id="b-compartir">📤&nbsp; Compartir</button><button class="pill" id="b-apagar">⏹&nbsp; Apagar la radio</button></div>
     <div id="letra"></div>
     <div class="cola" id="cola"></div>
     <button id="coche-salir">✕&nbsp; Salir del modo coche</button>
@@ -743,7 +743,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.14';
+var APP_VERSION = '2.15';
 var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
@@ -799,6 +799,7 @@ var ICONOS = (function(){
     siguiente:'<path d="M5 4l10 8-10 8z"/><path d="M19 5v14"/>',
     pausa:    '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>',
     play:     '<path d="M6 4l14 8-14 8z"/>',
+    parar:    '<rect x="6" y="6" width="12" height="12" rx="1.5"/>',
     info:     '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
     atras:    '<path d="m15 18-6-6 6-6"/>',
     trompeta: '<path d="M2 9.5v5"/><path d="M2 12h10"/><path d="M12 8.5 21 4v16l-9-4.5z"/><path d="M5 12v4h4v-4"/>',
@@ -814,7 +815,7 @@ var ICONOS = (function(){
     '🕐':'reloj','💿':'disco','🎤':'micro','⬇':'bajar','🆕':'chispa','✨':'chispa','⭐':'estrella*','😴':'luna',
     '🛟':'salvavidas','📤':'compartir','🎲':'dado','📼':'casete','🔴':'punto*','⚡':'rayo','👤':'persona','✎':'lapiz',
     '🔠':'letra','🎨':'paleta','📶':'wifi','📂':'carpeta','🔄':'recargar','↻':'recargar','📋':'portapapeles','🧹':'goma',
-    '🔁':'repetir','🔂':'repetir','⏭':'siguiente','⏸':'pausa','▶':'play*',
+    '🔁':'repetir','🔂':'repetir','⏭':'siguiente','⏸':'pausa','▶':'play*','⏹':'parar*',
     '🎺':'trompeta','🎷':'trompeta','💃':'disco','🎸':'guitarra','🎻':'piano','🎛':'mesa','💜':'corazon*','🌴':'palmera','🧸':'estrella*','ℹ':'info','←':'atras'};
   var claves = Object.keys(M).sort(function(a, b){ return b.length - a.length; });
   var RX = new RegExp('(' + claves.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|') + ')\\uFE0F?', 'g');
@@ -1370,22 +1371,62 @@ function servidoresPorOrden(lista, clave){
 }
 
 async function buscarYouTube(texto){
-  var orden = servidoresPorOrden(PIPED, 'mm_piped_ok'), ultimo = null;
+  var orden = servidoresPorOrden(PIPED, 'mm_piped_ok'), ultimo = null, nino = esNino();
   for(var i=0;i<orden.length;i++){
     try{
       var d = await traerConLimite(orden[i] + '/search?q=' + encodeURIComponent(texto) +
-                                   '&filter=videos', 9000);
+                                   '&filter=' + (nino ? 'music_videos' : 'videos'), 9000);
       var items = (d && d.items) || [];
       try{ localStorage.setItem('mm_piped_ok', orden[i]); }catch(_){}
-      return items.filter(function(x){ return x.url && x.url.indexOf('watch?v=') >= 0; })
+      var L = items.filter(function(x){ return x.url && x.url.indexOf('watch?v=') >= 0; })
         .slice(0, 20).map(function(x){
           return {vid: x.url.split('watch?v=')[1].split('&')[0],
                   titulo: x.title || '', canal: x.uploaderName || '',
                   seg: x.duration || 0, miniatura: x.thumbnail || ''};
         });
+      if(!nino) return L;
+      var n0 = L.length;
+      L = L.filter(function(v){ return !PALABRAS_NO.test(sinTildes(v.titulo + ' ' + v.canal)); });
+      L = await quitarExplicitas(L, texto);
+      if(n0 > L.length) linea('youtube niños: «' + texto + '» ' + n0 + ' → ' + L.length + ' vídeos');
+      return L;
     }catch(err){ ultimo = err; anotar('youtube', orden[i] + ' · ' + err.message); }
   }
   throw ultimo || new Error('ningún servidor respondió');
+}
+/* ═════════ YouTube de los niños (v2.15) ═══════════════════════════
+   Pedido el 30/10/2026: en las tablets de Emiliano y Emmanuel Alejandro, solo música y sana.
+   · Se busca en «vídeos musicales» (el catálogo de YouTube Music), no en todo YouTube.
+   · Fuera los títulos con palabras de PALABRAS_NO.
+   · Letra explícita: el buscador de Apple ESCONDE las canciones explícitas y marca «cleaned» las que
+     tienen versión censurada (la original es explícita; comprobado el 30/10/2026). Una sola pregunta a
+     Apple por búsqueda: si la canción sale «cleaned», o Apple conoce al cantante y la canción no sale,
+     el vídeo no se enseña. Lo que Apple no conoce (canales infantiles…) pasa solo por las palabras.
+   · No se pueden pegar enlaces ni salen los «Éxitos de hoy». */
+function esNino(){ return yo === 'emiliano' || yo === 'alejandro'; }
+// «mix»: las sesiones de DJ meten muchas canciones y no se pueden comprobar una a una.
+var PALABRAS_NO = /(\+18|18\+|sin censura|\b(mix|megamix|xxx|porno?|sexo|sexy|sex|desnud\w*|nudes?|twerk\w*|perreo|bellaqu\w*|terror|horror|gore|sangre|asesin\w*|diablo|satan\w*|drogas?|marihuana|cocaina|weed|borrach\w*|explicit\w*|uncensored|nalgas?|culo|putas?|puto|mierda|fuck\w*|shit|bitch\w*|nigga|verga|ching\w*|pendej\w*|cabron\w*|perra)\b)/;
+async function quitarExplicitas(L, texto){
+  var q = String(texto).replace(/\b(audio|video|v[ií]deo)\s+oficial\b|[eé]xitos/gi, '').replace(/\s+/g, ' ').trim();
+  if(!q || !L.length) return L;
+  var d;
+  try{ d = await traerConLimite('https://itunes.apple.com/search?term=' + encodeURIComponent(q) + '&media=music&entity=song&limit=200&country=us', 9000); }
+  catch(err){ anotar('youtube niños', 'Apple no contesta: ' + err.message); return L; }
+  var R = (d && d.results) || [];
+  if(!R.length) return L;
+  var art = {}, can = {};
+  R.forEach(function(x){
+    cantantesDe({artista:x.artistName}).forEach(function(a){ art[sinTildes(a)] = 1; });
+    var tn = sinTildes(x.trackName).replace(/\s*[(\[].*$/, '').trim();
+    if(tn.length > 2) can[tn] = (can[tn] === 'cleaned') ? 'cleaned' : x.trackExplicitness;   // una versión «cleaned» = la original es explícita
+  });
+  return L.filter(function(v){
+    var tv = sinTildes(v.titulo), mejor = '';
+    for(var tn in can) if(tv.indexOf(tn) >= 0 && tn.length > mejor.length) mejor = tn;
+    if(mejor) return can[mejor] !== 'cleaned';
+    var canal = sinTildes(v.canal).replace(/\s*-\s*topic$/, '').replace(/vevo$/, '').trim();
+    return !art[canal];
+  });
 }
 
 /* ═════════ Radio Browser — las emisoras del mundo entero ════════
@@ -2609,6 +2650,7 @@ async function pintarAhora(cancion){
   var imagen = elegida ? elegida.u : '', tieneImg = !!(elegida && elegida.blob);
   colorAhora(imagen);
   $('b-letra').style.display = (actual.tipo === 'radio') ? 'none' : '';
+  $('b-apagar').style.display = (actual.tipo === 'radio') ? '' : 'none';
   IMG_AHORA = imagen;
   if(LET.abierta) cargarLetra();
   ['n-art','m-art'].forEach(function(id){
@@ -2647,7 +2689,7 @@ async function pintarAhora(cancion){
       navigator.mediaSession.setActionHandler('pause', function(){ linea('orden de iOS: pausa (bloqueo, coche, auriculares o se desconectó el coche)'); pausarYo(); });
       navigator.mediaSession.setActionHandler('nexttrack', function(){ linea('orden de iOS: ⏭ siguiente'); siguiente(); });
       navigator.mediaSession.setActionHandler('previoustrack', function(){ linea('orden de iOS: ⏮ anterior'); anterior(); });
-      navigator.mediaSession.setActionHandler('stop', function(){ linea('orden de iOS: parar'); pausarYo(); });
+      navigator.mediaSession.setActionHandler('stop', function(){ linea('orden de iOS: parar'); if(actual && actual.tipo === 'radio') apagarRadio(); else pausarYo(); });
       if(actual.tipo === 'cancion'){
         navigator.mediaSession.setActionHandler('seekto', function(d){
           if(d.seekTime != null){ try{ audio.currentTime = d.seekTime; }catch(_){} }
@@ -3310,7 +3352,7 @@ function filaCancion(c, dentroDe){
   return '<div class="row'+(dentroDe?'':' desl')+(son?' sonando':'')+(c.falta?' falta':'')+'" data-cancion="'+esc(c.id)+'">'+
     cuadroCancion(c)+
     '<span class="r-x"><span class="r-t">'+esc(c.titulo)+'</span>'+
-      '<span class="r-s">'+esc(c.artista)+'</span></span>'+
+      '<span class="r-s">'+esc(c.artista)+(c.dur && esMezcla(c) ? ' · '+Math.round(c.dur / 60)+' min' : '')+'</span></span>'+
     der + acc + '</div>';
 }
 /* ═════════ Música de hoy: éxitos y cantantes (Apple) + historial ═════
@@ -3326,6 +3368,8 @@ var RB_PAIS = {es:'ES', ve:'VE', co:'CO', mx:'MX', us:'US'};
 var ARTISTAS_SUG = ['Bad Bunny','Karol G','Manuel Turizo','CNCO','Marc Anthony','Romeo Santos',
                     'Maluma','Feid','Shakira','Juan Luis Guerra','Rauw Alejandro','Peso Pluma',
                     'Daddy Yankee','Ozuna','Anuel AA','Rosalía'];
+var ARTISTAS_NINOS = ['Encanto','Moana','Frozen','Coco','Toy Story','El Rey León','CantaJuego',
+                      'Carlos Vives','Juan Luis Guerra','Sebastián Yatra','Shakira','Karol G'];
 var GR = {};                      // lo que hay pintado, por grupo: 'ex', 'au', 'rb', 'hi', 'mu'...
 var INI = {cc:'', t:0, apple:[], au:[], rb:[], art:{}, nombres:[], cargando:false, fallo:false, yo:''};
 var mu = {res:[], au:[], texto:'', buscando:false, fallo:''};
@@ -3668,14 +3712,16 @@ function listasAuto(){
     var ids = arr.filter(function(c){ return !c.falta; }).map(function(c){ return c.id; });
     if(ids.length) L.push({id:id, nombre:nombre, icono:icono, ids:ids});
   }
-  add('auto_todo', 'Toda mi música', '🔀', CANCIONES);
+  // Las mezclas (una hora de DJ) no se cuelan entre las canciones: tienen su sitio en Biblioteca → Mezclas.
+  var sueltas = CANCIONES.filter(function(c){ return !esMezcla(c); });
+  add('auto_todo', 'Toda mi música', '🔀', sueltas.length ? sueltas : CANCIONES);
   add('auto_mas', 'Lo más escuchado', '🔥', CANCIONES.filter(function(c){ return c.veces; })
       .sort(function(a, b){ return (b.veces||0) - (a.veces||0); }).slice(0, 25));
   add('auto_nuevas', 'Añadidas hace poco', '🆕', CANCIONES.slice()
       .sort(function(a, b){ return (b.anadida||0) - (a.anadida||0); }).slice(0, 25));
   add('auto_favs', 'Tus favoritas', corazon(true, 24), CANCIONES.filter(function(c){ return c.fav; }));
   var gm = {};
-  CANCIONES.forEach(function(c){ var g = generoDe(c); if(g !== 'Sin clasificar') (gm[g] = gm[g] || []).push(c); });
+  sueltas.forEach(function(c){ var g = generoDe(c); if(g !== 'Sin clasificar') (gm[g] = gm[g] || []).push(c); });
   Object.keys(gm).filter(function(g){ return gm[g].length >= 3; })
     .sort(function(a, b){ return gm[b].length - gm[a].length; }).slice(0, 4)
     .forEach(function(g){ add('auto_g_' + g, g, iconoEstilo({genero:g}), gm[g]); });
@@ -4182,9 +4228,11 @@ function pintarYouTube(){
   }else if(ytTexto){
     h += '<div class="vacio"><span class="em">📺</span>Sin resultados para «'+esc(ytTexto)+'».</div>';
   }else if(!ytVerId){
-    h += '<div class="hscroll" style="margin-top:2px">' + ARTISTAS_SUG.map(function(n){
+    if(esNino()) h += '<div class="note">⭐ Aquí solo salen vídeos de música, sin letras feas.</div>';
+    h += '<div class="hscroll" style="margin-top:2px">' + (esNino() ? ARTISTAS_NINOS : ARTISTAS_SUG).map(function(n){
            return '<button class="tab" data-yt-sug="'+esc(n)+'">'+esc(n)+'</button>'; }).join('') + '</div>';
-    if(INI.apple.length){
+    if(esNino()){}
+    else if(INI.apple.length){
       GR.yt = INI.apple;
       h += '<div class="shelf-t">🔥 Éxitos de hoy · toca para verlos</div>' +
         INI.apple.map(function(p, i){
@@ -4252,6 +4300,7 @@ async function lanzarBusquedaYouTube(texto){
   texto = (texto||'').trim();
   if(!texto) return;
   var pegado = idYouTube(texto);
+  if(pegado && esNino()){ toast('Aquí se busca la música por su nombre 🎵', null, 3500); return; }
   if(pegado){ ytVerId = pegado; ytResultados = []; ytTexto = ''; pintarYouTube(); return; }
   ytTexto = texto; ytBuscando = true; ytResultados = []; pintarYouTube();
   try{
@@ -4614,9 +4663,9 @@ function barajarMusica(ids){
   oidas.sort(function(a, b){ return a.ultima - b.ultima; });
   return frescas.concat(oidas).map(function(c){ return c.id; });
 }
-function grupoBib(f){ return (f === 'artistas' || f === 'albumes' || f === 'canciones' || f === 'generos') ? 'canciones' : f; }
+function grupoBib(f){ return (f === 'artistas' || f === 'albumes' || f === 'mezclas' || f === 'canciones' || f === 'generos') ? 'canciones' : f; }
 function marcarBib(){
-  var bs = document.querySelectorAll('#v-biblio [data-b]');
+  var bs = document.querySelectorAll('#v-biblio .tab[data-b], #v-biblio .sg[data-b]');
   for(var i=0;i<bs.length;i++){
     var seg = bs[i].classList.contains('sg');
     bs[i].classList.toggle('on', seg ? bs[i].dataset.b === filtro : grupoBib(bs[i].dataset.b) === grupoBib(filtro));
@@ -4778,6 +4827,106 @@ function pintarGeneros(C, LC){
         '<span class="r-a">›</span></div>'; }).join('');
   setTimeout(clasificarGeneros, 300);
 }
+/* ═════════ Cantantes y mezclas (v2.15) ════════════════════════════
+   Pedido el 30/10/2026: «está todo a lo loco, una por una». Las mezclas (sesiones largas de DJ,
+   álbum «Mezclas») van aparte y ordenadas por estilo; cada cantante tiene su página con sus
+   canciones. «A & B» o «A feat. B» cuenta para los dos. */
+var cantanteAbierto = null;
+function esMezcla(c){
+  if(!c) return false;
+  if(/mezcla|\bmix(es)?\b/i.test(c.album || '')) return true;
+  if(c.dur >= 12 * 60 || (!c.dur && c.bytes >= 25 * 1048576)) return true;
+  return /\bmix\b|enganchado|megamix/i.test(c.titulo || '');
+}
+function cantantesDe(c){
+  var a = String((c && c.artista) || '').trim();
+  if(!a || /^(varios|various( artists)?|artista desconocido|desconocido)$/i.test(a)) return ['Varios'];
+  var p = a.split(/\s*(?:&|,|;|\/|\bfeat\.?|\bft\.?|\bfeaturing\b|\s+x\s+)\s*/i)
+    .map(function(s){ return s.trim(); }).filter(Boolean);
+  return p.length ? p : [a];
+}
+function mapaCantantes(L){
+  var m = {}, nombre = {};
+  L.forEach(function(c){
+    var vistos = {};
+    cantantesDe(c).forEach(function(n){
+      var k = normTxt(n) || n.toLowerCase();
+      if(vistos[k]) return; vistos[k] = 1;
+      if(!nombre[k]) nombre[k] = n;
+      (m[k] = m[k] || []).push(c);
+    });
+  });
+  return Object.keys(m).map(function(k){ return {nombre:nombre[k], l:m[k]}; });
+}
+function cuantas(l){
+  var n = l.filter(function(c){ return !esMezcla(c); }).length, x = l.length - n;
+  return (n ? n + (n === 1 ? ' canción' : ' canciones') : '') + (n && x ? ' · ' : '') + (x ? x + (x === 1 ? ' mezcla' : ' mezclas') : '');
+}
+function fotoCantante(nombre, l){
+  for(var i=0;i<l.length;i++) if(urlCaratula(l[i]) || portadaDe(l[i]))
+    return cuadroCancion(l[i]).replace('style="', 'style="border-radius:50%;');   // la primera es la del cuadro
+  return '<span class="art vacia" style="background:'+tono(nombre)+';border-radius:50%">👤</span>';
+}
+function pintarCantantes(C, LC){
+  var todos = mapaCantantes(LC);
+  if(cantanteAbierto){
+    var a = null;
+    todos.forEach(function(x){ if(x.nombre === cantanteAbierto) a = x; });
+    if(!a){ cantanteAbierto = null; return pintarCantantes(C, LC); }
+    var can = a.l.filter(function(c){ return !esMezcla(c); }), mez = a.l.filter(esMezcla);
+    var porTitulo = function(x, y){ return x.titulo.localeCompare(y.titulo, 'es'); };
+    can.sort(porTitulo); mez.sort(porTitulo);
+    C.innerHTML =
+      '<button class="btn suave" data-cant-volver="1" style="margin-bottom:12px">←&nbsp; Todos los cantantes</button>'+
+      '<div class="card" style="display:flex;align-items:center;gap:12px">'+fotoCantante(a.nombre, a.l)+
+        '<span class="r-x"><span class="r-t" style="font-size:calc(16px * var(--esc))">'+esc(a.nombre)+'</span>'+
+        '<span class="r-s">'+cuantas(a.l)+'</span></span></div>'+
+      '<div style="display:flex;gap:8px"><button class="btn solido" data-cant-tocar="0" style="flex:1">▶&nbsp; Reproducir</button>'+
+        '<button class="btn solido" data-cant-tocar="1" style="flex:1">🔀&nbsp; Aleatorio</button></div>'+
+      (can.length && mez.length ? '<div class="city">🎵 Canciones</div>' : '') + can.map(function(c){ return filaCancion(c); }).join('')+
+      (mez.length ? '<div class="city">🎛 Mezclas</div>' + mez.map(function(c){ return filaCancion(c); }).join('') : '');
+    return;
+  }
+  if(!todos.length){ C.innerHTML = '<div class="vacio"><span class="em">🔎</span>Nada con ese nombre en tu música.</div>'; return; }
+  todos.sort(function(x, y){
+    if(x.nombre === 'Varios') return 1; if(y.nombre === 'Varios') return -1;
+    return x.nombre.localeCompare(y.nombre, 'es'); });
+  var letra = '', h = '';
+  todos.forEach(function(x){
+    var l = x.nombre === 'Varios' ? '…' : (normTxt(x.nombre).charAt(0) || '#').toUpperCase();
+    if(/[0-9]/.test(l)) l = '#';
+    if(todos.length > 12 && l !== letra){ letra = l; h += '<div class="city">' + (l === '…' ? 'Varios cantantes' : l) + '</div>'; }
+    h += '<div class="row" data-cant-abrir="'+esc(x.nombre)+'">'+fotoCantante(x.nombre, x.l)+
+      '<span class="r-x"><span class="r-t">'+esc(x.nombre)+'</span><span class="r-s">'+cuantas(x.l)+'</span></span>'+
+      '<span class="r-a">›</span></div>';
+  });
+  C.innerHTML = h;
+}
+function pintarMezclas(C, LC){
+  var L = LC.filter(esMezcla);
+  if(!L.length){
+    C.innerHTML = '<div class="vacio"><span class="em">🎛</span>' + (bibQ ? 'Ninguna mezcla con ese nombre.' :
+      'Aquí salen tus mezclas: las sesiones largas<br>de un DJ o de grandes éxitos.<br>Añádelas con <b>Añadir música</b>.') + '</div>';
+    return;
+  }
+  var m = {};
+  // Por el estilo tal cual viene en la etiqueta (Salsa, Merengue, Cumbia…): «Salsa y tropical» las juntaba todas.
+  L.forEach(function(c){
+    var g = String(c.genero || '').replace(/\(\d+\)/g, '').trim();
+    g = (!g || /^(sin g[eé]nero|sin clasificar|other|music|-)$/i.test(g)) ? 'Sin clasificar' : g.charAt(0).toUpperCase() + g.slice(1);
+    (m[g] = m[g] || []).push(c); });
+  var ks = Object.keys(m).sort(function(a, b){
+    if(a === 'Sin clasificar') return 1; if(b === 'Sin clasificar') return -1;
+    return m[b].length - m[a].length || a.localeCompare(b, 'es'); });
+  C.innerHTML =
+    '<div style="display:flex;gap:8px"><button class="btn solido" data-mez-tocar="0" style="flex:1">▶&nbsp; Reproducir</button>'+
+      '<button class="btn solido" data-mez-tocar="1" style="flex:1">🔀&nbsp; Aleatorio</button></div>'+
+    ks.map(function(g){
+      return '<div class="city">' + iconoEstilo({genero:g}) + ' ' + esc(g === 'Sin clasificar' ? 'Otras' : g) + ' · ' + m[g].length + '</div>' +
+        m[g].sort(function(x, y){ return (x.artista + x.titulo).localeCompare(y.artista + y.titulo, 'es'); })
+          .map(function(c){ return filaCancion(c); }).join('');
+    }).join('');
+}
 function pintarBiblio(){
   var C = $('bib-cuerpo');
   marcarBib();
@@ -4839,9 +4988,16 @@ function pintarBiblio(){
     return;
   }
   if(filtro === 'canciones'){
-    C.innerHTML = LC.length ? LC.map(function(c){ return bibSel ? filaSel(c) : filaCancion(c); }).join('')
-      : '<div class="vacio"><span class="em">🔎</span>Nada con ese nombre en tu música.</div>';
+    var mz = (ql || bibSel) ? [] : LC.filter(esMezcla);
+    var LT = mz.length ? LC.filter(function(c){ return !esMezcla(c); }) : LC;
+    C.innerHTML = (mz.length ? '<div class="row" data-ir-bib="mezclas"><span class="art" style="background:'+tono('Mezclas')+'">🎛</span>'+
+        '<span class="r-x"><span class="r-t">Mezclas</span><span class="r-s">'+mz.length+(mz.length===1?' mezcla':' mezclas')+' · aparte de las canciones</span></span>'+
+        '<span class="r-a">›</span></div>' : '') +
+      (LT.length ? LT.map(function(c){ return bibSel ? filaSel(c) : filaCancion(c); }).join('')
+        : (mz.length ? '' : '<div class="vacio"><span class="em">🔎</span>Nada con ese nombre en tu música.</div>'));
     return; }
+  if(filtro === 'artistas'){ pintarCantantes(C, LC); return; }
+  if(filtro === 'mezclas'){ pintarMezclas(C, LC); return; }
   if(filtro === 'listas'){
     // ¿Estás dentro de una lista? Entonces se ve su ficha.
     var abierta = null;
@@ -5530,7 +5686,7 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#b-reproducir') || t.closest('#b-aleatorio')){
     var alea = !!t.closest('#b-aleatorio'), qq = (bibQ || '').toLowerCase().trim();
     var lista = CANCIONES.filter(function(c){
-      return !c.falta && (!qq || (c.titulo+' '+c.artista+' '+c.album+' '+c.genero).toLowerCase().indexOf(qq) >= 0); })
+      return !c.falta && (qq ? (c.titulo+' '+c.artista+' '+c.album+' '+c.genero).toLowerCase().indexOf(qq) >= 0 : !esMezcla(c)); })
       .map(function(c){ return c.id; });
     if(!lista.length) return;
     aleatorio = false;                    // si es aleatorio, la cola ya va barajada: sin repetir ninguna
@@ -5568,7 +5724,7 @@ document.addEventListener('click', async function(ev){
   if((el = t.closest('[data-t]'))){ ponerPestana(el.dataset.t); return; }
   if((el = t.closest('[data-b]'))){
     filtro = el.dataset.b;
-    listaAbierta = null; bibSel = null;
+    listaAbierta = null; bibSel = null; cantanteAbierto = null;
     pintarBiblio(); return;
   }
 
@@ -5686,7 +5842,7 @@ document.addEventListener('click', async function(ev){
     if(pendVideo){ var pv = pendVideo; pendVideo = null; abrirVideoId(pv[0], pv[1], pv[2], pv[3]); }
     return; }
   if((el = t.closest('[data-yt-sug]'))){
-    $('q').value = el.dataset.ytSug; lanzarBusquedaYouTube(el.dataset.ytSug + ' éxitos'); return; }
+    $('q').value = el.dataset.ytSug; lanzarBusquedaYouTube(el.dataset.ytSug + (esNino() ? '' : ' éxitos')); return; }
   if((el = t.closest('[data-yt-cancion]'))){
     var pY = INI.apple[+el.dataset.ytCancion]; if(pY) escucharCompleta(pY); return; }
   if((el = t.closest('[data-estilo]'))){ radioPorEstilo(el.dataset.estilo, el.dataset.nombre || el.dataset.estilo); return; }
@@ -5729,6 +5885,20 @@ document.addEventListener('click', async function(ev){
     pintarVista(); return;
   }
   if((el = t.closest('[data-gen-abrir]'))){ generoAbierto = el.dataset.genAbrir; pintarBiblio(); return; }
+  if((el = t.closest('[data-cant-abrir]'))){ cantanteAbierto = el.dataset.cantAbrir; pintarBiblio(); window.scrollTo(0, 0); return; }
+  if(t.closest('[data-cant-volver]')){ cantanteAbierto = null; pintarBiblio(); return; }
+  if((el = t.closest('[data-ir-bib]'))){ filtro = el.dataset.irBib; cantanteAbierto = null; pintarBiblio(); window.scrollTo(0, 0); return; }
+  if((el = t.closest('[data-cant-tocar], [data-mez-tocar]'))){
+    var esCant = el.hasAttribute('data-cant-tocar'), quien = null;
+    if(esCant) mapaCantantes(CANCIONES).forEach(function(x){ if(x.nombre === cantanteAbierto) quien = x; });
+    var LL = esCant ? (quien ? quien.l : []) : CANCIONES.filter(esMezcla);
+    if(esCant) LL = LL.filter(function(c){ return !esMezcla(c); }).concat(LL.filter(esMezcla));
+    var idsC = LL.filter(function(c){ return !c.falta; }).map(function(c){ return c.id; });
+    if(!idsC.length) return;
+    if((el.dataset.cantTocar || el.dataset.mezTocar) === '1') idsC = barajarMusica(idsC);
+    aleatorio = false; pintarModos(); viendoVideo = false;
+    await tocarCancion(idsC[0], idsC); pintarVista(); return;
+  }
   if(t.closest('[data-gen-volver]')){ generoAbierto = null; pintarBiblio(); return; }
   if((el = t.closest('[data-gen-tocar]'))){
     var idsG = CANCIONES.filter(function(c){ return generoDe(c) === generoAbierto && !c.falta; }).map(function(c){ return c.id; });
@@ -5928,7 +6098,8 @@ document.addEventListener('click', async function(ev){
   if(t.closest('#a-reparar')){ if(confirm('Limpiaré el caché y el Service Worker.\nLa app se recargará.\n\nTu música NO se borra.')) reparar(); return; }
 
   if(t.closest('#m-prev')){ ev.stopPropagation(); anterior(); return; }
-  if(t.closest('#m-stop')){ ev.stopPropagation(); pausarYo(); return; }
+  if(t.closest('#m-stop')){ ev.stopPropagation(); if(actual && actual.tipo === 'radio') apagarRadio(); else pausarYo(); return; }
+  if(t.closest('#b-apagar')){ apagarRadio(); return; }
   if(t.closest('#m-pp') || t.closest('#b-pp')){ ev.stopPropagation(); playPause(); return; }
   if(t.closest('#m-next')){ ev.stopPropagation(); siguiente(); return; }
   if(t.closest('#b-next')){ siguiente(); return; }
@@ -6105,7 +6276,7 @@ gestoBajar({zona: $('hoja'), mover: $('hoja-caja'),
 
 // Volver atrás deslizando desde el borde izquierdo (como en el iPhone): en una lista, un género,
 // Clásicos o un vídeo de YouTube. Donde no hay «atrás» no hace nada.
-var SEL_ATRAS = '[data-cerrar-lista], [data-gen-volver], [data-cerrar-ia], [data-cerrar-yt]';
+var SEL_ATRAS = '[data-cerrar-lista], [data-gen-volver], [data-cant-volver], [data-cerrar-ia], [data-cerrar-yt]';
 function hayAtras(){
   var v = $('v-' + vistaActual);
   return !!((v && v.querySelector(SEL_ATRAS)) || (vistaActual === 'buscar' && pestana === 'youtube' && ytVerId));
@@ -6190,6 +6361,19 @@ function volverAtras(){
   caja.addEventListener('pointercancel', function(){ arrastrando = false; delete caja.dataset.arr; pintarProgreso(); });
 })();
 
+/* ⏹ con la radio = APAGARLA (pedido 30/10/2026: «que se calle ya»). La pausa la deja preparada en la
+   pantalla de bloqueo y en el coche, y un ▶ del volante o de iOS la vuelve a encender; además «Al abrir:
+   Seguir» la volvía a dejar lista. Apagar suelta el directo, borra la ficha de iOS, esconde la barrita y
+   olvida la emisora para la próxima vez que se abra la app. */
+function apagarRadio(){
+  if(!actual || actual.tipo !== 'radio') return;
+  linea('radio apagada (⏹)');
+  anotar('radio', 'apagada con ⏹', actual.titulo);
+  pausarYo();
+  try{ localStorage.removeItem('mm_ultimo_' + yo); }catch(_){}
+  quitarReproduccion();
+  toast('📻 Radio apagada.', 'bueno', 2500);
+}
 /* Quitar la reproducción: con la música PARADA, se desliza la barrita de abajo hacia la
    izquierda y desaparece (la música guardada no se toca; solo se olvida lo que sonaba). */
 function quitarReproduccion(){

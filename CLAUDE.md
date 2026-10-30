@@ -89,7 +89,21 @@
   alta con iconos de 36 px. `ES_ANDROID`: «la música de la tablet» en vez de «Archivos o iCloud Drive».
   Probado en Chrome a 1000×560 (niño) y 393 (Emmanuel sin cambios).
 
+- **v2.15 (30/10) — biblioteca ordenada, apagar la radio, YouTube de los niños:**
+  (1) Biblioteca: Todas · **Cantantes** · **Mezclas** · Géneros (fuera «Álbumes»). `esMezcla` = álbum
+  «Mezclas»/«mix», ≥ 12 min o ≥ 25 MB sin duración; «Todas», «Toda mi música» y las listas por género
+  no las llevan. Cantantes: `cantantesDe` parte «A & B», «feat.», «x»; página propia (`cantanteAbierto`).
+  Mezclas agrupadas por el género TAL CUAL de la etiqueta. Sus MP3 de `OneDrive\Music\Mezclas` llevan
+  ya género y álbum «Mezclas» (ordenados el 30/10). (2) ⏹ con radio = `apagarRadio()`: suelta, borra la
+  ficha de iOS, esconde la barrita y olvida `mm_ultimo` (antes ⏹ = pausa y el volante/«Al abrir» la
+  devolvían). Botón «Apagar la radio» en Sonando ahora. Informe de la tablet de Alejandro del 30/10: la
+  pausa sí paraba, pero quedaba «RNA (en pausa)». (3) `esNino()`: YouTube con `filter=music_videos`,
+  `PALABRAS_NO` (incluye «mix»), `quitarExplicitas` (Apple esconde las explícitas y marca «cleaned» las
+  que tienen versión censurada; si Apple conoce al cantante y no la canción, fuera), sin pegar enlaces,
+  sin «Éxitos de hoy», sugerencias `ARTISTAS_NINOS`. No es 100 %: Family Link para el resto.
+
 ### SIN CONFIRMAR en iPhone (buscar en la línea de tiempo del informe)
+- v2.15: `radio apagada (⏹)`, `youtube niños: «…» N → M vídeos`.
 - v2.12: `canción: 7 s sin arrancar` (¿qué rs/ns/err da en el iPhone?), `fantasma: la radio se reconecta por el camino normal`.
 - v2.11 radio con cortes de red (el `ended` de fondo ya CONFIRMADO el 24/10): `radio: el directo se cortó (ended)`, `radio: la pausa vino tras un corte de red`, `play() tras el corte aceptado/rechazado`, `toque justo cuando ya volvía sola`.
 - v2.9 Compartir: `compartido con imagen/texto/vídeo`; ¿sale «Mi estado» en WhatsApp y la historia en Instagram?

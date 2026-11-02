@@ -22,6 +22,8 @@
 - Informes del 11/10 de los dos móviles con la 2.5: sin fallos nuevos. La 2.6
   solo apunta `orden de iOS: ▶/pausa/parar` en la línea de tiempo.
 
+- **v2.16 (02/11) — informe del 2/11 con la 2.15:** «apple · Load failed (×2)» + «descanso para itunes.apple.com» en cada apertura. Causa: con user-agent de iPhone, `itunes.apple.com/search` con `media=music` responde 301 a `musics://…` (abre la app Música) y `fetch` falla; en Android/Mac da 200. Quitado `&media=music` (con `entity=song` basta) en las 4 búsquedas (portadas, novedades, búsqueda, YouTube niños). Pendiente igual en `publica/web/index.html`. Resto del informe sin fallos (pasos de canción con pantalla apagada y vuelta tras otra app OK).
+
 - **v2.7 (15/10) — rutina del día a día:** (1) «Lo de siempre» arriba en Inicio
   (`tarjetaRutina`/`loDeSiempre`): cada `playing` apunta en `mm_rutina_<yo>`
   la emisora (`r:<url>`) o tu música (`m`), una vez cada 45 min; propone lo que

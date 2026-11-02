@@ -743,7 +743,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.15';
+var APP_VERSION = '2.16';
 var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
@@ -1410,7 +1410,7 @@ async function quitarExplicitas(L, texto){
   var q = String(texto).replace(/\b(audio|video|v[ií]deo)\s+oficial\b|[eé]xitos/gi, '').replace(/\s+/g, ' ').trim();
   if(!q || !L.length) return L;
   var d;
-  try{ d = await traerConLimite('https://itunes.apple.com/search?term=' + encodeURIComponent(q) + '&media=music&entity=song&limit=200&country=us', 9000); }
+  try{ d = await traerConLimite('https://itunes.apple.com/search?term=' + encodeURIComponent(q) + '&entity=song&limit=200&country=us', 9000); }
   catch(err){ anotar('youtube niños', 'Apple no contesta: ' + err.message); return L; }
   var R = (d && d.results) || [];
   if(!R.length) return L;
@@ -3256,7 +3256,7 @@ function limpiaBusqueda(t){
 async function traerPortada(c){
   var busca = limpiaBusqueda(c.artista) + ' ' + limpiaBusqueda(c.titulo);
   var u = 'https://itunes.apple.com/search?term=' + encodeURIComponent(busca) +
-          '&media=music&entity=song&limit=1';
+          '&entity=song&limit=1';
   try{
     var d = await traerConLimite(u, 9000);
     var x = (d && d.results || [])[0];
@@ -3499,7 +3499,7 @@ async function exitosAppleDirecto(cc){
 }
 async function buscarAppleDirecto(texto, cc){
   var d = await traerConLimite('https://itunes.apple.com/search?term=' + encodeURIComponent(texto) +
-    '&media=music&entity=song&limit=40&country=' + (cc || 'es'), 12000);
+    '&entity=song&limit=40&country=' + (cc || 'es'), 12000);
   var vistas = {}, fuera = [];
   ((d && d.results) || []).map(pistaDeBusqueda).filter(Boolean).forEach(function(p){
     var k = (p.artista + '|' + p.titulo).toLowerCase().replace(/\s*[\(\[].*$/, '');
@@ -4753,7 +4753,7 @@ var clasificando = false, clasifHechas = 0, clasifTotal = 0, generoAbierto = nul
 async function buscarGenero(c){
   var busca = limpiaBusqueda(c.artista) + ' ' + limpiaBusqueda(c.titulo);
   try{
-    var d = await traerConLimite('https://itunes.apple.com/search?term=' + encodeURIComponent(busca) + '&media=music&entity=song&limit=1', 9000);
+    var d = await traerConLimite('https://itunes.apple.com/search?term=' + encodeURIComponent(busca) + '&entity=song&limit=1', 9000);
     var x = (d && d.results || [])[0];
     return (x && x.primaryGenreName) || '';
   }catch(err){

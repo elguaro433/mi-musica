@@ -22,6 +22,8 @@
 - Informes del 11/10 de los dos móviles con la 2.5: sin fallos nuevos. La 2.6
   solo apunta `orden de iOS: ▶/pausa/parar` en la línea de tiempo.
 
+- **v2.17 (02/11) — informe directo:** «Enviar informe» abre `whatsapp://send?phone=376644516` (su número, lo pidió él; si no se abre, `wa.me` al mismo chat) con el texto, y además lo copia en el mismo toque (ClipboardItem con promesa) por si WhatsApp no recibe el texto entero (el informe real ronda 12.000 caracteres). Antes: hoja de compartir. Sin probar en iPhone.
+
 - **v2.16 (02/11) — informe del 2/11 con la 2.15:** «apple · Load failed (×2)» + «descanso para itunes.apple.com» en cada apertura. Causa: con user-agent de iPhone, `itunes.apple.com/search` con `media=music` responde 301 a `musics://…` (abre la app Música) y `fetch` falla; en Android/Mac da 200. Quitado `&media=music` (con `entity=song` basta) en las 4 búsquedas (portadas, novedades, búsqueda, YouTube niños). Pendiente igual en `publica/web/index.html`. Resto del informe sin fallos (pasos de canción con pantalla apagada y vuelta tras otra app OK).
 
 - **v2.7 (15/10) — rutina del día a día:** (1) «Lo de siempre» arriba en Inicio

@@ -743,7 +743,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.16';
+var APP_VERSION = '2.17';
 var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
@@ -6701,18 +6701,30 @@ async function textoInforme(){
     '\n\nÚLTIMOS AVISOS Y ERRORES:\n' + (e.length ? e.slice(0,30).map(function(x){
       return x.f+' · '+x.o+' · '+x.m+(x.n > 1 ? ' (×'+x.n+')' : ''); }).join('\n') : '(ninguno)');
 }
+/* v2.17: el informe va DIRECTO al WhatsApp de Emmanuel (antes abría la hoja de compartir
+   y había que buscar el chat). También se copia en el mismo toque (iOS exige el gesto) por
+   si WhatsApp no recibe el texto entero: entonces basta con pegar. */
+var WSP_INFORME = '376644516';
 async function copiarInforme(){
-  var txt = await textoInforme();
-  // En el iPhone se abre la hoja de compartir: se manda directo por WhatsApp.
-  if(navigator.share){
-    try{ await navigator.share({title:'Informe de Mi Música', text:txt}); return; }
-    catch(err){ if(err && err.name === 'AbortError') return; }
+  var p = textoInforme();
+  var copiado = false;
+  try{
+    if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+      navigator.clipboard.write([new ClipboardItem({'text/plain': p.then(function(t){
+        return new Blob([t], {type:'text/plain'}); })})]).then(function(){ copiado = true; }, function(){});
+    }
+  }catch(_){}
+  var txt = await p;
+  if(!copiado && navigator.clipboard && navigator.clipboard.writeText){
+    try{ await navigator.clipboard.writeText(txt); }catch(_){}
   }
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(txt).then(function(){
-      toast('Informe copiado. Pégalo en un WhatsApp.', 'bueno', 5000);
-    }).catch(function(){ alert(txt); });
-  }else alert(txt);
+  var t = encodeURIComponent(txt);
+  toast('Abriendo tu WhatsApp… (el informe también está copiado)', 'bueno', 5000);
+  location.href = 'whatsapp://send?phone=' + WSP_INFORME + '&text=' + t;
+  // Sin la app de WhatsApp (o si iOS no la abre): la web de WhatsApp al mismo chat
+  setTimeout(function(){
+    if(document.visibilityState === 'visible') location.href = 'https://wa.me/' + WSP_INFORME + '?text=' + t;
+  }, 1500);
 }
 async function copiaDeEmergencia(){
   try{

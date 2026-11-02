@@ -6,7 +6,7 @@
    ⚠️ IMPORTANTE: este service worker NUNCA toca IndexedDB. La música vive ahí.
    Borrar estas cachés no borra ni una canción.                                 */
 
-const VERSION = '2.16';
+const VERSION = '2.17';
 const CACHE = 'mimusica-' + VERSION;
 
 const ARMAZON = [

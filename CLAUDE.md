@@ -22,6 +22,8 @@
 - Informes del 11/10 de los dos móviles con la 2.5: sin fallos nuevos. La 2.6
   solo apunta `orden de iOS: ▶/pausa/parar` en la línea de tiempo.
 
+- **v2.19/2.20 (19/11) — lista de canciones:** `subirInforme` sube también `musica-canciones-<yo>` (título | cantante | álbum | género | año | duración | tamaño | veces | fav | añadida | avisos: sin duración/cantante/carátula, archivo < 50 KB). Leer: `TIPO=canciones sh ../../_utiles/leer_informes_musica.sh`. La 2.19 salió rota ~3 min (saltos de línea reales dentro de un texto JS al parchear con Python): **comprobar la consola tras publicar**.
+
 - **v2.18 (19/11) — informe automático:** `subirInforme()` manda `textoInforme()` a Firestore (`familias/e286dfd7…52ef/appdata/musica-informe-<yo>`, REST sin SDK, como mucho cada 3 h, al abrir y al salir). Leer con `sh ../../_utiles/leer_informes_musica.sh [persona]`. El aviso «Hacer copia» de Inicio ya no sale (la copia manual sigue en Ajustes). Ojo: el id va en el código público; el informe no lleva nada sensible.
 
 - **v2.17 (02/11) — informe directo:** «Enviar informe» abre `whatsapp://send?phone=376644516` (su número, lo pidió él; si no se abre, `wa.me` al mismo chat) con el texto, y además lo copia en el mismo toque (ClipboardItem con promesa) por si WhatsApp no recibe el texto entero (el informe real ronda 12.000 caracteres). Antes: hoja de compartir. Sin probar en iPhone.

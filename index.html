@@ -743,7 +743,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.24';
+var APP_VERSION = '2.25';
 var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
@@ -1736,14 +1736,16 @@ function vigilar(){
     if(document.hidden){
       // De fondo solo se permite lo más suave: darle al play otra vez.
       // Rendirse rápido (4 intentos ≈ 6 s) para dejar que el rescate tome control.
-      if(intentosVigilante > 4){
+      // v2.25 (informe 19/11: radio muda 9 min sin cobertura): antes se rendía al 5º intento (~75 s).
+      // Ahora sigue probando play() cada vez más espaciado (15 s, 30 s, 45 s, 60 s…) unos 10 min.
+      if(intentosVigilante > 16){
         recuperarAlVolver = true;
-        anotar('vigilante', 'me rindo de fondo; lo retomo al volver');
+        anotar('vigilante', 'me rindo de fondo tras ~10 min; lo retomo al volver');
         return;
       }
       var p0 = audio.play();
       if(p0 && p0.catch) p0.catch(function(){});
-      setTimeout(vigilar, 1500);
+      setTimeout(vigilar, intentosVigilante > 4 ? Math.min(60000, 15000 * (intentosVigilante - 4)) : 1500);
     }else if(intentosVigilante === 1){
       var p1 = audio.play();
       if(p1 && p1.catch) p1.catch(function(){});

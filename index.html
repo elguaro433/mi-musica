@@ -743,7 +743,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.20';
+var APP_VERSION = '2.21';
 var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
@@ -6961,9 +6961,9 @@ var INFORME_KEY = 'AIzaSyCi0cdF5VqJjcsHibnLg6kvPGVN-f2b_DY';
 async function subirInforme(forzar){
   try{
     if(!yo || !navigator.onLine) return;
-    var ult = 0; try{ ult = +(localStorage.getItem('mm_informe_nube') || 0); }catch(_){}
+    var ult = 0; try{ ult = +(localStorage.getItem('mm_informe_nube_' + APP_VERSION) || 0); }catch(_){}
     if(!forzar && Date.now() - ult < 3 * 36e5) return;
-    try{ localStorage.setItem('mm_informe_nube', String(Date.now())); }catch(_){}
+    try{ localStorage.setItem('mm_informe_nube_' + APP_VERSION, String(Date.now())); }catch(_){}
     var t = await textoInforme();
     var r = await fetch(INFORME_NUBE + 'musica-informe-' + yo + '?key=' + INFORME_KEY, {
       method:'PATCH', keepalive: t.length < 60000, headers:{'Content-Type':'application/json'},

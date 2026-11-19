@@ -743,7 +743,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.21';
+var APP_VERSION = '2.22';
 var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
@@ -6094,7 +6094,7 @@ document.addEventListener('click', async function(ev){
     toast('Letra ' + el.textContent.trim().toLowerCase() + '.', 'bueno', 1800);
     return;
   }
-  if(t.closest('#a-informe')){ copiarInforme(); return; }
+  if(t.closest('#a-informe')){ copiarInforme(); subirInforme(true); return; }
   if(t.closest('#a-reparar')){ if(confirm('Limpiaré el caché y el Service Worker.\nLa app se recargará.\n\nTu música NO se borra.')) reparar(); return; }
 
   if(t.closest('#m-prev')){ ev.stopPropagation(); anterior(); return; }
@@ -6993,7 +6993,7 @@ async function subirInforme(forzar){
     if(!r2.ok) anotar('canciones nube', 'HTTP ' + r2.status);
   }catch(err){ anotar('informe nube', err && err.message); }
 }
-setTimeout(function(){ subirInforme(false); }, 20000);
+setTimeout(function(){ subirInforme(false); }, 5000);
 document.addEventListener('visibilitychange', function(){ if(document.hidden) subirInforme(false); });
 </script>
 </body>

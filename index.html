@@ -743,7 +743,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.18';
+var APP_VERSION = '2.19';
 var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
@@ -6971,6 +6971,29 @@ async function subirInforme(forzar){
         version:{stringValue:APP_VERSION}, fecha:{timestampValue:new Date().toISOString()}}})
     });
     if(!r.ok) anotar('informe nube', 'HTTP ' + r.status);
+    // v2.19: la lista de canciones (solo datos, nunca el audio)
+    var L = (CANCIONES || []).map(function(c){
+      var avisos = [];
+      if(!c.dur) avisos.push('sin duración');
+      if(!c.artista) avisos.push('sin cantante');
+      if(!c.caratula) avisos.push('sin carátula');
+      if(!c.bytes || c.bytes < 50000) avisos.push('archivo muy pequeño');
+      return [c.titulo || '?', c.artista || '', c.album || '', c.genero || '', c.anio || '',
+        c.dur ? Math.round(c.dur) + ' s' : '', c.bytes ? (c.bytes / 1048576).toFixed(1) + ' MB' : '',
+        'veces ' + (c.veces || 0), c.fav ? '❤️' : '', c.anadida ? new Date(c.anadida).toISOString().slice(0, 10) : '',
+        avisos.join(', ')].join(' | ');
+    });
+    var tl = 'MI MÚSICA — canciones de ' + yo + ' (' + L.length + ')
+' +
+      'título | cantante | álbum | género | año | duración | tamaño | veces | fav | añadida | avisos
+' + L.join('
+');
+    var r2 = await fetch(INFORME_NUBE + 'musica-canciones-' + yo + '?key=' + INFORME_KEY, {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({fields:{texto:{stringValue:tl}, persona:{stringValue:yo}, total:{integerValue:String(L.length)},
+        version:{stringValue:APP_VERSION}, fecha:{timestampValue:new Date().toISOString()}}})
+    });
+    if(!r2.ok) anotar('canciones nube', 'HTTP ' + r2.status);
   }catch(err){ anotar('informe nube', err && err.message); }
 }
 setTimeout(function(){ subirInforme(false); }, 20000);

@@ -743,7 +743,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.19';
+var APP_VERSION = '2.20';
 var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
@@ -6983,11 +6983,8 @@ async function subirInforme(forzar){
         'veces ' + (c.veces || 0), c.fav ? '❤️' : '', c.anadida ? new Date(c.anadida).toISOString().slice(0, 10) : '',
         avisos.join(', ')].join(' | ');
     });
-    var tl = 'MI MÚSICA — canciones de ' + yo + ' (' + L.length + ')
-' +
-      'título | cantante | álbum | género | año | duración | tamaño | veces | fav | añadida | avisos
-' + L.join('
-');
+    var tl = 'MI MÚSICA — canciones de ' + yo + ' (' + L.length + ')\n' +
+      'título | cantante | álbum | género | año | duración | tamaño | veces | fav | añadida | avisos\n' + L.join('\n');
     var r2 = await fetch(INFORME_NUBE + 'musica-canciones-' + yo + '?key=' + INFORME_KEY, {
       method:'PATCH', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({fields:{texto:{stringValue:tl}, persona:{stringValue:yo}, total:{integerValue:String(L.length)},

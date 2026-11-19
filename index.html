@@ -743,7 +743,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.17';
+var APP_VERSION = '2.18';
 var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
@@ -3144,7 +3144,7 @@ function avisosInicio(){
   if(ESPACIO_BAJO) h += '<div class="avisoi malo">⚠️ ' + esc(ESPACIO_BAJO) + '</div>';
   var luego = 0; try{ luego = +(localStorage.getItem('mm_copia_luego_' + yo) || 0); }catch(_){}
   var d = diasSinCopia();
-  if(CANCIONES.length && d > 7 && Date.now() - luego > 2 * 864e5){
+  if(false){ // v2.18: el aviso de copia ya no sale (la copia sigue en Ajustes)
     h += '<div class="avisoi">💾 ' + (d === Infinity ? 'Aún no tienes copia de seguridad de tus favoritos y listas.' : 'Hace ' + Math.floor(d) + ' días de tu última copia de seguridad.') +
       '<div class="acc"><button class="btn solido" id="a-exportar">Hacer copia</button><button class="btn" id="copia-luego">Luego</button></div></div>';
   }
@@ -6953,6 +6953,28 @@ document.addEventListener('visibilitychange', function(){
 });
 
 arrancar();
+
+/* v2.18 · informe automático: se sube solo a la nube de la familia (Firestore, sin SDK) para que
+   Claude lo lea sin que nadie pulse nada. Como mucho cada 3 h, al abrir la app y al salir de ella. */
+var INFORME_NUBE = 'https://firestore.googleapis.com/v1/projects/familia-diaz-gonzalez/databases/(default)/documents/familias/e286dfd771d061a73ea5fea178f57585acc9653ff165f17bec2a7f7f488352ef/appdata/';
+var INFORME_KEY = 'AIzaSyCi0cdF5VqJjcsHibnLg6kvPGVN-f2b_DY';
+async function subirInforme(forzar){
+  try{
+    if(!yo || !navigator.onLine) return;
+    var ult = 0; try{ ult = +(localStorage.getItem('mm_informe_nube') || 0); }catch(_){}
+    if(!forzar && Date.now() - ult < 3 * 36e5) return;
+    try{ localStorage.setItem('mm_informe_nube', String(Date.now())); }catch(_){}
+    var t = await textoInforme();
+    var r = await fetch(INFORME_NUBE + 'musica-informe-' + yo + '?key=' + INFORME_KEY, {
+      method:'PATCH', keepalive: t.length < 60000, headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({fields:{texto:{stringValue:t}, persona:{stringValue:yo},
+        version:{stringValue:APP_VERSION}, fecha:{timestampValue:new Date().toISOString()}}})
+    });
+    if(!r.ok) anotar('informe nube', 'HTTP ' + r.status);
+  }catch(err){ anotar('informe nube', err && err.message); }
+}
+setTimeout(function(){ subirInforme(false); }, 20000);
+document.addEventListener('visibilitychange', function(){ if(document.hidden) subirInforme(false); });
 </script>
 </body>
 </html>

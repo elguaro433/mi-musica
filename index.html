@@ -743,7 +743,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.25';
+var APP_VERSION = '2.26';
 var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
@@ -5569,7 +5569,10 @@ function reengancharAudio(){
       // load() y luego src son DOS cargas seguidas; en la radio basta con poner la fuente.
       try{ if(actual.tipo !== 'radio') audio.load(); audio.src = src; }catch(_){}
       if(actual.tipo === 'cancion' && t > 1) audio.addEventListener('loadedmetadata', function(){ try{ audio.currentTime = t; }catch(_){} }, {once:true});
-    }else if(actual.tipo === 'radio'){ try{ audio.src = actual.url; }catch(_){} }
+    }
+    // Informe 22/11/2026 (18:57): con la pantalla apagada se volvía a poner la fuente de la radio
+    // e iOS la rechazó (error código 4 + «The operation is not supported», dos veces). De fondo
+    // NO se toca audio.src (regla de iOS): solo play(); si no vale, ▶ y se reengancha al volver.
     var p = audio.play();
     if(p && p.then) p.then(function(){ linea('fantasma: play() aceptado'); volverAPonerFicha(); });
     if(p && p.catch) p.catch(function(er){

@@ -743,7 +743,7 @@ body.coche #coche-salir{display:block}
    MI MÚSICA — Familia Díaz González · Creador: Emmanuel Díaz
    Una sola página. Todo lo tuyo se guarda en este teléfono.
    ═══════════════════════════════════════════════════════════════════ */
-var APP_VERSION = '2.26';
+var APP_VERSION = '2.27';
 var ES_ANDROID = /Android/i.test(navigator.userAgent);   // tablets de los niños
 
 /* ─── Iconos propios en vez de emojis (v2.4) ─────────────────────────
@@ -1839,6 +1839,15 @@ function programarReconexion(){
     // Informe 22/10 (10:20:59): este reintento cambió la fuente 0,04 s después de que «seguir» la pusiera,
     // y las dos reconexiones se pisaron (AbortError). Si la app acaba de reengancharla, no se toca.
     if(Date.now() - tAutoVuelta < 3000){ linea('radio: reintento omitido, ya se está reenganchando'); return; }
+    if(document.hidden){
+      linea('radio: reintento de fondo sin cambiar la fuente; pruebo play()');
+      var pf = audio.play();
+      if(pf && pf.then) pf.then(function(){ linea('radio: play() de fondo aceptado'); }, function(er){
+        linea('radio: play() de fondo rechazado ' + (er && er.name) + '; dejo ▶ y reengancho al volver');
+        quedarEnPausaVisible();
+      });
+      return;
+    }
     fallosRadio++;
     anotar('radio', 'reintento ' + fallosRadio + ' de ' + actual.titulo);
     var u = actual.url;
@@ -2251,8 +2260,10 @@ async function tocarCancion(id, listaIds, opc){
   }
 }
 
+var turnoRadio = 0;   // v2.27: cada emisora puesta tiene su turno; un play() de otro turno ya no manda
 function tocarRadio(e, preparar){
   clearTimeout(reintento); clearTimeout(vigilante);
+  var miTurno = ++turnoRadio;
   soltarURLs(); soltarCaratula();
   fallosRadio = 0; espera = 1000; intentosVigilante = 0;
   paradoPorMi = !!preparar; recuperarAlVolver = false;
@@ -2264,7 +2275,12 @@ function tocarRadio(e, preparar){
   if(preparar){ pintarAhora(null); return; }     // sin src: el ▶ la conecta en directo (playPause)
   audio.src = e.url;
   var p = audio.play();
-  if(p && p.catch) p.catch(function(){
+  if(p && p.catch) p.catch(function(er){
+    // Informe 27/11/2026 (18:30): el play() de la emisora anterior, que seguía «conectando», se canceló al
+    // pulsar ⏭; su error lanzó la reconexión de Planeta 105.3, que cambió la fuente de fondo e iOS la paró.
+    if(miTurno !== turnoRadio || (er && er.name === 'AbortError')){
+      linea('radio: el play() de antes se canceló (' + (er && er.name) + '); no es fallo de ' + e.nombre); return;
+    }
     if(esHLS(e.url)) pintarEstado('Esta emisora necesita Safari o el iPhone.');
     else programarReconexion();
   });

@@ -22,6 +22,17 @@
 - Informes del 11/10 de los dos móviles con la 2.5: sin fallos nuevos. La 2.6
   solo apunta `orden de iOS: ▶/pausa/parar` en la línea de tiempo.
 
+- **v2.27 (28/11) — radio que se quedaba muda al pasar de emisora con la pantalla apagada (informe del 27/11, 18:27–18:30):**
+  ⏭ a una emisora que no conectaba (sin cobertura, 3,5 min «conectando»); al pulsar ⏭ otra vez, el `play()` colgado
+  de la anterior se canceló (AbortError) y su `catch` lanzó `programarReconexion()` de la NUEVA (Planeta 105.3), que
+  cambió `audio.src` de fondo → iOS la pausó y quedó muda. (1) `tocarRadio` lleva `turnoRadio`: un `play()` de otro
+  turno o un AbortError no reconecta (`radio: el play() de antes se canceló`). (2) El temporizador de
+  `programarReconexion` con `document.hidden` NO cambia la fuente: solo `play()`; si iOS lo rechaza,
+  `quedarEnPausaVisible()` (`radio: reintento de fondo sin cambiar la fuente` / `play() de fondo aceptado/rechazado`).
+  Probado en Chrome con una copia sin subida de informes. Límite que sigue: de fondo, una emisora que no conecta no
+  puede saltar sola a otra (iOS no deja cambiar la fuente sin un toque); ⏭ sí.
+  Ojo: `index.html` y `sw.js` están ahora en **LF** (no CRLF): parchear conservando `newline=''`.
+
 - **v2.19/2.20 (19/11) — lista de canciones:** `subirInforme` sube también `musica-canciones-<yo>` (título | cantante | álbum | género | año | duración | tamaño | veces | fav | añadida | avisos: sin duración/cantante/carátula, archivo < 50 KB). Leer: `TIPO=canciones sh ../../_utiles/leer_informes_musica.sh`. La 2.19 salió rota ~3 min (saltos de línea reales dentro de un texto JS al parchear con Python): **comprobar la consola tras publicar**.
 
 - **v2.18 (19/11) — informe automático:** `subirInforme()` manda `textoInforme()` a Firestore (`familias/e286dfd7…52ef/appdata/musica-informe-<yo>`, REST sin SDK, como mucho cada 3 h, al abrir y al salir). Leer con `sh ../../_utiles/leer_informes_musica.sh [persona]`. El aviso «Hacer copia» de Inicio ya no sale (la copia manual sigue en Ajustes). Ojo: el id va en el código público; el informe no lleva nada sensible.

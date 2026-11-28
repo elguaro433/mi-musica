@@ -22,6 +22,14 @@
 - Informes del 11/10 de los dos móviles con la 2.5: sin fallos nuevos. La 2.6
   solo apunta `orden de iOS: ▶/pausa/parar` en la línea de tiempo.
 
+- **v2.28 (28/11) — «Alegre del mundo»:** 9 emisoras nuevas en `EMISORAS` (`ciudad:'Alegre'`, grupo
+  `['Alegre','🌴','Alegre del mundo']` en `CIUDADES`): Z 92 Miami, La Mega Medellín 92.9, Top Urbano, Latina Reggaeton,
+  Top Salsa Radio, Colombia Salsa Dura, Latina Bachata, FieraMix, Top Merengue Radio. Elegidas por votos en Radio Browser
+  (salsa/reggaetón/bachata/merengue), solo https y sin enlaces con token (zeno/surfernetwork caducan); las 9 sonaron en
+  Chrome. Descartadas: rautemusik Salsa (404) y las de StreamTheWorld de Medellín (no se pueden comprobar desde el PC:
+  STW corta a 32 KB a curl incluso con LOS40 España, que sí va). `marcarAlegres()` (en `cargarDatos`) las pone ❤️ UNA vez
+  y solo con `yo==='emmanuel'` (`mm_fav_alegres`); aviso `emisoras alegres marcadas como favoritas: N` en el informe.
+
 - **v2.27 (28/11) — radio que se quedaba muda al pasar de emisora con la pantalla apagada (informe del 27/11, 18:27–18:30):**
   ⏭ a una emisora que no conectaba (sin cobertura, 3,5 min «conectando»); al pulsar ⏭ otra vez, el `play()` colgado
   de la anterior se canceló (AbortError) y su `catch` lanzó `programarReconexion()` de la NUEVA (Planeta 105.3), que
